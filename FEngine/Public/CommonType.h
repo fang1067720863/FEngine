@@ -3,14 +3,38 @@
 #include<string>
 
 
-
-enum class Semantic
+//enum Semantic
+//{
+//    POSITION,
+//    NORMAL,
+//    COLOR,
+//    TEXTURE_COORDINATES,
+//
+//    BINORMAL,
+//    TANGENT,
+//
+//    BLEND_WEIGHTS,
+//    BLEND_INDICES,
+//};
+enum class GpuContantType : uint8_t
 {
-    SV_Position,
-    SV_Target,
-    Custom,
-    NoSemanticSet,
+    GCT_FLOAT1,
+    GCT_FLOAT2,
+    GCT_FLOAT3,
+    GCT_FLOAT4,
+    GCT_SAMPLER1D,
+    GCT_SAMPLER2D,
+    GCT_SAMPLER3D,
+    GCT_SAMPLERCUBE,
+    GCT_SAMPLER1DSHADOW,
+    GCT_SAMPLER2DSHADOW,
+    GCT_SAMPLER2DARRAY,
+    GCT_SAMPLER_EXTERNAL_OES,
+    GCT_MATRIXF_4X4,
+    GCT_COUNT
 };
+
+
 
 enum class BufferType
 {
@@ -217,7 +241,7 @@ enum VertexElementType: uint32_t
     BONEINDEX=8,
     WEIGHT=9,
     BASIC_NUM=10,
-    POS_NOR_TEXO = 1<< POSITION + 1<< NORMAL+1<< TEXCORD0
+    //POS_NOR_TEXO = 1<< POSITION + 1<< NORMAL+1<< TEXCORD0
 
 };
 

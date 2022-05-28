@@ -16,6 +16,8 @@ enum ElementType {
 	INT,
 	SHORT,
 	MATRIX4F,
+	STRUCT,
+	ARRAY,
 	CUSTOM
 };
 class Array :public FObject{
@@ -48,8 +50,12 @@ template<typename T, ElementType type,  int ElementSize>
 class TemplateArray : public Array, public std::vector<T>
 {
 	TemplateArray(int ElementNum=0):Array(type, ElementNum, ElementSize), std::vector<T>(ElementNum){}
-};
+	virtual unsigned int    getNumElements() const { 
+		return static_cast<unsigned int>(this->size()); }
+	virtual void reserveArray(unsigned int num) { this->reserve(num); }
 
+};
+// 通过模板Vec2, Vec3而不是继承来实现多态 ， 某个类要引用这种不确定对象， 模板继承了一个非模板对象Array
 typedef TemplateArray<Vec3f, ElementType::VEC3F, 12> Vec3fArray;
 typedef TemplateArray<Vec2f, ElementType::VEC2F, 8> Vec2fArray;
 typedef TemplateArray<uint32_t, ElementType::INT, 4> IndexArray;

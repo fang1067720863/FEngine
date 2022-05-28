@@ -47,7 +47,7 @@ public:
     }
 
     template<typename R>
-    explicit Matrix4(const t_mat4<R>& rhs)
+    explicit Matrix4(const Matrix4<R>& rhs)
     {
         value[0] = rhs[0];
         value[1] = rhs[1];
@@ -66,7 +66,7 @@ public:
     value_type operator()(std::size_t c, std::size_t r) const { return value[c][r]; }
 
     template<typename R>
-    t_mat4& operator=(const t_mat4<R>& rhs)
+    Matrix4& operator=(const Matrix4<R>& rhs)
     {
         value[0] = rhs[0];
         value[1] = rhs[1];
@@ -88,10 +88,10 @@ public:
 
     void transpose()
     {
-        set(m[0][0], m[1][0], m[2][0], m[3][0],
-            m[0][1], m[1][1], m[2][1], m[3][1],
-            m[0][2], m[1][2], m[2][2], m[3][2],
-            m[0][3], m[1][3], m[2][3], m[3][3]);
+        set(value[0][0], value[1][0], value[2][0], value[3][0],
+            value[0][1], value[1][1], value[2][1], value[3][1],
+            value[0][2], value[1][2], value[2][2], value[3][2],
+            value[0][3], value[1][3], value[2][3], value[3][3]);
     }
     T* data() { return value[0].data(); }
     const T* data() const { return value[0].data(); }
@@ -100,158 +100,160 @@ public:
 using Mat4 = Matrix4<float>;
 using Mat4d = Matrix4<double>;
 
-template<class T>
-bool decompose(const Matrix4<T>& m, Vec3<T>& translation, Quat<T>& rotation, Vec3<T>& scale)
-{
-    // get the translation.
-    translation = m[3].xyz;
+//template<class T>
+//bool decompose(const Matrix4<T>& m, Vec3<T>& translation, Quat<T>& rotation, Vec3<T>& scale)
+//{
+//    // get the translation.
+//    translation = m[3].xyz;
+//
+//    // compute the scale
+//    scale[0] = length(m[0].xyz);
+//    scale[1] = length(m[1].xyz);
+//    scale[2] = length(m[2].xyz);
+//
+//    // check that we don't have any axis scaled by 0 as this would cause a
+//    // divide by zero in the rotation code.
+//    if (scale[0] == 0.0 || scale[1] == 0.0 || scale[2] == 0.0) return false;
+//
+//    // compute rotation matrix and subsequently the quaternion
+//    t_mat3<T> rm(m[0].xyz / scale[0],
+//        m[1].xyz / scale[1],
+//        m[2].xyz / scale[2]);
+//
+//    auto trace = rm[0][0] + rm[1][1] + rm[2][2]; // diagonal of matrix
+//    if (trace > static_cast<T>(0.0))
+//    {
+//        auto root = sqrt(trace + static_cast<T>(1.0));
+//        auto half_inv_root = static_cast<T>(0.5) / root;
+//        rotation.set(half_inv_root * (rm[1][2] - rm[2][1]),
+//            half_inv_root * (rm[2][0] - rm[0][2]),
+//            half_inv_root * (rm[0][1] - rm[1][0]),
+//            static_cast<T>(0.5) * root);
+//    }
+//    else // trace <= 0.0
+//    {
+//        // locate max on diagonal
+//        int i = 0;
+//        if (rm[1][1] > rm[0][0]) i = 1;
+//        if (rm[2][2] > rm[i][i]) i = 2;
+//
+//        // set up the orthogonal axis to the max diagonal.
+//        int next[3] = { 1, 2, 0 };
+//        int j = next[i];
+//        int k = next[j];
+//
+//        auto root = sqrt(rm[i][i] - rm[j][j] - rm[k][k] + static_cast<T>(1.0));
+//        auto half_inv_root = static_cast<T>(0.5) / root;
+//        rotation[i] = static_cast<T>(0.5) / root;
+//        rotation[j] = half_inv_root * (rm[i][j] + rm[j][i]);
+//        rotation[k] = half_inv_root * (rm[i][k] + rm[k][i]);
+//        rotation[3] = half_inv_root * (rm[j][k] - rm[k][j]);
+//    }
+//
+//    return true;
+//}
 
-    // compute the scale
-    scale[0] = length(m[0].xyz);
-    scale[1] = length(m[1].xyz);
-    scale[2] = length(m[2].xyz);
-
-    // check that we don't have any axis scaled by 0 as this would cause a
-    // divide by zero in the rotation code.
-    if (scale[0] == 0.0 || scale[1] == 0.0 || scale[2] == 0.0) return false;
-
-    // compute rotation matrix and subsequently the quaternion
-    t_mat3<T> rm(m[0].xyz / scale[0],
-        m[1].xyz / scale[1],
-        m[2].xyz / scale[2]);
-
-    auto trace = rm[0][0] + rm[1][1] + rm[2][2]; // diagonal of matrix
-    if (trace > static_cast<T>(0.0))
-    {
-        auto root = sqrt(trace + static_cast<T>(1.0));
-        auto half_inv_root = static_cast<T>(0.5) / root;
-        rotation.set(half_inv_root * (rm[1][2] - rm[2][1]),
-            half_inv_root * (rm[2][0] - rm[0][2]),
-            half_inv_root * (rm[0][1] - rm[1][0]),
-            static_cast<T>(0.5) * root);
-    }
-    else // trace <= 0.0
-    {
-        // locate max on diagonal
-        int i = 0;
-        if (rm[1][1] > rm[0][0]) i = 1;
-        if (rm[2][2] > rm[i][i]) i = 2;
-
-        // set up the orthogonal axis to the max diagonal.
-        int next[3] = { 1, 2, 0 };
-        int j = next[i];
-        int k = next[j];
-
-        auto root = sqrt(rm[i][i] - rm[j][j] - rm[k][k] + static_cast<T>(1.0));
-        auto half_inv_root = static_cast<T>(0.5) / root;
-        rotation[i] = static_cast<T>(0.5) / root;
-        rotation[j] = half_inv_root * (rm[i][j] + rm[j][i]);
-        rotation[k] = half_inv_root * (rm[i][k] + rm[k][i]);
-        rotation[3] = half_inv_root * (rm[j][k] - rm[k][j]);
-    }
-
-    return true;
-}
-
-template<typename T>
-class TranformMatrix : public Matrix4
-{
-
-    TranformMatrix(const Vec3<T>& position, const Vec3<T>& size, const Quat<T>& rotation):mPosition(position),
-        mScale(size), mRotation(rotation)
-    {
-       
-    }
-private:
-    Vec3<T> mPosition;
-    Vec3<T> mScale;
-    Quat<T> mRotation;
-    bool mDirty = false;
-public:
-
-    template<T>
-    Quat<T> rotation() const
-    {
-        return mRotation;
-    }
-
-    template<T>
-    Vec3<T> position() const
-    {
-        return mPosition;
-    }
-
-    template<T>
-    Vec3<T> size() const
-    {
-        return mScale;
-    }
-
-    template<T>
-    void SetRotation(const Quat<T>& q)
-    {
-        mRotation = q;
-    }
-
-    template<T>
-    void SetPosition(const Vec3<T>& p)
-    {
-        mPosition = p;
-    }
-
-    template<T>
-    void SetScale(const Vec3<T>& s)
-    {
-        mScale = s;
-    }
-
-    template<T>
-    void Rotate(const Quat<T>& q)
-    {
-        mRotation *= q;
-        mDirty = true;
-    }
-
-    template<T>
-    void Rotate(const Vec3<T>& axis, T angle)
-    {
-        Rotate(Quat<T>(angle, axis));
-    }
-
-    template<T>
-    void Rotate(const Vec3<T>& euler)
-    {
-        Rotate(Quat<T>(euler));
-    }
-
-    template<T>
-    void Scale(const Vec3<T>& s)
-    {
-        mScale* = s;
-        mDirty = true;
-    }
-
-    template<T>
-    void Scale(T s)
-    {
-        mScale* = s;
-        mDirty = true;
-    }
-
-    void Tanslate(const Vec3<T>& t)
-    {
-        mPosition += t;
-        mDirty = true;
-    }
-private:
-    void DoCompose()
-    {
-
-    }
+//template<typename T>
+//class TranformMatrix : public Matrix4<T>
+//{
+//
+//    TranformMatrix(const Vec3<T>& position, const Vec3<T>& size, const Quat<T>& rotation):mPosition(position),
+//        mScale(size), mRotation(rotation)
+//    {
+//       
+//    }
+//private:
+//    Vec3<T> mPosition;
+//    Vec3<T> mScale;
+//    Quat<T> mRotation;
+//    bool mDirty = false;
+//public:
+//
+//    template<T>
+//    Quat<T> rotation() const
+//    {
+//        return mRotation;
+//    }
+//
+//    template<T>
+//    Vec3<T> position() const
+//    {
+//        return mPosition;
+//    }
+//
+//    template<T>
+//    Vec3<T> size() const
+//    {
+//        return mScale;
+//    }
+//
+//    template<T>
+//    void SetRotation(const Quat<T>& q)
+//    {
+//        mRotation = q;
+//    }
+//
+//    template<T>
+//    void SetPosition(const Vec3<T>& p)
+//    {
+//        mPosition = p;
+//    }
+//
+//    template<T>
+//    void SetScale(const Vec3<T>& s)
+//    {
+//        mScale = s;
+//    }
+//
+//    template<T>
+//    void Rotate(const Quat<T>& q)
+//    {
+//        mRotation *= q;
+//        mDirty = true;
+//    }
+//
+//    template<T>
+//    void Rotate(const Vec3<T>& axis, T angle)
+//    {
+//        Rotate(Quat<T>(angle, axis));
+//    }
+//
+//    template<T>
+//    void Rotate(const Vec3<T>& euler)
+//    {
+//        Rotate(Quat<T>(euler));
+//    }
+//
+//    template<T>
+//    void Scale(const Vec3<T>& s)
+//    {
+//        mScale* = s;
+//        mDirty = true;
+//    }
+//
+//    template<T>
+//    void Scale(T s)
+//    {
+//        mScale* = s;
+//        mDirty = true;
+//    }
+//
+//    void Tanslate(const Vec3<T>& t)
+//    {
+//        mPosition += t;
+//        mDirty = true;
+//    }
+//private:
+//    void DoCompose()
+//    {
+//
+//    }
+//
+//
+//
+//};
 
 
-
-};
 //
 //VSG_type_name(vsg::mat4);
 //VSG_type_name(vsg::dmat4);

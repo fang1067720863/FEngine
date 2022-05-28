@@ -6,7 +6,7 @@
 class FReference
 {
 public:
-	std::atomic<int> ref_count;
+	std::atomic<std::size_t> ref_count;
 
 	// By default the reference count is initialized to 1
 	explicit FReference(std::size_t count = 1)
@@ -150,14 +150,14 @@ public:
 	{
 		return a.p != nullptr;
 	}
-	friend bool operator==(std::nullptr_t, const ref_count_ptr& a)
-	{
-		return a.p == nullptr;
-	}
-	friend bool operator!=(std::nullptr_t, const ref_count_ptr& a)
-	{
-		return a.p != nullptr;
-	}
+	//friend bool operator==(std::nullptr_t, const ref_count_ptr& a)
+	//{
+	//	return a.p == nullptr;
+	//}
+	//friend bool operator!=(std::nullptr_t, const ref_count_ptr& a)
+	//{
+	//	return a.p != nullptr;
+	//}
 };
 
 template<typename T>

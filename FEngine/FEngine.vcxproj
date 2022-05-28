@@ -78,7 +78,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\FInfras\Public;..\FEventSystem\Public;$(IncludePath)</IncludePath>
+    <IncludePath>..\FInfras\Public;..\FEventSystem\Public;..\ThirdParty\googleTest\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\ThirdParty\googleTest\lib\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -117,11 +118,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\FInfras\Public;..\FRenderer\Public;..\FEventSystem\Public;..\FEngine\Public;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\FInfras\Public;..\FEventSystem\Public;..\FEngine\Public;..\ThirdParty\googleTest\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>gtest.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -143,29 +145,20 @@
   <ItemGroup>
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
-    <ClInclude Include="Public\Asset.h" />
-    <ClInclude Include="Public\Buffer.h" />
     <ClInclude Include="Public\BufferDescription.h" />
-    <ClInclude Include="Public\Camera.h" />
     <ClInclude Include="Public\CameraManipulator.h" />
-    <ClInclude Include="Public\CommonType.h" />
     <ClInclude Include="Public\Event.h" />
     <ClInclude Include="Public\EventHandler.h" />
     <ClInclude Include="Public\EventQueue.h" />
-    <ClInclude Include="Public\Geometry.h" />
     <ClInclude Include="Public\GraphicViewWin32.h" />
-    <ClInclude Include="Public\Group.h" />
     <ClInclude Include="Public\Handle.h" />
     <ClInclude Include="Public\Image.h" />
     <ClInclude Include="Public\Light.h" />
     <ClInclude Include="Public\Material.h" />
-    <ClInclude Include="Public\Math.h" />
+    <ClInclude Include="Public\FMath.h" />
     <ClInclude Include="Public\Matrix.h" />
-    <ClInclude Include="Public\Mesh.h" />
-    <ClInclude Include="Public\Node.h" />
     <ClInclude Include="Public\Quat.h" />
     <ClInclude Include="Public\Reference.h" />
-    <ClInclude Include="Public\Scene.h" />
     <ClInclude Include="Public\Core.h" />
     <ClInclude Include="Public\Shader.h" />
     <ClInclude Include="Public\ShaderInput.h" />
@@ -178,12 +171,8 @@
     <ClInclude Include="Renderer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Private\Camera.cpp" />
-    <ClCompile Include="Private\Geometry.cpp" />
-    <ClCompile Include="Private\Group.cpp" />
-    <ClCompile Include="Private\Node.cpp" />
-    <ClCompile Include="Private\Scene.cpp" />
     <ClCompile Include="Private\Core.cpp" />
+    <ClCompile Include="Private\test.cpp" />
     <ClCompile Include="Private\View.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

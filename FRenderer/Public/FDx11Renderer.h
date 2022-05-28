@@ -10,6 +10,9 @@
 
 #include"FDx11Mesh.h"
 #include"FDx11Pass.h"
+#include"ShaderParameter.h"
+
+#include"Camera.h"
 
 
 
@@ -32,28 +35,24 @@ class FDx11Renderer : public FRenderer
 public:
 	 FDx11Renderer(FGraphicContext::Traits * traits,HWND hwnd);
 
-	 void InitGBufferPass(FDx11Pass* gBufferPass);
-	 void ExecuteGBufferPass(FDx11Pass* GBufferPass);
-	 void ClearFrameBuffer(FDx11Pass* GBufferPass);
+	 void InitSinglePass();
+	 void ExecutePass(FDx11Pass* pass);
+	 void ClearFrameBuffer(FDx11Pass* pass);
 	 void SetRenderStates(const RenderStateSet* renderStates);
 
 	 void SetGpuProgram(FDx11GpuProgram* program);
 
+	
+
 	 void Initialize() override;
-	 void InitGameObject()
-	 {
-		 Ptr<FShape> sphere = new FBox(2.0);
-		 Ptr<FGeometry> sphereGeom = ShapeGeometryBuilder::Build(sphere.get());
-		 sphereMesh = new FDx11Mesh(sphereGeom.get());
-		 sphereMesh->SetLocalPosition(Vec3f(0.0, 1.0, 0.0));
-	 }
-
-	 void OnResize() override;
 	 bool InitDirect3D(FGraphicContext::Traits* traits, HWND hwnd);
-	 void Update(const FTimer* gt) override;
-	 void Draw(const FTimer* gt) override;
+	 int Run();
+	 void OnResize() override;
+	
+	 void Update() override;
+	 void Draw() override;
 
-	 Ptr<FDx11Mesh> sphereMesh;
+	 Ptr<FDx11Pass> singlePass;
 	 // Direct3D 11
 	 ComPtr<ID3D11Device> mDevice;							// D3D11设备
 	 ComPtr<ID3D11DeviceContext> mDeviceContext;		// D3D11设备上下文
@@ -72,8 +71,29 @@ public:
 	 bool	  m_Enable4xMsaa;	 // 是否开启4倍多重采样
 	 UINT      m_4xMsaaQuality;   // MSAA支持的质量等级
 
+	 FGraphicContext::Traits* mTraits;
+	 HWND mHwnd;
+
+	 FTimer mTimer;         // 计时器
 };
 
+
+class FDx11App : public FDx11Renderer
+{
+public:
+	;
+	FDx11App(FGraphicContext::Traits* traits, HWND hwnd):FDx11Renderer(traits,hwnd) {}
+	void InitMainCamera();
+	void InitGameObject();
+	void InitCommmonConstantBuffer();
+
+	void Initialize() override;
+	void Draw()override;
+
+	Ptr<FDx11Mesh> sphereMesh;
+	Ptr<FCamera> mainCamera;
+
+}
 
 
 

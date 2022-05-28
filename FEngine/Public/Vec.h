@@ -1,6 +1,6 @@
 #pragma once
 
-#include"Math.h"
+#include"FMath.h"
 template<class T>
 class Vec2
 {
@@ -162,7 +162,7 @@ using Vec2d = Vec2<double>;
 template<class T>
 inline Vec2<T> componentMultiply(const Vec2<T>& lhs, const Vec2<T>& rhs)
 {
-    return Vec2(lhs[0] * rhs[0], lhs[1] * rhs[1]);
+    return Vec2<T>(lhs[0] * rhs[0], lhs[1] * rhs[1]);
 }
 
 template<class T>
@@ -188,7 +188,7 @@ public:
     /** Constructor that sets all components of the vector to zero */
     Vec3() { _v[0] = 0.0f; _v[1] = 0.0f; _v[2] = 0.0f; }
     Vec3(scalar_type x, scalar_type y, scalar_type z) { _v[0] = x; _v[1] = y; _v[2] = z; }
-    Vec3(const Vec2& v2, scalar_type zz)
+    Vec3(const Vec2<T>& v2, scalar_type zz)
     {
         _v[0] = v2[0];
         _v[1] = v2[1];
@@ -234,9 +234,9 @@ public:
     inline scalar_type z() const { return _v[2]; }
 
     /** Returns true if all components have values that are not NaN. */
-    inline bool valid() const { return !isNaN(); }
+    //inline bool valid() const { return !isNaN(); }
     /** Returns true if at least one component has value NaN. */
-    inline bool isNaN() const { return osg::isNaN(_v[0]) || osg::isNaN(_v[1]) || osg::isNaN(_v[2]); }
+    //inline bool isNaN() const { return osg::isNaN(_v[0]) || osg::isNaN(_v[1]) || osg::isNaN(_v[2]); }
 
     /** Dot product. */
     inline scalar_type operator * (const Vec3& rhs) const
@@ -359,7 +359,7 @@ using Vec3ub = Vec3<uint8_t>;
 template<class T>
 inline Vec3<T> componentMultiply(const Vec3<T>& lhs, const Vec3<T>& rhs)
 {
-    return Vec3(lhs[0] * rhs[0], lhs[1] * rhs[1], lhs[2] * rhs[2]);
+    return Vec3<T>(lhs[0] * rhs[0], lhs[1] * rhs[1], lhs[2] * rhs[2]);
 }
 
 /** divide rhs components by rhs vector components. */
@@ -400,7 +400,7 @@ public:
         _v[3] = w;
     }
 
-    Vec4(const Vec3& v3, scalar_type w)
+    Vec4(const Vec3<T>& v3, scalar_type w)
     {
         _v[0] = v3[0];
         _v[1] = v3[1];

@@ -22,11 +22,11 @@ class Quat
         value{ v.x, v.y, v.z, v.w } {}
     constexpr Quat(value_type in_x, value_type in_y, value_type in_z, value_type in_w) :
         value{ in_x, in_y, in_z, in_w } {}
-    constexpr Quat(value_type angle_radians, const t_vec3<value_type>& axis)
+    constexpr Quat(value_type angle_radians, const Vec3<value_type>& axis)
     {
         set(angle_radians, axis);
     }
-    constexpr Quat(const t_vec3<value_type>& from, const t_vec3<value_type>& to)
+    constexpr Quat(const Vec3<value_type>& from, const Vec3<value_type>& to)
     {
         set(from, to);
     }
@@ -58,7 +58,7 @@ class Quat
     template<typename T>
     inline Vec4<T> asVec4() const
     {
-        return Vec4<T>(_v[0], _v[1], _v[2], _v[3]);
+        return Vec4<T>(value[0], value[1], value[2], value[3]);
     }
 
     void set(value_type in_x, value_type in_y, value_type in_z, value_type in_w)
@@ -69,7 +69,7 @@ class Quat
         w = in_w;
     }
 
-    void set(value_type angle_radians, const t_vec3<value_type>& axis)
+    void set(value_type angle_radians, const Vec3<value_type>& axis)
     {
         const value_type epsilon = 1e-7;
         value_type len = length(axis);
@@ -90,38 +90,38 @@ class Quat
         w = coshalfangle;
     }
 
-    void set(const t_vec3<value_type>& from, const t_vec3<value_type>& to)
-    {
-        const value_type epsilon = 1e-7;
+    //void set(const Vec3<value_type>& from, const Vec3<value_type>& to)
+    //{
+    //    const value_type epsilon = 1e-7;
 
-        value_type dot_pd = vsg::dot(from, to);
-        value_type div = std::sqrt(length2(from) * length2(to));
-        vsg::dvec3 axis;
-        if (div - dot_pd < epsilon)
-        {
-            axis = orthogonal(from);
-        }
-        else
-        {
-            axis = cross(from, to);
-        }
+    //    value_type dot_pd = dot(from, to);
+    //    value_type div = std::sqrt(length2(from) * length2(to));
+    //    Vec3d axis;
+    //    if (div - dot_pd < epsilon)
+    //    {
+    //        axis = orthogonal(from);
+    //    }
+    //    else
+    //    {
+    //        axis = cross(from, to);
+    //    }
 
-        value_type len = length(axis);
+    //    value_type len = length(axis);
 
-        double angle_radians = acos(dot_pd / div);
+    //    double angle_radians = acos(dot_pd / div);
 
-        value_type inversenorm = 1.0 / len;
-        value_type coshalfangle = cos(0.5 * angle_radians);
-        value_type sinhalfangle = sin(0.5 * angle_radians);
+    //    value_type inversenorm = 1.0 / len;
+    //    value_type coshalfangle = cos(0.5 * angle_radians);
+    //    value_type sinhalfangle = sin(0.5 * angle_radians);
 
-        x = axis.x * sinhalfangle * inversenorm;
-        y = axis.y * sinhalfangle * inversenorm;
-        z = axis.z * sinhalfangle * inversenorm;
-        w = coshalfangle;
-    }
+    //    x = axis.x * sinhalfangle * inversenorm;
+    //    y = axis.y * sinhalfangle * inversenorm;
+    //    z = axis.z * sinhalfangle * inversenorm;
+    //    w = coshalfangle;
+    //}
 
     template<typename T>
-    constexpr T length const()
+    T length () const 
     {
         return std::sqrt(value[0] * value[0] + value[1] * value[1] + value[2] * value[2] + value[3] * value[3]);
     }
@@ -139,9 +139,9 @@ class Quat
     }
     inline Quat<T>& operator*=(const Quat<T>& rhs)
     {
-        value_type x = rhs.value[3] * _v[0] + rhs.value[0] * value[3] + rhs.value[1] * value[2] - rhs.value[2] * value[1];
-        value_type y = rhs.value[3] * _v[1] - rhs.value[0] * value[2] + rhs.value[1] * value[3] + rhs.value[2] * value[0];
-        value_type z = rhs.value[3] * _v[2] + rhs.value[0] * value[1] - rhs.value[1] * value[0] + rhs.value[2] * value[3];
+        value_type x = rhs.value[3] * value[0] + rhs.value[0] * value[3] + rhs.value[1] * value[2] - rhs.value[2] * value[1];
+        value_type y = rhs.value[3] * value[1] - rhs.value[0] * value[2] + rhs.value[1] * value[3] + rhs.value[2] * value[0];
+        value_type z = rhs.value[3] * value[2] + rhs.value[0] * value[1] - rhs.value[1] * value[0] + rhs.value[2] * value[3];
         value[3] = rhs.value[3] * value[3] - rhs.value[0] * value[0] - rhs.value[1] * value[1] - rhs.value[2] * value[2];
 
         value[2] = z;
@@ -160,7 +160,7 @@ using Quatd = Quat<double>;
 template<typename T>
 constexpr Quat<T> operator*(const Quat<T>& lhs, const Quat<T>& rhs)
 {
-    t_quat<T> q(rhs[3] * lhs[0] + rhs[0] * lhs[3] + rhs[1] * lhs[2] - rhs[2] * lhs[1],
+    Quat<T> q(rhs[3] * lhs[0] + rhs[0] * lhs[3] + rhs[1] * lhs[2] - rhs[2] * lhs[1],
         rhs[3] * lhs[1] - rhs[0] * lhs[2] + rhs[1] * lhs[3] + rhs[2] * lhs[0],
         rhs[3] * lhs[2] + rhs[0] * lhs[1] - rhs[1] * lhs[0] + rhs[2] * lhs[3],
         rhs[3] * lhs[3] - rhs[0] * lhs[0] - rhs[1] * lhs[1] - rhs[2] * lhs[2]);
@@ -173,8 +173,8 @@ template<typename T>
 constexpr Vec3<T> operator*(const Quat<T>& q, const Vec3<T>& v)
 {
     // nVidia SDK implementation
-    t_vec3<T> uv, uuv;
-    t_vec3<T> qvec(q[0], q[1], q[2]);
+    Vec3<T> uv, uuv;
+    Vec3<T> qvec(q[0], q[1], q[2]);
     uv = cross(qvec, v);
     uuv = cross(qvec, uv);
     T two(2.0);
@@ -187,7 +187,7 @@ template<typename T>
 constexpr Quat<T> normalize(const Quat<T>& v)
 {
     T inverse_len = static_cast<T>(1.0) / length(v);
-    return t_quat<T>(v[0] * inverse_len, v[1] * inverse_len, v[2] * inverse_len, v[3] * inverse_len);
+    return Quat<T>(v[0] * inverse_len, v[1] * inverse_len, v[2] * inverse_len, v[3] * inverse_len);
 }
 
 template<typename T>
@@ -199,38 +199,38 @@ constexpr T dot(const Quat<T>& lhs, const Quat<T>& rhs)
 template<typename T>
 constexpr Quat<T> inverse(const Quat<T>& v)
 {
-    t_quat<T> c = conj(v);
+    Quat<T> c = conj(v);
     T inverse_len = static_cast<T>(1.0) / length(v);
-    return t_quat<T>(c[0] * inverse_len, c[1] * inverse_len, c[2] * inverse_len, c[3] * inverse_len);
+    return Quat<T>(c[0] * inverse_len, c[1] * inverse_len, c[2] * inverse_len, c[3] * inverse_len);
 }
 
-template<typename T>
-constexpr Quat<T> slerp(const Quat<T>& from, Quat<T> to, T r)
-{
-    T epsilon = std::numeric_limits<T>::epsilon();
-    T one(1.0);
-
-    T cosomega = dot(from, to);
-    if (cosomega < 0.0)
-    {
-        cosomega = -cosomega;
-        to.x = -to.x;
-        to.y = -to.y;
-        to.z = -to.z;
-        to.w = -to.w;
-    }
-
-    if ((one - cosomega) > epsilon)
-    {
-        T omega = acos(cosomega);
-        T sinomega = sin(omega);
-        T scale_from = sin((one - r) * omega) / sinomega;
-        T scale_to = sin(r * omega) / sinomega;
-        return (from * scale_from) + (to * scale_to);
-    }
-    else
-    {
-        // quaternion's are very close so just linearly interpolate
-        return (from * (one - r)) + (to * r);
-    }
-}
+//template<typename T>
+//constexpr Quat<T> slerp(const Quat<T>& from, Quat<T> to, T r)
+//{
+//    T epsilon = std::numeric_limits<T>::epsilon();
+//    T one(1.0);
+//
+//    T cosomega = dot(from, to);
+//    if (cosomega < 0.0)
+//    {
+//        cosomega = -cosomega;
+//        to.x = -to.x;
+//        to.y = -to.y;
+//        to.z = -to.z;
+//        to.w = -to.w;
+//    }
+//
+//    if ((one - cosomega) > epsilon)
+//    {
+//        T omega = acos(cosomega);
+//        T sinomega = sin(omega);
+//        T scale_from = sin((one - r) * omega) / sinomega;
+//        T scale_to = sin(r * omega) / sinomega;
+//        return (from * scale_from) + (to * scale_to);
+//    }
+//    else
+//    {
+//        // quaternion's are very close so just linearly interpolate
+//        return (from * (one - r)) + (to * r);
+//    }
+//}

@@ -21,64 +21,26 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Private\Camera.cpp">
-      <Filter>Scene</Filter>
-    </ClCompile>
     <ClCompile Include="Private\Core.cpp">
       <Filter>GraphicsWindow</Filter>
-    </ClCompile>
-    <ClCompile Include="Private\Group.cpp">
-      <Filter>Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="Private\Geometry.cpp">
-      <Filter>Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="Private\Node.cpp">
-      <Filter>Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="Private\Scene.cpp">
-      <Filter>Scene</Filter>
     </ClCompile>
     <ClCompile Include="Private\View.cpp">
       <Filter>GraphicsWindow</Filter>
     </ClCompile>
+    <ClCompile Include="Private\test.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Public\Asset.h">
-      <Filter>RPI</Filter>
-    </ClInclude>
-    <ClInclude Include="Public\Camera.h">
-      <Filter>Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="Public\Geometry.h">
-      <Filter>Scene</Filter>
-    </ClInclude>
     <ClInclude Include="Public\Core.h">
       <Filter>GraphicsWindow</Filter>
     </ClInclude>
     <ClInclude Include="Public\GraphicViewWin32.h">
       <Filter>GraphicsWindow</Filter>
     </ClInclude>
-    <ClInclude Include="Public\CommonType.h">
-      <Filter>RPI</Filter>
-    </ClInclude>
-    <ClInclude Include="Public\Group.h">
-      <Filter>Scene</Filter>
-    </ClInclude>
     <ClInclude Include="Public\Image.h">
       <Filter>RPI</Filter>
     </ClInclude>
-    <ClInclude Include="Public\Node.h">
-      <Filter>Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="Public\Scene.h">
-      <Filter>Scene</Filter>
-    </ClInclude>
     <ClInclude Include="Public\View.h">
       <Filter>GraphicsWindow</Filter>
-    </ClInclude>
-    <ClInclude Include="Public\Buffer.h">
-      <Filter>RPI</Filter>
     </ClInclude>
     <ClInclude Include="Public\Event.h">
       <Filter>EventSystem</Filter>
@@ -119,15 +81,14 @@
     <ClInclude Include="Renderer.h">
       <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Public\Mesh.h">
-      <Filter>Scene</Filter>
-    </ClInclude>
     <ClInclude Include="Public\Texture.h" />
     <ClInclude Include="Public\ShaderParameter.h" />
     <ClInclude Include="Public\BufferDescription.h" />
     <ClInclude Include="Public\Light.h" />
     <ClInclude Include="Public\Vec.h" />
-    <ClInclude Include="Public\Math.h" />
+    <ClInclude Include="Public\FMath.h" />
     <ClInclude Include="Public\VecArray.h" />
+    <ClInclude Include="Public\Matrix.h" />
+    <ClInclude Include="Public\Quat.h" />
   </ItemGroup>
 </Project>

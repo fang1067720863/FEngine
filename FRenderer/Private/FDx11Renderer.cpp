@@ -7,19 +7,94 @@
 
 FDx11Renderer::FDx11Renderer(FGraphicContext::Traits* traits, HWND hwnd)
 {
-	InitDirect3D(traits, hwnd);
+	
 }
 
-void FDx11Renderer::Update(const FTimer* gt)
+
+void FDx11Renderer::Initialize()
+{
+	InitDirect3D(mTraits, mHwnd);
+	InitSinglePass()
+}
+
+
+void FDx11Renderer::Update()
 {
 
 }
 
-void FDx11Renderer::Draw(const FTimer* gt)
+void FDx11Renderer::Draw()
 {
+	ExecutePass(singlePass.get());
+
+}
+void FDx11Renderer::InitSinglePass()
+{
+	singlePass = new FDx11Pass(1);
 
 }
 
+
+void FDx11Renderer::ExecutePass(FDx11Pass* gBufferPass)
+{
+	// Set Viewport
+	mDeviceContext->RSSetViewports(gBufferPass->GetNumViews(), gBufferPass->GetViewport());
+	mDeviceContext->RSSetScissorRects(1,gBufferPass->GetScissorRects());
+	
+	// Clear&Set FrameBuffer
+	ClearFrameBuffer(gBufferPass);
+	mDeviceContext->OMSetRenderTargets(gBufferPass->GetNumViews(), gBufferPass->GetRenderTargetViewAddress(), gBufferPass->GetDepthStencilView());
+
+	// Render state
+	SetRenderStates(gBufferPass->GetRenderStates());
+	// shader & shader resource
+	SetGpuProgram(gBufferPass->GetGpuProgram());
+
+	// Draw GameObject
+
+}
+
+void FDx11Renderer::SetGpuProgram(FDx11GpuProgram* program)
+{
+	// shader
+	mDeviceContext->VSSetShader(program->GetVertexShader(), program->GetClassInstance(ShaderType::Vertex),
+		program->GetNumInstance(ShaderType::Vertex));
+	mDeviceContext->PSSetShader(program->GetPixelShader(), program->GetClassInstance(ShaderType::Pixel),
+		program->GetNumInstance(ShaderType::Pixel));
+
+	// 一个slot 只设置一块resource element ,不设置成Array magicNumber = 1
+	// shader resource constant buffer
+	unsigned int num = program->GetConstantBufferNum();
+	for (unsigned int i = 0; i < num; i++)
+	{
+		ID3D11Buffer* bufferArray[1];
+		ConstantBufferObject* cbo = program->GetContantBufferObject(0);
+		bufferArray[0] = cbo->GetBufferView();
+
+		UINT slot = i;
+		mDeviceContext->VSSetConstantBuffers(slot, 1, bufferArray);
+	}
+
+	// shader resource texture
+	num = program->GetTextureNum();
+	for (unsigned int i = 0; i < num; i++)
+	{
+
+		UINT slot = i;
+		UINT num = 1;
+		mDeviceContext->PSSetShaderResources(slot, num, program->GetGpuTextureView(i));
+	}
+
+	// shader resource sampler
+	num = program->GetSamplerNum();
+	for (unsigned int i = 0; i < num; i++)
+	{
+		UINT slot = i;
+		UINT num = 1;
+		mDeviceContext->PSSetSamplers(slot, num, program->GetSamplerView(i));
+	}
+
+}
 
 void FDx11Renderer::ClearFrameBuffer(FDx11Pass* GBufferPass)
 {
@@ -64,114 +139,40 @@ void FDx11Renderer::SetRenderStates(const RenderStateSet* renderStates)
 	mDeviceContext->OMSetBlendState(renderStates->mBlendState.Get(), nullptr, 0xFFFFFFFF);  // blend
 }
 
-void FDx11Renderer::ExecuteGBufferPass(FDx11Pass* gBufferPass)
+int FDx11Renderer::Run()
 {
-	// Set Viewport
-	mDeviceContext->RSSetViewports(gBufferPass->GetNumViews(), gBufferPass->GetViewport());
-	mDeviceContext->RSSetScissorRects(1,gBufferPass->GetScissorRects());
-	
-	// Clear&Set FrameBuffer
-	ClearFrameBuffer(gBufferPass);
-	mDeviceContext->OMSetRenderTargets(gBufferPass->GetNumViews(), gBufferPass->GetRenderTargetViewAddress(), gBufferPass->GetDepthStencilView());
+	MSG msg = { 0 };
 
-	// Render state
-	SetRenderStates(gBufferPass->GetRenderStates());
-	// shader & shader resource
-	SetGpuProgram(gBufferPass->GetGpuProgram());
+	mTimer.Reset();
 
-	// Draw GameObject
-
-}
-
-void FDx11Renderer::InitGBufferPass(FDx11Pass* gBufferPass)
-{
-	gBufferPass = new FDx11Pass(3);
-	// init gbuffer constant
-
-}
-void FDx11Renderer::SetGpuProgram(FDx11GpuProgram* program)
-{
-	// shader
-	mDeviceContext->VSSetShader(program->GetVertexShader(), program->GetClassInstance(ShaderType::Vertex),
-		program->GetNumInstance(ShaderType::Vertex));
-	mDeviceContext->PSSetShader(program->GetPixelShader(), program->GetClassInstance(ShaderType::Pixel),
-		program->GetNumInstance(ShaderType::Pixel));
-
-	// 一个slot 只设置一块resource element ,不设置成Array magicNumber = 1
-	// shader resource constant buffer
-	unsigned int num = program->GetConstantBufferNum();
-	for (unsigned int i = 0; i < num; i++)
+	while (msg.message != WM_QUIT)
 	{
-		ID3D11Buffer* bufferArray[1];
-		ConstantBufferObject* cbo = program->GetContantBufferObject(0);
-		bufferArray[0] = cbo->GetBufferView();
+		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+		else
+		{
+			mTimer.Tick();
 
-		UINT slot = i;
-		mDeviceContext->VSSetConstantBuffers(slot, 1, bufferArray);
+			if (!m_AppPaused)
+			{
+				//CalculateFrameStats();
+				//UpdateScene(m_Timer.DeltaTime());
+				Draw();
+			}
+			else
+			{
+				Sleep(100);
+			}
+		}
 	}
 
-	// shader resource texture
-	num = program->GetTextureNum();
-	for (unsigned int i = 0; i < num; i++)
-	{
-	
-		UINT slot = i;
-		UINT num = 1;
-		mDeviceContext->PSSetShaderResources(slot, num, program->GetGpuTextureView(i));
-	}
-
-	// shader resource sampler
-	num = program->GetSamplerNum();
-	for (unsigned int i = 0; i < num; i++)
-	{
-		UINT slot = i;
-		UINT num = 1;
-		mDeviceContext->PSSetSamplers(slot, num, program->GetSamplerView(i));
-	}
-
+	return (int)msg.wParam;
 }
 
-void FDx11Renderer::Initialize()
-{
 
-
-		//DirectionalLight dirLight;
-		//dirLight.ambient = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
-		//dirLight.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
-		//dirLight.specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-		//dirLight.direction = XMFLOAT3(0.577f, -0.577f, -0.577f);
-
-		//m_BasicEffect.SetDirLight(dirLight);
-		//m_BasicEffect.SetEyePos(m_pCamera->GetPosition());
-		//m_BasicEffect.SetProjMatrix(m_pCamera->GetProjXM());
-		//m_BasicEffect.SetViewMatrix(m_pCamera->GetViewXM());
-		//m_BasicEffect.SetRenderDefault(m_pd3dImmediateContext.Get());
-		//m_BasicEffect.InitAll(m_pd3dDevice.Get());
-		//struct CBChangesEveryObjectDrawing
-		//{
-		//	Material material;
-		//};
-
-		//struct CBChangesEveryFrame
-		//{
-		//	DirectX::XMMATRIX view;
-		//	DirectX::XMMATRIX world;
-		//	DirectX::XMFLOAT4 eyePos;
-		//	//float pad;                    //16字节对齐
-		//};
-
-		//struct CBChangesOnResize
-		//{
-		//	DirectX::XMMATRIX proj;
-		//};
-
-		//struct CBChangesRarely
-		//{
-		//	DirectionalLight dirLight;
-		//};
-
-
-}
 
 
 void FDx11Renderer::OnResize()
@@ -290,3 +291,78 @@ bool FDx11Renderer::InitDirect3D(FGraphicContext::Traits* traits, HWND hwnd)
 }
 
 
+
+
+
+void  FDx11App::Initialize() 
+{
+	FDx11Renderer::Initialize();
+	InitMainCamera();
+	InitGameObject();
+	InitCommmonConstantBuffer();
+
+
+}
+void FDx11App::InitMainCamera()
+{
+	mainCamera = new FCamera(Frustum(), "MainCamera");
+
+}
+
+void  FDx11App::InitGameObject()
+{
+	Ptr<FShape> sphere = new FBox(2.0);
+	Ptr<FGeometry> sphereGeom = ShapeGeometryBuilder::Build(sphere.get());
+	sphereMesh = new FDx11Mesh(sphereGeom.get());
+	sphereMesh->SetLocalPosition(Vec3f(0.0, 1.0, 0.0));
+}
+
+void FDx11App::InitCommmonConstantBuffer()
+{
+	UniformDefaultPtr dirLight = new UniformDefault("dirLight", {});
+	UniformBasePtr diffuse = new UniformVec4f("diffuse", Vec4f(0.8f, 0.8f, 0.8f, 1.0f));
+	UniformBasePtr specular = new UniformVec4f("specular", Vec4f(0.1f, 0.1f, 0.1f, 1.0f));
+	UniformBasePtr direction = new UniformVec4f("direction", Vec4f(0.577f, -0.577f, -0.577f, 1.0f));
+	UniformBasePtr ambient = new UniformVec4f("direction", Vec4f(0.8f, 0.8f, 0.8f, 1.0f));
+	dirLight->AddSubUniform(diffuse);
+	dirLight->AddSubUniform(specular);
+	dirLight->AddSubUniform(direction);
+	dirLight->AddSubUniform(ambient);
+
+	//m_BasicEffect.SetDirLight(dirLight);
+	//m_BasicEffect.SetEyePos(m_pCamera->GetPosition());
+	//m_BasicEffect.SetProjMatrix(m_pCamera->GetProjXM());
+	//m_BasicEffect.SetViewMatrix(m_pCamera->GetViewXM());
+	//m_BasicEffect.SetRenderDefault(m_pd3dImmediateContext.Get());
+	//m_BasicEffect.InitAll(m_pd3dDevice.Get());
+	//struct CBChangesEveryObjectDrawing
+	//{
+	//	Material material;
+	//};
+
+	//struct CBChangesEveryFrame
+	//{
+	//	DirectX::XMMATRIX view;
+	//	DirectX::XMMATRIX world;
+	//	DirectX::XMFLOAT4 eyePos;
+	//	//float pad;                    //16字节对齐
+	//};
+
+	//struct CBChangesOnResize
+	//{
+	//	DirectX::XMMATRIX proj;
+	//};
+
+	//struct CBChangesRarely
+	//{
+	//	DirectionalLight dirLight;
+	//};
+
+}
+
+
+void FDx11App::Draw()
+{
+	ExecutePass(singlePass.get());
+	sphereMesh->Draw(mDeviceContext.Get());
+}

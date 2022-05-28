@@ -1,10 +1,12 @@
 #pragma once
 
 
-typedef unsigned __int64 Timer_t;
+
 
 class FTimer {
 public:
+	typedef unsigned __int64 Timer_t;
+
 	FTimer();
 
 	float TotalTime()const;		// 总游戏时间

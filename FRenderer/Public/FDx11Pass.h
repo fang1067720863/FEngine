@@ -3,12 +3,13 @@
 
 #include"FDx11Shader.h"
 #include"FDx11RenderState.h"
+#include"Reference.h"
 
 #define MAX_MULTIPLE_RENDER_TARGETS 8
 
 
 
-class FDx11Pass
+class FDx11Pass:public FReference
 {
 public:
 

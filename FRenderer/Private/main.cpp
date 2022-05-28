@@ -24,8 +24,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE prevInstance,
 	_CrtDumpMemoryLeaks();
 	//_CrtSetBreakAlloc(179);
 
-	FCore coreApp(hInstance);
-	coreApp.Realize();
+	/*FCore coreApp(hInstance);
+	coreApp.Realize();*/
+
+	FGraphicWindowWin32 window(hInstance);
+	FDx11App application(window.GetTraits(), window.GetMainWnd());
+	application.Initialize();
+	application.Run();
 
 
 	system("pause");

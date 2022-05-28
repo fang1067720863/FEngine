@@ -8,7 +8,11 @@
 class FNode:public FObject
 {
 public:
-	FNode(std::string name):mName(name)
+	FNode() :mName("")
+	{
+
+	}
+	FNode(const std::string& name):mName(name)
 	{
 
 	}
