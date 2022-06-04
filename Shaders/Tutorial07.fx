@@ -61,5 +61,6 @@ PS_INPUT VS( VS_INPUT input )
 //--------------------------------------------------------------------------------------
 float4 PS( PS_INPUT input) : SV_Target
 {
+//test
     return txDiffuse.Sample( samLinear, input.Tex ) * vMeshColor;
 }
