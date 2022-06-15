@@ -105,10 +105,11 @@ bool FDx11Pass::InitRenderTexture(ID3D11Device* device)
 
 bool FDx11Pass::InitRenderState()
 {
-
+	return true;
 }
 
 bool FDx11Pass::InitGpuProgram()
 {
+	return true;
 
 }

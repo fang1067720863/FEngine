@@ -4,6 +4,7 @@ class FRhiSceneObject;
 class FTimer;
 class FRenderer {
 public:
+	FRenderer() {}
 	virtual void Update() = 0;
 	virtual void Draw() = 0;
 	virtual void Initialize() = 0;
@@ -11,8 +12,6 @@ public:
 	virtual void OnResize() = 0;
 	//virtual void Draw(FRhiSceneObject *sceneObj) = 0;
 
-	
-protected:
-private:
+
 
 };

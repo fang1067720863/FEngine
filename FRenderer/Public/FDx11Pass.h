@@ -2,11 +2,10 @@
 
 
 #include"FDx11Shader.h"
-#include"FDx11RenderState.h"
+
 #include"Reference.h"
 
 #define MAX_MULTIPLE_RENDER_TARGETS 8
-
 
 
 class FDx11Pass:public FReference
@@ -42,10 +41,10 @@ public:
 		return mGpuProgram.get();
 	}
 
-	const RenderStateSet* GetRenderStates() const
+	/*const RenderStateSet* GetRenderStates() const
 	{
-		return &mRenderStates;
-	}
+	   return mRenderStates;
+	}*/
 	
 protected:
 
@@ -71,5 +70,5 @@ protected:
 
 	std::unique_ptr<FDx11GpuProgram> mGpuProgram;
 
-	RenderStateSet mRenderStates;
+	//RenderStateSet* mRenderStates;
 };

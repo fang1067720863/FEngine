@@ -13,6 +13,7 @@
     <ClCompile Include="Private\FDx11Pass.cpp" />
     <ClCompile Include="Private\FDx11Texture.cpp" />
     <ClCompile Include="Private\FDx11BufferObject.cpp" />
+    <ClCompile Include="Private\FDx11Util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="test">

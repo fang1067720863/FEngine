@@ -2,6 +2,8 @@
 
 
 #include"FDx11BufferObject.h"
+#include"FDx11InpuyLayout.h"
+
 #include"Material.h"
 #include"VecArray.h"
 #include"Ptr.h"
@@ -45,7 +47,7 @@ public:
 		mDeviceContext->IASetPrimitiveTopology(mTopology);
 
 		const VBufferDescriptor& vDesc = mVBO->descriptor;
-		mDeviceContext->IASetVertexBuffers(vDesc.registerSlot, vDesc.count, vbo->GetBufferViewAddress(), &vDesc.stride, &vDesc.offset);
+		mDeviceContext->IASetVertexBuffers(vDesc.registerSlot, vDesc.count, mVBO->GetBufferViewAddress(), &vDesc.stride, &vDesc.offset);
 
 		if (mUseIndex)
 		{

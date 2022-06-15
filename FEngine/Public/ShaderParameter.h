@@ -31,7 +31,7 @@ public:
 
 
 };
-using UniformBasePtr = Ptr<UniformBase>;
+
 
 template<class T, ElementType type=ElementType::CUSTOM>
 class Uniform :public UniformBase
@@ -49,7 +49,7 @@ public:
     ~Uniform() {}
     T mData;
 
-    void AddSubUniform(UniformBasePtr uniform) {
+    void AddSubUniform(Ptr<UniformBase> uniform) {
         mSubUniformList.push_back(uniform);
     }
 
@@ -81,8 +81,8 @@ public:
 
     void Print(int incident = 0) override
     {
-        printf("%*s", incident * 4, " ");
-        std::cout << " mSematic " << mSematic << " mOffset " << mOffset << " mByteSize " << mByteSize << std::endl;
+       // printf("%*s", incident * 4, " ");
+        //std::cout << " mSematic " << mSematic << " mOffset " << mOffset << " mByteSize " << mByteSize << std::endl;
         for (auto iter = mSubUniformList.begin(); iter != mSubUniformList.end(); iter++)
         {
             if ((*iter)->mCompiled)
@@ -96,13 +96,20 @@ protected:
     //instance data
     // 这里好像只能用继承  不能用模板
        // 这里不希望结构体存储具体的数据T 而只存储地址T* 因为在constantBuffer中所有的数据合并成一个长Buffer
-    std::vector<UniformBasePtr> mSubUniformList;
+    std::vector<Ptr<UniformBase>> mSubUniformList;
     
 };
 
-using UniformInt = Uniform<int,ElementType::INT>;
-using UniformFloat = Uniform<float, ElementType::FLOAT>;
-using UniformDouble = Uniform<double, ElementType::DOUBLE>;
+
+//typedef Uniform<int, ElementType::ET_INT> UniformInt;
+//typedef Uniform<float, ElementType::ET_INT> UniformFloat;
+//typedef Uniform<double, ElementType::ET_INT> UniformDouble;
+//typedef Uniform<Mat4, ElementType::ET_INT> UniformMatrix4f;
+//typedef Uniform<Vec4f, ElementType::ET_INT> UniformVec4f;
+//typedef Uniform<Vec3f, ElementType::ET_INT> UniformVec3f;
+using UniformInt = Uniform<int, ElementType::ET_INT>;
+using UniformFloat = Uniform<float, ElementType::ET_FLOAT>;
+using UniformDouble = Uniform<double, ElementType::ET_DOUBLE>;
 using UniformMatrix4f = Uniform<Mat4, ElementType::MATRIX4F>;
 using UniformVec4f = Uniform<Vec4f, ElementType::VEC4F>;
 using UniformVec3f = Uniform<Vec3f, ElementType::VEC3F>;
@@ -150,5 +157,5 @@ class Data {
 
 };
 using UniformDefault = Uniform<Data,ElementType::STRUCT>;
-using UniformDefaultPtr = Ptr<UniformDefault>;
+using UniformBasePtr = Ptr<UniformBase>;
 

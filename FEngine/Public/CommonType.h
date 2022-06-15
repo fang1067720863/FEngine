@@ -36,18 +36,18 @@ enum class GpuContantType : uint8_t
 
 
 
-enum class BufferType
-{
-    AppendStructuredBuffer,
-    ConsumeStructuredBuffer,
-    Buffer,
-    ByteAddressBuffer,
-    StructuredBuffer,
-    RwBuffer,
-    RwByteAddressBuffer,
-    RwStructuredBuffer,
-    Unknown
-};
+//enum class BufferType
+//{
+//    AppendStructuredBuffer,
+//    ConsumeStructuredBuffer,
+//    Buffer,
+//    ByteAddressBuffer,
+//    StructuredBuffer,
+//    RwBuffer,
+//    RwByteAddressBuffer,
+//    RwStructuredBuffer,
+//    Unknown
+//};
 
 enum class GraphicFormat : uint32_t
 {

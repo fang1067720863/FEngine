@@ -3,10 +3,11 @@
 
 #include <windows.h>
 #include <d3d11.h>
-#include<DXGIFormat.h>
 #include <wrl/client.h>
 #include <DirectXMath.h>
 #include<D3Dcompiler.h>
+#include<DXGIFormat.h>
+
 
 #include<string>
 #include<memory>

@@ -7,7 +7,7 @@
 //IASetVertexBuffers
 
 
-class Dx11BufferObject:FReference
+class Dx11BufferObject:public FReference
 {
 public:
 	Dx11BufferObject()

@@ -6,23 +6,23 @@
 #include"FDx11Renderer.h"
 #include"FTimer.h"
 
-class FView
-{
-public:
+//class FView
+//{
+//public:
+//
+//protected:
+//	FTimer                            m_Timer;
+//
+//	//Devices                                 _eventSources;
+//
+//	//osg::ref_ptr<osgViewer::Scene>          _scene;
+//	//osg::ref_ptr<osgGA::EventQueue>         _eventQueue;
+//	//osg::ref_ptr<osgGA::CameraManipulator>  _cameraManipulator;
+//	//EventHandlers                           _eventHandlers;
+//};
 
-protected:
-	FTimer                            m_Timer;
 
-	//Devices                                 _eventSources;
-
-	//osg::ref_ptr<osgViewer::Scene>          _scene;
-	//osg::ref_ptr<osgGA::EventQueue>         _eventQueue;
-	//osg::ref_ptr<osgGA::CameraManipulator>  _cameraManipulator;
-	//EventHandlers                           _eventHandlers;
-};
-
-
-class FCore: public FView
+class FCore
 {
 public:
 	FCore(HINSTANCE hInstance);
@@ -41,4 +41,5 @@ private:
 	FGraphicWindowWin32* window;
 	HINSTANCE m_hAppInst;        // Ó¦ÓÃÊµÀý¾ä±ú
 	bool m_AppPaused = false;
+	FTimer                            m_Timer;
 };

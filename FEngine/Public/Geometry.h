@@ -3,7 +3,7 @@
 #include"VecArray.h"
 #include"Ptr.h"
 
-class FShape
+class FShape:public FReference
 {
 
 };
@@ -18,13 +18,25 @@ public:
 	float mHalfLength;
 	float mHalfHeight;
 };
-class FGeometry
+class FGeometry: public FReference
 {
 public:
-	void SetVertexPositionArray(Vec3fArray* poss);
-	void SetVertexNormalArray(Vec3fArray* normals);
-	void SetVertexTexcoordArray(Vec2fArray* texcoords);
-	void SetIndexArray(IndexArray* _indices);
+	void SetVertexPositionArray(Vec3fArray* poss)
+	{
+		_positions = poss;
+	}
+	void SetVertexNormalArray(Vec3fArray* normals)
+	{
+		_normals = normals;
+	}
+	void SetVertexTexcoordArray(Vec2fArray* texcoords)
+	{
+		_texcoords = texcoords;
+	}
+	void SetIndexArray(IndexArray* indices)
+	{
+		_indices = indices;
+	}
 
 	VertexElementType GetVertexElementType() const{ return mType; }
 	unsigned char* GetCompiledVertexData() { return nullptr; }
@@ -43,12 +55,17 @@ protected:
 		Quad
 	};
 	IndexType mIndicesType;
-	VertexElementType mType = VertexElementType::POS_NOR_TEXO;
+	VertexElementType mType;
 };
 class ShapeGeometryBuilder
 {
 public:
-	static FGeometry* Build(FShape* shape) {}
+	static FGeometry* Build(FShape* shape) { 
+		build(&shape);
+
+		FGeometry* geom = new FGeometry();
+		geom->SetVertexPositionArray(_vertices);
+		return nullptr; }
 	void build(const FBox& box);
 protected:
 	// 移动之后还是会析构吗

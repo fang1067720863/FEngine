@@ -10,7 +10,7 @@ struct Frustum
     float mFovY = 0.0f;
 };
 
-class FCamera: FNode
+class FCamera: public FNode
 {
     enum Projection
     {

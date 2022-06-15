@@ -3,15 +3,16 @@
 #include<unordered_map>
 #include<memory>
 
-#include"GraphicContext.h"
+
 #include"FDx11RenderTarget.h"
-#include"FDx11Shader.h"
-#include"FRenderer.h"
 
 #include"FDx11Mesh.h"
 #include"FDx11Pass.h"
-#include"ShaderParameter.h"
 
+#include"FRenderer.h"
+#include"FTimer.h"
+#include"GraphicContext.h"
+#include"ShaderParameter.h"
 #include"Camera.h"
 
 
@@ -30,6 +31,41 @@ class FDx11ShadingState
 	ComPtr<ID3D11ShaderResourceView> m_pTextureDiffuseDefault;
 };
 
+class RenderStates
+{
+public:
+	template <class T>
+	using ComPtr = Microsoft::WRL::ComPtr<T>;
+
+	static bool IsInit();
+
+	static void InitAll(ID3D11Device* device);
+	// 使用ComPtr无需手工释放
+
+public:
+	static ComPtr<ID3D11RasterizerState> RSWireframe;		            // 光栅化器状态：线框模式
+	static ComPtr<ID3D11RasterizerState> RSNoCull;			            // 光栅化器状态：无背面裁剪模式
+	static ComPtr<ID3D11RasterizerState> RSCullClockWise;	            // 光栅化器状态：顺时针裁剪模式
+
+	static ComPtr<ID3D11SamplerState> SSLinearWrap;			            // 采样器状态：线性过滤
+	static ComPtr<ID3D11SamplerState> SSAnistropicWrap;		            // 采样器状态：各项异性过滤
+
+	static ComPtr<ID3D11BlendState> BSNoColorWrite;		                // 混合状态：不写入颜色
+	static ComPtr<ID3D11BlendState> BSTransparent;		                // 混合状态：透明混合
+	static ComPtr<ID3D11BlendState> BSAlphaToCoverage;	                // 混合状态：Alpha-To-Coverage
+	static ComPtr<ID3D11BlendState> BSAdditive;			                // 混合状态：加法混合
+
+
+	static ComPtr<ID3D11DepthStencilState> DSSLessEqual;		        // 深度/模板状态：允许绘制深度值相等的像素
+	static ComPtr<ID3D11DepthStencilState> DSSWriteStencil;		        // 深度/模板状态：写入模板值
+	static ComPtr<ID3D11DepthStencilState> DSSDrawWithStencil;	        // 深度/模板状态：对指定模板值的区域进行绘制
+	static ComPtr<ID3D11DepthStencilState> DSSNoDoubleBlend;	        // 深度/模板状态：无二次混合区域
+	static ComPtr<ID3D11DepthStencilState> DSSNoDepthTest;		        // 深度/模板状态：关闭深度测试
+	static ComPtr<ID3D11DepthStencilState> DSSNoDepthWrite;		        // 深度/模板状态：仅深度测试，不写入深度值
+	static ComPtr<ID3D11DepthStencilState> DSSNoDepthTestWithStencil;	// 深度/模板状态：关闭深度测试，对指定模板值的区域进行绘制
+	static ComPtr<ID3D11DepthStencilState> DSSNoDepthWriteWithStencil;	// 深度/模板状态：仅深度测试，不写入深度值，对指定模板值的区域进行绘制
+};
+
 class FDx11Renderer : public FRenderer
 {
 public:
@@ -38,7 +74,7 @@ public:
 	 void InitSinglePass();
 	 void ExecutePass(FDx11Pass* pass);
 	 void ClearFrameBuffer(FDx11Pass* pass);
-	 void SetRenderStates(const RenderStateSet* renderStates);
+	 void SetRenderStates();
 
 	 void SetGpuProgram(FDx11GpuProgram* program);
 
@@ -82,7 +118,7 @@ class FDx11App : public FDx11Renderer
 {
 public:
 	;
-	FDx11App(FGraphicContext::Traits* traits, HWND hwnd):FDx11Renderer(traits,hwnd) {}
+	FDx11App(FGraphicContext::Traits* traits, HWND hwnd) :FDx11Renderer(traits, hwnd) {}
 	void InitMainCamera();
 	void InitGameObject();
 	void InitCommmonConstantBuffer();
@@ -93,7 +129,7 @@ public:
 	Ptr<FDx11Mesh> sphereMesh;
 	Ptr<FCamera> mainCamera;
 
-}
+};
 
 
 

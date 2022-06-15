@@ -5,9 +5,14 @@
 class FGraphicWindowWin32: public FGraphicWindow
 {
 public:
-	FGraphicWindowWin32(){}
+	FGraphicWindowWin32(){
+		
+		
+	}
 	FGraphicWindowWin32(HINSTANCE hInstance)
-		: m_hAppInst(hInstance){}
+		: m_hAppInst(hInstance), FGraphicWindow(){
+		CreateMainWindow();
+	}
 	FGraphicWindowWin32(FGraphicContext::Traits* traits =nullptr);
 	FGraphicWindowWin32(int x, int y, int width, int height);
 	~FGraphicWindowWin32();

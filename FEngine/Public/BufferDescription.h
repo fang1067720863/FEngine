@@ -23,7 +23,7 @@ typedef struct IBufferDescriptor
 enum BufferType :uint8_t {
 	Vertex,
 	Index,
-	Uniform,
+	BT_Uniform,
 	ShaderStorage,
 	Indirect
 };

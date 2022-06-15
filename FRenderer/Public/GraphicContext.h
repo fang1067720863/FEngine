@@ -1,21 +1,29 @@
 #pragma once
 
 #include<string>
-
-//#include"FDx11Renderer.h"
 #include"Ptr.h"
 
 class FGraphicContext
 {
 public:
+    FGraphicContext()
+    {
+        _traits = new Traits();
+    }
+
+    virtual ~FGraphicContext()
+    {
+        delete _traits;
+    }
+
     struct Traits 
     {
     public:
         // graphics context original and size
-        int x;
-        int y;
-        int width;
-        int height;
+        int x = 0;
+        int y = 0;
+        int width = 800;
+        int height = 600;
 
         std::string windowingSystemPreference;
 
@@ -39,7 +47,7 @@ public:
         unsigned int samples;
 
         // V-sync
-        bool            vsync;
+        bool            vsync = true;
 
         // Swap Group
 
@@ -71,16 +79,11 @@ public:
 class FGraphicWindow: public FGraphicContext
 {
 public:
-    FGraphicWindow(){}
-
-
+    FGraphicWindow():FGraphicContext(){}
     ~FGraphicWindow() {};
 
     virtual bool IsInit() { return _initialized; }
 
-    //void setEventQueue(FEventQueue* eventQueue) { _eventQueue = eventQueue; }
-    //FEventQueue* getEventQueue() { return _eventQueue.get(); }
-    //const FEventQueue* getEventQueue() const { return _eventQueue.get(); }
     virtual bool Init() { return false; }
 
 protected:

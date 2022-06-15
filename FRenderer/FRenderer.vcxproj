@@ -115,7 +115,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
@@ -149,6 +149,7 @@
     <ClCompile Include="Private\FDx11Pass.cpp" />
     <ClCompile Include="Private\FDx11Renderer.cpp" />
     <ClCompile Include="Private\FDx11Texture.cpp" />
+    <ClCompile Include="Private\FDx11Util.cpp" />
     <ClCompile Include="Private\FGraphicWindowWin32.cpp" />
     <ClCompile Include="Private\FTimer.cpp" />
     <ClCompile Include="Private\FView.cpp" />

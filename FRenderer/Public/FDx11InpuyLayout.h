@@ -1,7 +1,11 @@
 #pragma once
 
-#include "CommonType.h"
+
 #include"FDx11.h"
+#include"Reference.h"
+#include "CommonType.h"
+
+#include<map>
 
 struct VertexElementDesc
 {
@@ -33,7 +37,7 @@ public:
     {
         for (uint32_t i = 0; i < VertexElementType::BASIC_NUM; i++)
         {
-            if (1 << i & type != 0)
+            if ((1 << i) & type != 0)
             {
                 mElementNum++;
             }
@@ -43,7 +47,7 @@ public:
         unsigned int vOffset = 0;
         for (uint32_t i = 0; i < VertexElementType::BASIC_NUM; i++)
         {
-            if (1 << i & type != 0)
+            if ((1 << i) & type != 0)
             {
 
                 D3D11_INPUT_ELEMENT_DESC& desc = inputLayoutDescs[mElementNum];

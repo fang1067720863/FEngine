@@ -11,10 +11,10 @@ enum ElementType {
 	VEC2F,
 	VEC3F,
 	VEC4F,
-	FLOAT,
-	DOUBLE,
-	INT,
-	SHORT,
+	ET_FLOAT,
+	ET_DOUBLE,
+	ET_INT,
+	ET_SHORT,
 	MATRIX4F,
 	STRUCT,
 	ARRAY,
@@ -58,8 +58,8 @@ class TemplateArray : public Array, public std::vector<T>
 // 通过模板Vec2, Vec3而不是继承来实现多态 ， 某个类要引用这种不确定对象， 模板继承了一个非模板对象Array
 typedef TemplateArray<Vec3f, ElementType::VEC3F, 12> Vec3fArray;
 typedef TemplateArray<Vec2f, ElementType::VEC2F, 8> Vec2fArray;
-typedef TemplateArray<uint32_t, ElementType::INT, 4> IndexArray;
-typedef TemplateArray<uint16_t, ElementType::SHORT, 2> ShortIndexArray;
+typedef TemplateArray<uint32_t, ElementType::ET_INT, 4> IndexArray;
+typedef TemplateArray<uint16_t, ElementType::ET_SHORT, 2> ShortIndexArray;
 typedef Ptr<Vec3fArray>  Vec3fArrayPtr;
 typedef Ptr<Array>  ArrayPtr;
 
