@@ -241,7 +241,7 @@ enum VertexElementType: uint32_t
     BONEINDEX=8,
     WEIGHT=9,
     BASIC_NUM=10,
-    //POS_NOR_TEXO = 1<< POSITION + 1<< NORMAL+1<< TEXCORD0
+    POS_NOR_TEXO = (1<< POSITION) + (1<< NORMAL)+(1<< TEXCORD0)
 
 };
 

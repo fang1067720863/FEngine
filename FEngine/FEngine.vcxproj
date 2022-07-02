@@ -171,7 +171,9 @@
     <ClInclude Include="Renderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Private\Camera.cpp" />
     <ClCompile Include="Private\Core.cpp" />
+    <ClCompile Include="Private\Geometry.cpp" />
     <ClCompile Include="Private\test.cpp" />
     <ClCompile Include="Private\View.cpp" />
   </ItemGroup>

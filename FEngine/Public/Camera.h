@@ -4,10 +4,11 @@
 #include"Matrix.h"
 struct Frustum
 {
-    float mNearZ = 0.0f;
-    float mFarZ = 0.0f;
+    float mNearZ = 0.5f;
+    float mFarZ = 1000.0f;
     float mAspect = 0.0f;
-    float mFovY = 0.0f;
+    float mFovY = 800/600;
+    //XM_PI / 3, AspectRatio(), 0.5f, 1000.0f
 };
 
 class FCamera: public FNode

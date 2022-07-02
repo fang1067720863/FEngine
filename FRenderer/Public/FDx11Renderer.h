@@ -78,7 +78,6 @@ public:
 
 	 void SetGpuProgram(FDx11GpuProgram* program);
 
-	
 
 	 void Initialize() override;
 	 bool InitDirect3D(FGraphicContext::Traits* traits, HWND hwnd);
@@ -92,6 +91,9 @@ public:
 	 // Direct3D 11
 	 ComPtr<ID3D11Device> mDevice;							// D3D11设备
 	 ComPtr<ID3D11DeviceContext> mDeviceContext;		// D3D11设备上下文
+
+	 FDx11Device device;
+
 	 ComPtr<IDXGISwapChain> mSwapChain;						// D3D11交换链
 
 	 // 常用资源
@@ -99,6 +101,10 @@ public:
 	 ComPtr<ID3D11RenderTargetView> m_pRenderTargetView;		// 渲染目标视图
 	 ComPtr<ID3D11DepthStencilView> m_pDepthStencilView;		// 深度模板视图
 	 D3D11_VIEWPORT m_ScreenViewport;  
+
+	 float mClientWidth = 800.0;
+	 float mClientHeight = 600.0;
+
 	 
 	 bool      m_AppPaused;       // 应用是否暂停
 	 bool      m_Minimized;       // 应用是否最小化

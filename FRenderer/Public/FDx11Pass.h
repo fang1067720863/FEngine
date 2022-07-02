@@ -12,8 +12,8 @@ class FDx11Pass:public FReference
 {
 public:
 
-	FDx11Pass();
-	FDx11Pass(unsigned int numViews);
+	FDx11Pass(const FDx11Device& _device, const D3D11_VIEWPORT& vp);
+	FDx11Pass(unsigned int numViews,  const D3D11_VIEWPORT& vp,const FDx11Device& _device);
 	bool InitPass(ID3D11Device* device);
 	// render target view
 	unsigned int GetNumViews() { return mNumViews; }
@@ -41,10 +41,6 @@ public:
 		return mGpuProgram.get();
 	}
 
-	/*const RenderStateSet* GetRenderStates() const
-	{
-	   return mRenderStates;
-	}*/
 	
 protected:
 
@@ -56,6 +52,8 @@ protected:
 
 	bool InitGpuProgram();
 
+	bool InitVertexInputLayout();
+
 	// ‰÷»æƒø±Í ”Õº
 	ID3D11RenderTargetView* mRenderTargetView[MAX_MULTIPLE_RENDER_TARGETS];		
 	ID3D11Texture2D* mRenderTargetTextures[MAX_MULTIPLE_RENDER_TARGETS];
@@ -64,11 +62,13 @@ protected:
 	ComPtr<ID3D11Texture2D> mDepthStencilBuffer;		
 
 	D3D11_VIEWPORT mViewport;
-	D3D11_RECT mRect;
+	D3D11_RECT mRect;	
 
 	unsigned int mNumViews = 0;
 
-	std::unique_ptr<FDx11GpuProgram> mGpuProgram;
+	FPtr<FDx11GpuProgram> mGpuProgram;
+	FPtr<FDx11VertexInputLayout> mVInputLayout;
 
+	const FDx11Device& mDevice;
 	//RenderStateSet* mRenderStates;
 };

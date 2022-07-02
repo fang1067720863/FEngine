@@ -18,8 +18,9 @@ public:
 	typedef std::shared_ptr<Material> MaterialPtr;
 	typedef Ptr<VertexBufferObject> VBOPtr;
 	typedef Ptr<IndexBufferObject> IBOPtr;
+	
 
-	FDx11Mesh(FGeometry* geom):FNode("") {
+	FDx11Mesh(FGeometry* geom, const FDx11Device& _device):FNode(""),device(_device) {
 		Init(geom);
 	}
 
@@ -31,39 +32,39 @@ public:
 	void Init(FGeometry* geom)
 	{
 		// Init Dx11 InputLayout&Topology
-		mInputLayout = new FDx11VertexInputLayout(geom->GetVertexElementType());
+		//mInputLayout = new FDx11VertexInputLayout(geom->GetVertexElementType(),device);
 		// magic 
 		mTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 		// Init Dx11 VBO IBO
-		mVBO = new VertexBufferObject(geom->GetCompiledVertexDataSize(), geom->GetCompiledVertexData());
-		mIBO = new IndexBufferObject(geom->GetCompiledIndexDataSize(), geom->GetCompiledIndexData());
+		mVBO = new VertexBufferObject(geom->GetCompiledVertexDataSize(), geom->GetCompiledVertexData(), device);
+		mIBO = new IndexBufferObject(geom->GetCompiledIndexDataSize(), geom->GetCompiledIndexData(), device);
 		
 	}
 
-	void Draw(ID3D11DeviceContext* mDeviceContext)
+	void Draw()
 	{
-		mDeviceContext->IASetInputLayout(mInputLayout->GetD3D11InputLayout());
-		mDeviceContext->IASetPrimitiveTopology(mTopology);
+		//device.GetDeviceContext()->IASetInputLayout(mInputLayout->GetD3D11InputLayout());
+		device.GetDeviceContext()->IASetPrimitiveTopology(mTopology);
 
 		const VBufferDescriptor& vDesc = mVBO->descriptor;
-		mDeviceContext->IASetVertexBuffers(vDesc.registerSlot, vDesc.count, mVBO->GetBufferViewAddress(), &vDesc.stride, &vDesc.offset);
+		device.GetDeviceContext()->IASetVertexBuffers(vDesc.registerSlot, vDesc.count, mVBO->GetBufferViewAddress(), &vDesc.stride, &vDesc.offset);
 
 		if (mUseIndex)
 		{
 			const IBufferDescriptor& iDesc = mIBO->descriptor;
-			mDeviceContext->IASetIndexBuffer(mIBO->GetBufferView(), mIBO->GetElementFormat(), iDesc.offset);
-			mDeviceContext->DrawIndexed(iDesc.count, iDesc.startIndexLocation, iDesc.baseVertexLocation);
+			device.GetDeviceContext()->IASetIndexBuffer(mIBO->GetBufferView(), mIBO->GetElementFormat(), iDesc.offset);
+			device.GetDeviceContext()->DrawIndexed(iDesc.count, iDesc.startIndexLocation, iDesc.baseVertexLocation);
 		}
 		else {
-			mDeviceContext->Draw(vDesc.count, vDesc.startVertexLocation);
+			device.GetDeviceContext()->Draw(vDesc.count, vDesc.startVertexLocation);
 		}
 	}
 	
 
 protected:
-	ID3D11Device* device;
-	Ptr<FDx11VertexInputLayout> mInputLayout = nullptr;
+	const FDx11Device& device;
+	//Ptr<FDx11VertexInputLayout> mInputLayout = nullptr;
 	D3D_PRIMITIVE_TOPOLOGY mTopology;
 	bool mUseIndex = true;
 

@@ -301,7 +301,15 @@ mHwnd(hwnd)
 
 void FDx11Renderer::Initialize()
 {
+	
 	InitDirect3D(mTraits, mHwnd);
+	ZeroMemory(&m_ScreenViewport, sizeof(D3D11_VIEWPORT));
+	m_ScreenViewport.TopLeftX = 0;
+	m_ScreenViewport.TopLeftY = 0;
+	m_ScreenViewport.Width = static_cast<float>(mClientWidth);
+	m_ScreenViewport.Height = static_cast<float>(mClientHeight);
+	m_ScreenViewport.MinDepth = 0.0f;
+	m_ScreenViewport.MaxDepth = 1.0f;
 	//InitSinglePass()
 }
 
@@ -318,20 +326,21 @@ void FDx11Renderer::Draw()
 }
 void FDx11Renderer::InitSinglePass()
 {
-	singlePass = new FDx11Pass(1);
+	singlePass = new FDx11Pass(1, m_ScreenViewport, device );
 
 }
 
 
 void FDx11Renderer::ExecutePass(FDx11Pass* gBufferPass)
 {
+	
 	// Set Viewport
-	mDeviceContext->RSSetViewports(gBufferPass->GetNumViews(), gBufferPass->GetViewport());
-	mDeviceContext->RSSetScissorRects(1,gBufferPass->GetScissorRects());
+	device.GetDeviceContext()->RSSetViewports(gBufferPass->GetNumViews(), gBufferPass->GetViewport());
+	device.GetDeviceContext()->RSSetScissorRects(1,gBufferPass->GetScissorRects());
 	
 	// Clear&Set FrameBuffer
 	ClearFrameBuffer(gBufferPass);
-	mDeviceContext->OMSetRenderTargets(gBufferPass->GetNumViews(), gBufferPass->GetRenderTargetViewAddress(), gBufferPass->GetDepthStencilView());
+	device.GetDeviceContext()->OMSetRenderTargets(gBufferPass->GetNumViews(), gBufferPass->GetRenderTargetViewAddress(), gBufferPass->GetDepthStencilView());
 
 	// Render state
 	//SetRenderStates(gBufferPass->GetRenderStates());
@@ -346,9 +355,9 @@ void FDx11Renderer::ExecutePass(FDx11Pass* gBufferPass)
 void FDx11Renderer::SetGpuProgram(FDx11GpuProgram* program)
 {
 	// shader
-	mDeviceContext->VSSetShader(program->GetVertexShader(), program->GetClassInstance(ShaderType::ST_Vertex),
+	device.GetDeviceContext()->VSSetShader(program->GetVertexShader(), program->GetClassInstance(ShaderType::ST_Vertex),
 		program->GetNumInstance(ShaderType::ST_Vertex));
-	mDeviceContext->PSSetShader(program->GetPixelShader(), program->GetClassInstance(ShaderType::ST_Pixel),
+	device.GetDeviceContext()->PSSetShader(program->GetPixelShader(), program->GetClassInstance(ShaderType::ST_Pixel),
 		program->GetNumInstance(ShaderType::ST_Pixel));
 
 	// 一个slot 只设置一块resource element ,不设置成Array magicNumber = 1
@@ -361,7 +370,7 @@ void FDx11Renderer::SetGpuProgram(FDx11GpuProgram* program)
 		bufferArray[0] = cbo->GetBufferView();
 
 		UINT slot = i;
-		mDeviceContext->VSSetConstantBuffers(slot, 1, bufferArray);
+		device.GetDeviceContext()->VSSetConstantBuffers(slot, 1, bufferArray);
 	}
 
 	// shader resource texture
@@ -371,7 +380,7 @@ void FDx11Renderer::SetGpuProgram(FDx11GpuProgram* program)
 
 		UINT slot = i;
 		UINT num = 1;
-		mDeviceContext->PSSetShaderResources(slot, num, program->GetGpuTextureView(i));
+		device.GetDeviceContext()->PSSetShaderResources(slot, num, program->GetGpuTextureView(i));
 	}
 
 	// shader resource sampler
@@ -380,7 +389,7 @@ void FDx11Renderer::SetGpuProgram(FDx11GpuProgram* program)
 	{
 		UINT slot = i;
 		UINT num = 1;
-		mDeviceContext->PSSetSamplers(slot, num, program->GetSamplerView(i));
+		device.GetDeviceContext()->PSSetSamplers(slot, num, program->GetSamplerView(i));
 	}
 
 }
@@ -406,7 +415,7 @@ void FDx11Renderer::ClearFrameBuffer(FDx11Pass* GBufferPass)
 	unsigned int numberOfViews = GBufferPass->GetNumViews();
 	for (unsigned int i = 0; i < numberOfViews; ++i)
 	{
-		mDeviceContext->ClearRenderTargetView(pRTView[i], reinterpret_cast<const float*>(&black));
+		device.GetDeviceContext()->ClearRenderTargetView(pRTView[i], reinterpret_cast<const float*>(&black));
 	}
 
 
@@ -415,7 +424,7 @@ void FDx11Renderer::ClearFrameBuffer(FDx11Pass* GBufferPass)
 	ClearFlags |= D3D11_CLEAR_STENCIL;
 
 
-	mDeviceContext->ClearDepthStencilView(
+	device.GetDeviceContext()->ClearDepthStencilView(
 		GBufferPass->GetDepthStencilView(),
 		ClearFlags, depth, static_cast<UINT8>(stencil));
 
@@ -424,9 +433,9 @@ void FDx11Renderer::ClearFrameBuffer(FDx11Pass* GBufferPass)
 void FDx11Renderer::SetRenderStates()
 {
 	
-	mDeviceContext->RSSetState(RenderStates::RSCullClockWise.Get());              // rasterize 
-	mDeviceContext->OMSetDepthStencilState(RenderStates::DSSLessEqual.Get(), 0);  // depthStencil 
-	mDeviceContext->OMSetBlendState(RenderStates::BSTransparent.Get(), nullptr, 0xFFFFFFFF);  // blend
+	device.GetDeviceContext()->RSSetState(RenderStates::RSCullClockWise.Get());              // rasterize 
+	device.GetDeviceContext()->OMSetDepthStencilState(RenderStates::DSSLessEqual.Get(), 0);  // depthStencil 
+	device.GetDeviceContext()->OMSetBlendState(RenderStates::BSTransparent.Get(), nullptr, 0xFFFFFFFF);  // blend
 }
 
 int FDx11Renderer::Run()
@@ -502,13 +511,13 @@ bool FDx11Renderer::InitDirect3D(FGraphicContext::Traits* traits, HWND hwnd)
 	{
 		d3dDriverType = driverTypes[driverTypeIndex];
 		hr = D3D11CreateDevice(nullptr, d3dDriverType, nullptr, createDeviceFlags, featureLevels, numFeatureLevels,
-			D3D11_SDK_VERSION, mDevice.GetAddressOf(), &featureLevel, mDeviceContext.GetAddressOf());
+			D3D11_SDK_VERSION, device.device.GetAddressOf(), &featureLevel, device.deviceContext.GetAddressOf());
 
 		if (hr == E_INVALIDARG)
 		{
 			// Direct3D 11.0 的API不承认D3D_FEATURE_LEVEL_11_1，所以我们需要尝试特性等级11.0以及以下的版本
 			hr = D3D11CreateDevice(nullptr, d3dDriverType, nullptr, createDeviceFlags, &featureLevels[1], numFeatureLevels - 1,
-				D3D11_SDK_VERSION, mDevice.GetAddressOf(), &featureLevel, mDeviceContext.GetAddressOf());
+				D3D11_SDK_VERSION, device.device.GetAddressOf(), &featureLevel, device.deviceContext.GetAddressOf());
 		}
 
 		if (SUCCEEDED(hr))
@@ -529,7 +538,7 @@ bool FDx11Renderer::InitDirect3D(FGraphicContext::Traits* traits, HWND hwnd)
 	}
 	
 	// 检测 MSAA支持的质量等级
-	mDevice->CheckMultisampleQualityLevels(
+	device.GetDevice()->CheckMultisampleQualityLevels(
 		DXGI_FORMAT_B8G8R8A8_UNORM, 4, &m_4xMsaaQuality);	// 注意此处DXGI_FORMAT_B8G8R8A8_UNORM
 	assert(m_4xMsaaQuality > 0);
 
@@ -541,7 +550,9 @@ bool FDx11Renderer::InitDirect3D(FGraphicContext::Traits* traits, HWND hwnd)
 
 	// 为了正确创建 DXGI交换链，首先我们需要获取创建 D3D设备 的 DXGI工厂，否则会引发报错：
 	// "IDXGIFactory::CreateSwapChain: This function is being called with a device from a different IDXGIFactory."
-	HR(mDevice.As(&dxgiDevice));
+	//HR((device.GetDevice().As(&dxgiDevice));
+	HR(device.device.As(&dxgiDevice));
+
 	HR(dxgiDevice->GetAdapter(dxgiAdapter.GetAddressOf()));
 	HR(dxgiAdapter->GetParent(__uuidof(IDXGIFactory1), reinterpret_cast<void**>(dxgiFactory1.GetAddressOf())));
 
@@ -573,7 +584,7 @@ bool FDx11Renderer::InitDirect3D(FGraphicContext::Traits* traits, HWND hwnd)
 	sd.Windowed = TRUE;
 	sd.SwapEffect = DXGI_SWAP_EFFECT_SEQUENTIAL;
 	sd.Flags = 0;
-	HR(dxgiFactory1->CreateSwapChain(mDevice.Get(), &sd, mSwapChain.GetAddressOf()));
+	HR(dxgiFactory1->CreateSwapChain(device.GetDevice(), &sd, mSwapChain.GetAddressOf()));
 
 	OnResize();
 
@@ -589,6 +600,7 @@ void  FDx11App::Initialize()
 	FDx11Renderer::Initialize();
 	InitMainCamera();
 	InitGameObject();
+	InitSinglePass();
 	InitCommmonConstantBuffer();
 
 
@@ -601,9 +613,10 @@ void FDx11App::InitMainCamera()
 
 void  FDx11App::InitGameObject()
 {
-	Ptr<FShape> sphere = new FBox(2.0);
-	Ptr<FGeometry> sphereGeom = ShapeGeometryBuilder::Build(sphere.get());
-	sphereMesh = new FDx11Mesh(sphereGeom.get());
+	
+	FBox box(2.0); 
+	Ptr<FGeometry> sphereGeom = ShapeGeometryBuilder::instance().BuildBox(box);
+	sphereMesh = new FDx11Mesh(sphereGeom.get(),device);
 	sphereMesh->SetLocalPosition(Vec3f(0.0, 1.0, 0.0));
 }
 
@@ -654,5 +667,5 @@ void FDx11App::InitCommmonConstantBuffer()
 void FDx11App::Draw()
 {
 	ExecutePass(singlePass.get());
-	sphereMesh->Draw(mDeviceContext.Get());
+	sphereMesh->Draw();
 }

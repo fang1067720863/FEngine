@@ -17,21 +17,23 @@ enum ShaderType : uint16_t
 	ST_Pixel,
 };
 
-class FDx11GpuProgram {
+class FDx11GpuProgram:public FReference {
 public:
 
+	FDx11GpuProgram(const FDx11Device& _device) :device(_device) { Init(); }
 	bool Init()
 	{
-		HR(CreateShaderFromFile(L"HLSL\\DefaultVertex.cso", L"HLSL\\DefaultVertex.hlsl", "VS", "vs_5_0", blob.ReleaseAndGetAddressOf()));
-		HR(device->CreateVertexShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, mVertexShader.GetAddressOf()));
+		HR(CreateShaderFromFile(L"Shader\\DefaultVertex.cso", L"Shader\\DefaultVertex.hlsl", "VS", "vs_5_0", blob.ReleaseAndGetAddressOf()));
+		HR(device.GetDevice()->CreateVertexShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, mVertexShader.GetAddressOf()));
 		// 创建顶点布局
 		//device->CreateInputLayout(mInputLayout->GetInputLayoutDesc(), mInputLayout->GetElementNum(), blob->GetBufferPointer(), blob->GetBufferSize(), mInputLayout->GetD3D11InputLayoutAddress());
 
 		HR(CreateShaderFromFile(L"HLSL\\DefaultPixel.cso", L"HLSL\\DefaultPixel.hlsl", "PS", "ps_5_0", blob.ReleaseAndGetAddressOf()));
-		HR(device->CreatePixelShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, mPixelShader.GetAddressOf()));
+		HR(device.GetDevice()->CreatePixelShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, mPixelShader.GetAddressOf()));
+		return true;
 	}
 
-
+	ID3DBlob* GetD3DBlob() { return blob.Get(); }
 
 
 	ID3D11VertexShader* GetVertexShader() const {
@@ -120,5 +122,6 @@ protected:
 	typedef std::map<std::string, ID3D11ClassInstance*>::iterator ClassInstanceIterator;
 	ClassInstanceMap mInstanceMap;
 
-	ID3D11Device* device; 
+	//ID3D11Device* device; 
+	const FDx11Device& device;
 };

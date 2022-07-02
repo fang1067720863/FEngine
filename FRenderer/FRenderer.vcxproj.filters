@@ -14,6 +14,7 @@
     <ClCompile Include="Private\FDx11Texture.cpp" />
     <ClCompile Include="Private\FDx11BufferObject.cpp" />
     <ClCompile Include="Private\FDx11Util.cpp" />
+    <ClCompile Include="Private\FDx11InputLayout.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="test">

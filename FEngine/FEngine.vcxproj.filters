@@ -28,6 +28,8 @@
       <Filter>GraphicsWindow</Filter>
     </ClCompile>
     <ClCompile Include="Private\test.cpp" />
+    <ClCompile Include="Private\Geometry.cpp" />
+    <ClCompile Include="Private\Camera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Public\Core.h">

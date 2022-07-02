@@ -105,6 +105,8 @@ public:
 			p = nullptr;
 		}
 		p = ptr;
+		if (p)
+			p->add_ref();
 		return *this;
 
 	}
@@ -114,8 +116,6 @@ public:
 		//std::cout << "Ptr move assgin" << std::endl;
 		other.p = nullptr;
 	}
-
-
 	~FPtr()
 	{
 		//std::cout << "Ptr dtor"  << std::endl;

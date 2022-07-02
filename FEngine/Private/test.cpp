@@ -2,6 +2,7 @@
 #include<vector>
 #include<iostream>
 #include"ShaderParameter.h"
+#include"Geometry.h"
 
 class Apple:public FReference {
 
@@ -23,12 +24,14 @@ void TestPtr()
 {
 	Ptr<Apple> apple = new Apple();
 	std::cout << "----------------------------------" << std::endl;
-	Ptr<Apple> newapple(std::move(apple));
+	apple = new Apple();
 	std::cout << "----------------------------------" << std::endl;
 }
 int main()
 {
 	TestPtr();
+
+		
     //Ptr<UniformDefault> light = new UniformDefault("light");
     ////UniformBasePtr light = new UniformDefault("light", "struct");
     //UniformBasePtr pos = new UniformVec3f("pos", Vec3f(1.0, 0.0, 0.0));

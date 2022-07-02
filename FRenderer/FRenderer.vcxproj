@@ -79,7 +79,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <ExecutablePath>..\ThirdParty\DirectX\bin\x64;..\ThirdParty\zlib128\bin;..\ThirdParty\libpng1637\bin;$(ExecutablePath)</ExecutablePath>
-    <IncludePath>..\ThirdParty\DirectX\Include;Public;Private;..\FEngine\Public;$(IncludePath)</IncludePath>
+    <IncludePath>..\ThirdParty\DirectX\Include;Public;Private;..\FRenderer\Public;..\FEngine\Public;$(IncludePath)</IncludePath>
     <LibraryPath>..\ThirdParty\DirectX\Lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -120,6 +120,7 @@
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\FEngine\Public;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -146,6 +147,7 @@
   <ItemGroup>
     <ClCompile Include="Private\FDx11.cpp" />
     <ClCompile Include="Private\FDx11BufferObject.cpp" />
+    <ClCompile Include="Private\FDx11InputLayout.cpp" />
     <ClCompile Include="Private\FDx11Pass.cpp" />
     <ClCompile Include="Private\FDx11Renderer.cpp" />
     <ClCompile Include="Private\FDx11Texture.cpp" />

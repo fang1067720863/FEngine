@@ -4,6 +4,7 @@
 #include"FDx11.h"
 #include"Reference.h"
 #include "CommonType.h"
+//#include"FDx11Shader.h"
 
 #include<map>
 
@@ -20,24 +21,25 @@ const std::map<VertexElementType, VertexElementDesc> VertexElementDescMap = {
     {VertexElementType::TEXCORD0, {"TEXCORD0",DXGI_FORMAT_R32G32_FLOAT,8}}
 };
 
-
+class FDx11GpuProgram;
 class FDx11VertexInputLayout:public FReference{
 
 public:  
-    FDx11VertexInputLayout(VertexElementType type):mVertexElementType(type)
+    FDx11VertexInputLayout(VertexElementType type, FDx11GpuProgram* program,  const FDx11Device& _device):mVertexElementType(type),device(_device)
     {
-        Init(type);
+        GenVertexInputDesc(type);
+        PrepareDxResource(program);
     }
 
     ~FDx11VertexInputLayout() {
         free(inputLayoutDescs);
     }
 
-    void Init(VertexElementType type)
+    void GenVertexInputDesc(VertexElementType type)
     {
         for (uint32_t i = 0; i < VertexElementType::BASIC_NUM; i++)
         {
-            if ((1 << i) & type != 0)
+            if (((1 << i) & type) != 0)
             {
                 mElementNum++;
             }
@@ -47,7 +49,7 @@ public:
         unsigned int vOffset = 0;
         for (uint32_t i = 0; i < VertexElementType::BASIC_NUM; i++)
         {
-            if ((1 << i) & type != 0)
+            if (((1 << i) & type) != 0)
             {
 
                 D3D11_INPUT_ELEMENT_DESC& desc = inputLayoutDescs[mElementNum];
@@ -63,10 +65,11 @@ public:
             }
         }
        
-        ComPtr<ID3DBlob> blob;
-        device->CreateInputLayout(inputLayoutDescs, mElementNum,
-            blob->GetBufferPointer(), blob->GetBufferSize(), inputLayout.GetAddressOf());
+  
     }
+
+    void PrepareDxResource(FDx11GpuProgram* program);
+    
     unsigned int GetElementNum() const { return mElementNum; }
  
     const D3D11_INPUT_ELEMENT_DESC* GetInputLayoutDesc()const { return inputLayoutDescs; }
@@ -81,7 +84,7 @@ public:
     D3D11_INPUT_ELEMENT_DESC* GetinputLayoutDescs() const { return inputLayoutDescs; }
 
 private:
-    ID3D11Device* device;
+    const FDx11Device& device;
     D3D11_INPUT_ELEMENT_DESC* inputLayoutDescs;
     ComPtr<ID3D11InputLayout> inputLayout;
     VertexElementType mVertexElementType;

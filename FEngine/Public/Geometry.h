@@ -2,6 +2,7 @@
 
 #include"VecArray.h"
 #include"Ptr.h"
+#include"CommonType.h"
 
 class FShape:public FReference
 {
@@ -37,6 +38,22 @@ public:
 	{
 		_indices = indices;
 	}
+	Vec3fArray* GetVertexPositionArray()
+	{
+		return _positions.get();
+	}
+	Vec3fArray* GetVertexNormalArray()
+	{
+		return _normals.get();
+	}
+	Vec2fArray* GetVertexTexcoordArray()
+	{
+		return _texcoords.get();
+	}
+	IndexArray* GetIndexArray(IndexArray* indices)
+	{
+		return _indices.get();
+	}
 
 	VertexElementType GetVertexElementType() const{ return mType; }
 	unsigned char* GetCompiledVertexData() { return nullptr; }
@@ -55,18 +72,160 @@ protected:
 		Quad
 	};
 	IndexType mIndicesType;
-	VertexElementType mType;
+	VertexElementType mType = VertexElementType::POS_NOR_TEXO;
 };
+
 class ShapeGeometryBuilder
 {
 public:
-	static FGeometry* Build(FShape* shape) { 
-		build(&shape);
-
+	static ShapeGeometryBuilder& instance()
+	{
+		static ShapeGeometryBuilder instance;
+		return instance;
+	}
+     FGeometry* Build(const FShape& shape) {
+		/*build(shape);
 		FGeometry* geom = new FGeometry();
-		geom->SetVertexPositionArray(_vertices);
-		return nullptr; }
-	void build(const FBox& box);
+		geom->SetVertexPositionArray(_vertices.get());
+		geom->SetVertexNormalArray(_normals.get());
+		geom->SetVertexTexcoordArray(_texcoords.get());
+		geom->SetIndexArray(_indices.get());
+		return geom;*/
+	 }
+
+	 void build(const FBox& box)
+	 {
+		 float dx = box.mHalfLength;
+		 float dy = box.mHalfWidth;
+		 float dz = box.mHalfHeight;
+
+		 // 24 points in box
+		 // create body
+		 Normal3f(0.0f, -1.0f, 0.0f);
+		 TexCoord2f(0.0f, 1.0f);
+		 Vertex3f(-dx, -dy, dz);
+
+		 Normal3f(0.0f, -1.0f, 0.0f);
+		 TexCoord2f(0.0f, 0.0f);
+		 Vertex3f(-dx, -dy, -dz);
+
+		 Normal3f(0.0f, -1.0f, 0.0f);
+		 TexCoord2f(1.0f, 0.0f);
+		 Vertex3f(dx, -dy, -dz);
+
+		 Normal3f(0.0f, -1.0f, 0.0f);
+		 TexCoord2f(1.0f, 1.0f);
+		 Vertex3f(dx, -dy, dz);
+
+		 // +ve y plane
+		 Normal3f(0.0f, 1.0f, 0.0f);
+		 TexCoord2f(0.0f, 1.0f);
+		 Vertex3f(dx, dy, dz);
+
+		 Normal3f(0.0f, 1.0f, 0.0f);
+		 TexCoord2f(0.0f, 0.0f);
+		 Vertex3f(dx, dy, -dz);
+
+		 Normal3f(0.0f, 1.0f, 0.0f);
+		 TexCoord2f(1.0f, 0.0f);
+		 Vertex3f(-dx, dy, -dz);
+
+		 Normal3f(0.0f, 1.0f, 0.0f);
+		 TexCoord2f(1.0f, 1.0f);
+		 Vertex3f(-dx, dy, dz);
+
+		 // +ve x plane
+		 Normal3f(1.0f, 0.0f, 0.0f);
+		 TexCoord2f(0.0f, 1.0f);
+		 Vertex3f(dx, -dy, dz);
+
+		 Normal3f(1.0f, 0.0f, 0.0f);
+		 TexCoord2f(0.0f, 0.0f);
+		 Vertex3f(dx, -dy, -dz);
+
+		 Normal3f(1.0f, 0.0f, 0.0f);
+		 TexCoord2f(1.0f, 0.0f);
+		 Vertex3f(dx, dy, -dz);
+
+		 Normal3f(1.0f, 0.0f, 0.0f);
+		 TexCoord2f(1.0f, 1.0f);
+		 Vertex3f(dx, dy, dz);
+
+		 // -ve x plane
+		 Normal3f(-1.0f, 0.0f, 0.0f);
+		 TexCoord2f(0.0f, 1.0f);
+		 Vertex3f(-dx, dy, dz);
+
+		 Normal3f(-1.0f, 0.0f, 0.0f);
+		 TexCoord2f(0.0f, 0.0f);
+		 Vertex3f(-dx, dy, -dz);
+
+		 Normal3f(-1.0f, 0.0f, 0.0f);
+		 TexCoord2f(1.0f, 0.0f);
+		 Vertex3f(-dx, -dy, -dz);
+
+		 Normal3f(-1.0f, 0.0f, 0.0f);
+		 TexCoord2f(1.0f, 1.0f);
+		 Vertex3f(-dx, -dy, dz);
+
+		 //createTop
+		 // +ve z plane
+		 Normal3f(0.0f, 0.0f, 1.0f);
+		 TexCoord2f(0.0f, 1.0f);
+		 Vertex3f(-dx, dy, dz);
+
+		 Normal3f(0.0f, 0.0f, 1.0f);
+		 TexCoord2f(0.0f, 0.0f);
+		 Vertex3f(-dx, -dy, dz);
+
+		 Normal3f(0.0f, 0.0f, 1.0f);
+		 TexCoord2f(1.0f, 0.0f);
+		 Vertex3f(dx, -dy, dz);
+
+		 Normal3f(0.0f, 0.0f, 1.0f);
+		 TexCoord2f(1.0f, 1.0f);
+		 Vertex3f(dx, dy, dz);
+
+
+		 //createBottom
+		 Normal3f(0.0f, 0.0f, -1.0f);
+		 TexCoord2f(0.0f, 1.0f);
+		 Vertex3f(dx, dy, -dz);
+
+		 Normal3f(0.0f, 0.0f, -1.0f);
+		 TexCoord2f(0.0f, 0.0f);
+		 Vertex3f(dx, -dy, -dz);
+
+		 Normal3f(0.0f, 0.0f, -1.0f);
+		 TexCoord2f(1.0f, 0.0f);
+		 Vertex3f(-dx, -dy, -dz);
+
+		 Normal3f(0.0f, 0.0f, -1.0f);
+		 TexCoord2f(1.0f, 1.0f);
+		 Vertex3f(-dx, dy, -dz);
+
+	 }
+	 FGeometry* BuildBox(const FBox& box)
+	 {
+		 build(box);
+		 FGeometry* geom = new FGeometry();
+		 geom->SetVertexPositionArray(_vertices.get());
+		 geom->SetVertexNormalArray(_normals.get());
+		 geom->SetVertexTexcoordArray(_texcoords.get());
+		 geom->SetIndexArray(_indices.get());
+		 return geom;
+	 }
+	 void Clear()
+	 {
+		 
+	 }
+private:
+	ShapeGeometryBuilder() {
+		_vertices = new Vec3fArray();
+		_normals= new Vec3fArray();
+		_texcoords = new Vec2fArray();
+		_indices = new IndexArray();
+	}
 protected:
 	// 移动之后还是会析构吗
 	// inline void Vertex(Vec3f&& v) { _vertices->push_back(std::move(v)); }

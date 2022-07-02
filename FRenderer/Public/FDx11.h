@@ -22,6 +22,17 @@ using ComPtr = Microsoft::WRL::ComPtr<T>;
 // internel 成员函数  _createShaderResorce 小写 下划线开头
 // 枚举成员 全大写 下划线     eg: TEXTURE_2D_ARRAY
 
+struct FDx11Device
+{
+	ComPtr<ID3D11Device> device;
+	ComPtr<ID3D11DeviceContext> deviceContext;
+
+	inline ID3D11Device* GetDevice() const { return device.Get(); }
+	inline ID3D11DeviceContext* GetDeviceContext()const { return deviceContext.Get(); }
+	inline ID3D11DeviceContext** GetDeviceContextAddress() { return deviceContext.GetAddressOf(); }
+	inline ID3D11Device** GetDeviceAddress() { return device.GetAddressOf(); }
+};
+
 // Debug模式下的错误提醒与追踪
 HRESULT WINAPI DXTraceW(_In_z_ const WCHAR* strFile, _In_ DWORD dwLine, _In_ HRESULT hr,
 	_In_opt_ const WCHAR* strMsg, _In_ bool bPopMsgBox); 

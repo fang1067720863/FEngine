@@ -1,33 +1,38 @@
 #include"../Public/FDx11Pass.h"
 
-FDx11Pass::FDx11Pass()
+FDx11Pass::FDx11Pass(const FDx11Device& _device,const D3D11_VIEWPORT& vp) :mDevice(_device)
 {
-
+	mViewport = vp;
 }
 
-FDx11Pass::FDx11Pass(unsigned int numViews) :mNumViews(numViews)
+FDx11Pass::FDx11Pass(unsigned int numViews, const D3D11_VIEWPORT& vp, const FDx11Device& _device) :mNumViews(numViews), mDevice(_device)
 {
-
+	mViewport = vp;
+	InitPass(mDevice.GetDevice());
 }
 bool FDx11Pass::InitPass(ID3D11Device* device)
 {
-	if (InitRenderTexture(device))
+	if (!InitRenderTexture(device))
 	{
 		return false;
 	}
-	if (InitRenderTargetView(device))
+	if (!InitRenderTargetView(device))
 	{
 		return false;
 	}
-	if (InitRenderState())
+	if (!InitRenderState())
 	{
 		return false;
 	}
-	if (InitGpuProgram())
+	if (!InitGpuProgram())
 	{
 		return false;
 	}
-
+	if (!InitVertexInputLayout())
+	{
+		return false;
+	}
+	
 	
 }
 
@@ -55,15 +60,15 @@ bool FDx11Pass::InitRenderTexture(ID3D11Device* device)
 	
 	// 后面改成TextureArray
 	D3D11_TEXTURE2D_DESC texArrayDesc;
-	texArrayDesc.Width = 128;
-	texArrayDesc.Height = 128;
+	texArrayDesc.Width = 800;
+	texArrayDesc.Height = 600;
 	texArrayDesc.MipLevels = 1;
 	texArrayDesc.ArraySize = 1;
 	texArrayDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	texArrayDesc.SampleDesc.Count = 1;      // 不使用多重采样
 	texArrayDesc.SampleDesc.Quality = 0;
 	texArrayDesc.Usage = D3D11_USAGE_DEFAULT;
-	texArrayDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	texArrayDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 	texArrayDesc.CPUAccessFlags = 0;
 	texArrayDesc.MiscFlags = 0; // 指定需要生成mipmap
 
@@ -75,7 +80,7 @@ bool FDx11Pass::InitRenderTexture(ID3D11Device* device)
 
 	for (unsigned int i = 0; i < mNumViews; i++)
 	{
-		device->CreateTexture2D(&texArrayDesc, nullptr, &mRenderTargetTextures[i]);
+		HR(device->CreateTexture2D(&texArrayDesc, nullptr, &mRenderTargetTextures[i]));
 	}
 
 	D3D11_TEXTURE2D_DESC depthStencilDesc;
@@ -110,6 +115,14 @@ bool FDx11Pass::InitRenderState()
 
 bool FDx11Pass::InitGpuProgram()
 {
+	mGpuProgram = new FDx11GpuProgram(mDevice);
 	return true;
 
+}
+
+bool FDx11Pass::InitVertexInputLayout()
+{
+	//magic
+	mVInputLayout = new FDx11VertexInputLayout(VertexElementType::POS_NOR_TEXO, mGpuProgram.get() ,mDevice);
+	return true;
 }

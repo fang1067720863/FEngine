@@ -49,6 +49,7 @@ protected:
 template<typename T, ElementType type,  int ElementSize>
 class TemplateArray : public Array, public std::vector<T>
 {
+public:
 	TemplateArray(int ElementNum=0):Array(type, ElementNum, ElementSize), std::vector<T>(ElementNum){}
 	virtual unsigned int    getNumElements() const { 
 		return static_cast<unsigned int>(this->size()); }
