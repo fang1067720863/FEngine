@@ -22,7 +22,15 @@ public:
 class FGeometry: public FReference
 {
 public:
-	void SetVertexPositionArray(Vec3fArray* poss)
+	FGeometry() = default;
+	~FGeometry()
+	{
+		if (mCompiledVertices)
+		{
+			delete[] mCompiledVertices;
+		}
+	}
+ 	void SetVertexPositionArray(Vec3fArray* poss)
 	{
 		_positions = poss;
 	}
@@ -54,13 +62,49 @@ public:
 	{
 		return _indices.get();
 	}
+	uint32_t GetIndexELementNum()
+	{
+		return _indices->getNumElements();
+	}
+	uint32_t GetVertexELementNum()
+	{
+		return _positions->getNumElements();
+	}
+
+	//hack
+	bool Compile()
+	{
+		if (!_positions || !_normals || !_texcoords)
+		{
+			return false;
+		}
+		const uint32_t vertexNum = _positions->getNumElements();
+		const uint32_t stride = 4 * 3 + 4 * 3 + 4 * 2;
+		mVertexStride = stride;
+		unsigned char* posT = (unsigned char*)(_positions->data()->data());
+		unsigned char* norT = (unsigned char*)(_normals->data()->data());
+		unsigned char* tex0T = (unsigned char*)(_texcoords->data()->data());
+		
+		mCompiledVertices = new unsigned char[vertexNum * stride];
+		
+		for (auto i = 0; i < vertexNum; i++) {
+			memcpy(mCompiledVertices + i * stride, posT + 12 * i, 12);
+			memcpy(mCompiledVertices + i * stride +12, norT + 12 * i, 12);
+			memcpy(mCompiledVertices + i * stride+20, tex0T + 8 * i, 8);
+		}
+		return true;
+	}
 
 	VertexElementType GetVertexElementType() const{ return mType; }
-	unsigned char* GetCompiledVertexData() { return nullptr; }
-	unsigned int GetCompiledVertexDataSize() { return 0; }
+	unsigned int GetVertexStride() const
+	{
+		return mVertexStride;
+	}
+	void * GetCompiledVertexData() { return mCompiledVertices; }
+	unsigned int GetCompiledVertexDataSize() { return mVertexStride * (_positions->getNumElements()); }
 
-	unsigned char* GetCompiledIndexData() { return nullptr; }
-	unsigned int GetCompiledIndexDataSize() { return 0; }
+	void* GetCompiledIndexData() { return static_cast<void*>(_indices->data()); }
+	unsigned int GetCompiledIndexDataSize() { return (_indices->getNumElements())*4; }
 protected:
 	Ptr<Vec3fArray> _positions;
 	Ptr<Vec3fArray> _normals;
@@ -73,6 +117,9 @@ protected:
 	};
 	IndexType mIndicesType;
 	VertexElementType mType = VertexElementType::POS_NOR_TEXO;
+	bool mCompiled = false;
+	unsigned int mVertexStride = 0;
+	unsigned char* mCompiledVertices = nullptr;
 };
 
 class ShapeGeometryBuilder
@@ -204,6 +251,27 @@ public:
 		 TexCoord2f(1.0f, 1.0f);
 		 Vertex3f(-dx, dy, -dz);
 
+		 End();
+	 }
+	
+	 void End()
+	 {
+		 // Quad Mode
+		 for (unsigned int i = 0; i < _vertices->size(); i += 4)
+		 {
+			 unsigned int p0 = i;
+			 unsigned int p1 = i + 1;
+			 unsigned int p2 = i + 2;
+			 unsigned int p3 = i + 3;
+
+			 _indices->emplace_back(p0);
+			 _indices->emplace_back(p1);
+			 _indices->emplace_back(p3);
+
+			 _indices->emplace_back(p1);
+			 _indices->emplace_back(p2);
+			 _indices->emplace_back(p3);
+		 }
 	 }
 	 FGeometry* BuildBox(const FBox& box)
 	 {
@@ -213,6 +281,7 @@ public:
 		 geom->SetVertexNormalArray(_normals.get());
 		 geom->SetVertexTexcoordArray(_texcoords.get());
 		 geom->SetIndexArray(_indices.get());
+		 geom->Compile();
 		 return geom;
 	 }
 	 void Clear()

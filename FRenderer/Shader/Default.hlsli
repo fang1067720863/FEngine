@@ -1,9 +1,8 @@
 #include"light.hlsli"
 
-Texture2D g_DiffuseMap : register(t0);
-//Texture2D g_NormalMap : register(t1);
-TextureCube g_TexCube : register(t1);
-SamplerState g_Sam : register(s0);
+//Texture2D g_DiffuseMap : register(t0);
+//TextureCube g_TexCube : register(t1);
+//SamplerState g_Sam : register(s0);
 
 cbuffer m_CBFrame : register(b0)
 {
@@ -16,14 +15,14 @@ cbuffer m_CBOnResize : register(b1)
 	matrix g_Proj;  // 该教程往后将使用默认的列主矩阵，但需要在C++代码端预先将矩阵进行转置。
 }
 
-cbuffer CBChangesEveryObjectDrawing : register(b2)
-{
-	Material g_Material;
-}
-cbuffer CBChangesRarely : register(b3)
-{
-	DirectionalLight g_DirLight;
-}
+//cbuffer CBChangesEveryObjectDrawing : register(b2)
+//{
+//	Material g_Material;
+//}
+//cbuffer CBChangesRarely : register(b3)
+//{
+//	DirectionalLight g_DirLight;
+//}
 
 
 struct VertexPosNormalTex

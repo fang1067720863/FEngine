@@ -5,6 +5,7 @@
 template<typename T>
 class Quat
 {
+public:
     using value_type = T;
 
     union
@@ -132,11 +133,11 @@ class Quat
         set(value[0] * inverse_len, value[1] * inverse_len, value[2] * inverse_len, value[3] * inverse_len);
     }
 
-    void operator*=(const Quat<T>& q)
-    {
-       /* T inverse_len = static_cast<T>(1.0) / length();
-        set(value[0] * inverse_len, value[1] * inverse_len, value[2] * inverse_len, value[3] * inverse_len);*/
-    }
+    //void operator*=(const Quat<T>& q)
+    //{
+    //   /* T inverse_len = static_cast<T>(1.0) / length();
+    //    set(value[0] * inverse_len, value[1] * inverse_len, value[2] * inverse_len, value[3] * inverse_len);*/
+    //}
     inline Quat<T>& operator*=(const Quat<T>& rhs)
     {
         value_type x = rhs.value[3] * value[0] + rhs.value[0] * value[3] + rhs.value[1] * value[2] - rhs.value[2] * value[1];

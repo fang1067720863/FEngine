@@ -37,7 +37,7 @@ private:
 	void DrawSceneObjects(FRhiSceneObject* sObject);
 	void Draw();
 
-	FRenderer* renderer;
+	//FRenderer* renderer;
 	FGraphicWindowWin32* window;
 	HINSTANCE m_hAppInst;        // Ó¦ÓÃÊµÀý¾ä±ú
 	bool m_AppPaused = false;

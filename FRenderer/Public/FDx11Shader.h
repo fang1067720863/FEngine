@@ -27,9 +27,9 @@ public:
 		HR(device.GetDevice()->CreateVertexShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, mVertexShader.GetAddressOf()));
 		// 创建顶点布局
 		//device->CreateInputLayout(mInputLayout->GetInputLayoutDesc(), mInputLayout->GetElementNum(), blob->GetBufferPointer(), blob->GetBufferSize(), mInputLayout->GetD3D11InputLayoutAddress());
-
-		HR(CreateShaderFromFile(L"HLSL\\DefaultPixel.cso", L"HLSL\\DefaultPixel.hlsl", "PS", "ps_5_0", blob.ReleaseAndGetAddressOf()));
-		HR(device.GetDevice()->CreatePixelShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, mPixelShader.GetAddressOf()));
+		ComPtr<ID3DBlob> blob2;
+		HR(CreateShaderFromFile(L"Shader\\DefaultPixel.cso", L"Shader\\DefaultPixel.hlsl", "PS", "ps_5_0", blob2.ReleaseAndGetAddressOf()));
+		HR(device.GetDevice()->CreatePixelShader(blob2->GetBufferPointer(), blob2->GetBufferSize(), nullptr, mPixelShader.GetAddressOf()));
 		return true;
 	}
 

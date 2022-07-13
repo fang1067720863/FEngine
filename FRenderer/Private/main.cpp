@@ -30,7 +30,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE prevInstance,
 	FGraphicWindowWin32 window(hInstance);
 
 	FDx11App application(window.GetTraits(), window.GetMainWnd());
-	application.Initialize();
+	application.Prepare();
 	application.Run();
 
 

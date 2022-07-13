@@ -17,17 +17,24 @@ public:
 	bool InitPass(ID3D11Device* device);
 	// render target view
 	unsigned int GetNumViews() { return mNumViews; }
-	ID3D11RenderTargetView** GetRenderTargetViewAddress() { 
+	ID3D11RenderTargetView** GetRenderTargetViewAddress() {
 		return mRenderTargetView; }
 	ID3D11RenderTargetView* GetRenderTargetView(unsigned int i) {
 		return mRenderTargetView[i];
 	}
-	ID3D11DepthStencilView* GetDepthStencilBuffer() {
-		return mDepthStencilView.Get();
+	ID3D11Texture2D* GetDepthStencilBuffer() {
+		return mDepthStencilBuffer.Get();
 	}
 
 	ID3D11DepthStencilView* GetDepthStencilView() {
 		return mDepthStencilView.Get();
+	}
+	void ResetAll()
+	{
+		mDepthStencilView.Reset();
+		mDepthStencilBuffer.Reset();
+		mMainRTV.Reset();
+
 	}
 	const D3D11_VIEWPORT* GetViewport() const{
 		return &mViewport;
@@ -40,7 +47,14 @@ public:
 	{
 		return mGpuProgram.get();
 	}
-
+	FDx11VertexInputLayout* GetInputLayout() const
+	{
+		return mVInputLayout.get();
+	}
+	ComPtr<ID3D11RenderTargetView> mMainRTV;
+	ComPtr<ID3D11Texture2D> mMainRTTextures;
+	ComPtr<ID3D11DepthStencilView> mDepthStencilView;
+	ComPtr<ID3D11Texture2D> mDepthStencilBuffer;
 	
 protected:
 
@@ -57,9 +71,10 @@ protected:
 	// 渲染目标视图
 	ID3D11RenderTargetView* mRenderTargetView[MAX_MULTIPLE_RENDER_TARGETS];		
 	ID3D11Texture2D* mRenderTargetTextures[MAX_MULTIPLE_RENDER_TARGETS];
+
+	
 	// 深度模板视图
-	ComPtr<ID3D11DepthStencilView> mDepthStencilView;		
-	ComPtr<ID3D11Texture2D> mDepthStencilBuffer;		
+	
 
 	D3D11_VIEWPORT mViewport;
 	D3D11_RECT mRect;	

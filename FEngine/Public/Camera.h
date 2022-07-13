@@ -53,6 +53,9 @@ public:
         mProjMatrix = perspective<float>(fovy_radians, aspectRatio, zNear, zFar);
     } 
 
+    const Mat4& GetViewMatrix()const { return mViewMatrix; }
+    const Mat4& GetProjMatrix()const { return mProjMatrix; }
+
     template<class T>
     constexpr Matrix4<T> perspective(T fovy_radians, T aspectRatio, T zNear, T zFar)
     {

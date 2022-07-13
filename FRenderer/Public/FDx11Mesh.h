@@ -37,8 +37,8 @@ public:
 		mTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 		// Init Dx11 VBO IBO
-		mVBO = new VertexBufferObject(geom->GetCompiledVertexDataSize(), geom->GetCompiledVertexData(), device);
-		mIBO = new IndexBufferObject(geom->GetCompiledIndexDataSize(), geom->GetCompiledIndexData(), device);
+		mVBO = new VertexBufferObject(geom->GetCompiledVertexDataSize(), geom->GetCompiledVertexData(), device, geom->GetVertexStride(),geom->GetVertexELementNum());
+		mIBO = new IndexBufferObject(geom->GetCompiledIndexDataSize(), geom->GetCompiledIndexData(), device, geom->GetIndexELementNum());
 		
 	}
 
@@ -48,7 +48,7 @@ public:
 		device.GetDeviceContext()->IASetPrimitiveTopology(mTopology);
 
 		const VBufferDescriptor& vDesc = mVBO->descriptor;
-		device.GetDeviceContext()->IASetVertexBuffers(vDesc.registerSlot, vDesc.count, mVBO->GetBufferViewAddress(), &vDesc.stride, &vDesc.offset);
+		device.GetDeviceContext()->IASetVertexBuffers(vDesc.registerSlot, vDesc.numBuffers, mVBO->GetBufferViewAddress(), &vDesc.stride, &vDesc.offset);
 
 		if (mUseIndex)
 		{
@@ -59,6 +59,7 @@ public:
 		else {
 			device.GetDeviceContext()->Draw(vDesc.count, vDesc.startVertexLocation);
 		}
+	
 	}
 	
 

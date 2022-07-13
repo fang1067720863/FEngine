@@ -8,6 +8,11 @@ FDx11Pass::FDx11Pass(const FDx11Device& _device,const D3D11_VIEWPORT& vp) :mDevi
 FDx11Pass::FDx11Pass(unsigned int numViews, const D3D11_VIEWPORT& vp, const FDx11Device& _device) :mNumViews(numViews), mDevice(_device)
 {
 	mViewport = vp;
+	/*for (uint32_t i = 0; i < mNumViews; i++)
+	{
+		mRTTextures.push_back(ComPtr<ID3D11Texture2D>());
+		mRTV.push_back(ComPtr<ID3D11RenderTargetView>());
+	}*/
 	InitPass(mDevice.GetDevice());
 }
 bool FDx11Pass::InitPass(ID3D11Device* device)
@@ -44,8 +49,9 @@ bool FDx11Pass::InitRenderTargetView(ID3D11Device *device)
 	}
 	for (UINT i = 0; i < mNumViews; i++)
 	{
-		ComPtr<ID3D11Texture2D> backBuffer;
+		//ComPtr<ID3D11Texture2D> backBuffer;
 		HR(device->CreateRenderTargetView(mRenderTargetTextures[i], nullptr, &mRenderTargetView[i]));
+		//HR(device->CreateRenderTargetView(mRTTextures[i].Get(), nullptr, mRTV[i].GetAddressOf()));
 	}
 	HR(device->CreateDepthStencilView(mDepthStencilBuffer.Get(), nullptr, mDepthStencilView.GetAddressOf()));
 	return true;
@@ -57,6 +63,7 @@ bool FDx11Pass::InitRenderTexture(ID3D11Device* device)
 	{
 		return true;
 	}
+	
 	
 	// 后面改成TextureArray
 	D3D11_TEXTURE2D_DESC texArrayDesc;
@@ -81,6 +88,7 @@ bool FDx11Pass::InitRenderTexture(ID3D11Device* device)
 	for (unsigned int i = 0; i < mNumViews; i++)
 	{
 		HR(device->CreateTexture2D(&texArrayDesc, nullptr, &mRenderTargetTextures[i]));
+		//HR(device->CreateTexture2D(&texArrayDesc, nullptr, mRTTextures[i].GetAddressOf());
 	}
 
 	D3D11_TEXTURE2D_DESC depthStencilDesc;

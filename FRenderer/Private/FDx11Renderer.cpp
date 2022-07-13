@@ -299,7 +299,7 @@ mHwnd(hwnd)
 }
 
 
-void FDx11Renderer::Initialize()
+void FDx11Renderer::Prepare()
 {
 	
 	InitDirect3D(mTraits, mHwnd);
@@ -310,7 +310,6 @@ void FDx11Renderer::Initialize()
 	m_ScreenViewport.Height = static_cast<float>(mClientHeight);
 	m_ScreenViewport.MinDepth = 0.0f;
 	m_ScreenViewport.MaxDepth = 1.0f;
-	//InitSinglePass()
 }
 
 
@@ -321,7 +320,6 @@ void FDx11Renderer::Update()
 
 void FDx11Renderer::Draw()
 {
-	ExecutePass(singlePass.get());
 
 }
 void FDx11Renderer::InitSinglePass()
@@ -330,7 +328,28 @@ void FDx11Renderer::InitSinglePass()
 
 }
 
+void FDx11Renderer::ExecuteMainPass(FDx11Pass* pass)
+{
 
+	// Set Viewport
+	device.GetDeviceContext()->RSSetViewports(pass->GetNumViews(), pass->GetViewport());
+	device.GetDeviceContext()->RSSetScissorRects(1, pass->GetScissorRects());
+
+	// Clear&Set FrameBuffer
+	ClearFrameBuffer(pass);
+	
+	//device.GetDeviceContext()->OMSetRenderTargets(1, pass->mMainRTV.GetAddressOf(), pass->GetDepthStencilView());
+	device.GetDeviceContext()->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), m_pDepthStencilView.Get());
+	// Render state
+	//SetRenderStates(gBufferPass->GetRenderStates());
+	SetRenderStates();
+	// shader & shader resource
+	SetGpuProgram(pass->GetGpuProgram());
+	// vertex inputlayout
+	device.GetDeviceContext()->IASetInputLayout(pass->GetInputLayout()->GetD3D11InputLayout());
+	// Draw GameObject
+
+}
 void FDx11Renderer::ExecutePass(FDx11Pass* gBufferPass)
 {
 	
@@ -341,16 +360,18 @@ void FDx11Renderer::ExecutePass(FDx11Pass* gBufferPass)
 	// Clear&Set FrameBuffer
 	ClearFrameBuffer(gBufferPass);
 	device.GetDeviceContext()->OMSetRenderTargets(gBufferPass->GetNumViews(), gBufferPass->GetRenderTargetViewAddress(), gBufferPass->GetDepthStencilView());
-
+	device.GetDeviceContext()->OMSetRenderTargets(1, gBufferPass->mMainRTV.GetAddressOf(), gBufferPass->GetDepthStencilView());
 	// Render state
 	//SetRenderStates(gBufferPass->GetRenderStates());
 	SetRenderStates();
 	// shader & shader resource
 	SetGpuProgram(gBufferPass->GetGpuProgram());
-
+	// vertex inputlayout
+	device.GetDeviceContext()->IASetInputLayout(gBufferPass->GetInputLayout()->GetD3D11InputLayout());
 	// Draw GameObject
 
 }
+
 
 void FDx11Renderer::SetGpuProgram(FDx11GpuProgram* program)
 {
@@ -396,28 +417,28 @@ void FDx11Renderer::SetGpuProgram(FDx11GpuProgram* program)
 
 void FDx11Renderer::ClearFrameBuffer(FDx11Pass* GBufferPass)
 {
-	ID3D11RenderTargetView* pRTView[MAX_MULTIPLE_RENDER_TARGETS];
-	memset(pRTView, 0, sizeof(pRTView));
+	/*ID3D11RenderTargetView* pRTView[MAX_MULTIPLE_RENDER_TARGETS];
+	memset(pRTView, 0, sizeof(pRTView));*/
 
-	for (unsigned int i = 0; i < MAX_MULTIPLE_RENDER_TARGETS; i++)
+	/*for (unsigned int i = 0; i < MAX_MULTIPLE_RENDER_TARGETS; i++)
 	{
 		pRTView[i] = GBufferPass->GetRenderTargetView(i);
 		if (!pRTView[i])
 		{
 			break;
 		}
-	}
+	}*/
 
 	float depth = 1.0;
 	UINT8 stencil = 0;
-	static float black[4] = { 0.0f, 1.0f, 0.0f, 1.0f };	// RGBA = (0,0,0,255)
+	static float black[4] = { 1.0f, 0.0f, 0.0f, 1.0f };	// RGBA = (0,0,0,255)
 
 	unsigned int numberOfViews = GBufferPass->GetNumViews();
 	for (unsigned int i = 0; i < numberOfViews; ++i)
 	{
-		device.GetDeviceContext()->ClearRenderTargetView(pRTView[i], reinterpret_cast<const float*>(&black));
+		device.GetDeviceContext()->ClearRenderTargetView(GBufferPass->GetRenderTargetView(i), reinterpret_cast<const float*>(&black));
 	}
-
+	device.GetDeviceContext()->ClearRenderTargetView(m_pRenderTargetView.Get(), reinterpret_cast<const float*>(&black));
 
 	UINT ClearFlags = 0;
 	ClearFlags |= D3D11_CLEAR_DEPTH;
@@ -476,6 +497,79 @@ int FDx11Renderer::Run()
 
 void FDx11Renderer::OnResize()
 {
+	assert(device.GetDeviceContext());
+	assert(device.GetDevice());
+	assert(mSwapChain);
+	
+	
+	// 释放渲染管线输出用到的相关资源
+	m_pRenderTargetView.Reset();
+	m_pDepthStencilView.Reset();
+	m_pDepthStencilBuffer.Reset();
+	//singlePass->GetDepthStencilBuffer()
+	//if (singlePass)
+	//{
+	//	singlePass->ResetAll();
+	//}
+	
+
+
+	// 重设交换链并且重新创建渲染目标视图
+	ComPtr<ID3D11Texture2D> backBuffer;
+	HR(mSwapChain->ResizeBuffers(1, 800, 600, DXGI_FORMAT_B8G8R8A8_UNORM, 0));	// 注意此处DXGI_FORMAT_B8G8R8A8_UNORM
+	HR(mSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBuffer.GetAddressOf())));
+	HR(device.GetDevice()->CreateRenderTargetView(backBuffer.Get(), nullptr, m_pRenderTargetView.GetAddressOf()));
+
+	// 设置调试对象名
+	//D3D11SetDebugObjectName(backBuffer.Get(), "BackBuffer[0]");
+
+	//backBuffer.Reset();
+
+
+	D3D11_TEXTURE2D_DESC depthStencilDesc;
+
+	depthStencilDesc.Width = 800;
+	depthStencilDesc.Height = 600;
+	depthStencilDesc.MipLevels = 1;
+	depthStencilDesc.ArraySize = 1;
+	depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+
+	// 要使用 4X MSAA?
+	if (m_Enable4xMsaa)
+	{
+		depthStencilDesc.SampleDesc.Count = 4;
+		depthStencilDesc.SampleDesc.Quality = m_4xMsaaQuality - 1;
+	}
+	else
+	{
+		depthStencilDesc.SampleDesc.Count = 1;
+		depthStencilDesc.SampleDesc.Quality = 0;
+	}
+
+
+	depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
+	depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthStencilDesc.CPUAccessFlags = 0;
+	depthStencilDesc.MiscFlags = 0;
+
+	// 创建深度缓冲区以及深度模板视图
+	HR(device.GetDevice()->CreateTexture2D(&depthStencilDesc, nullptr, m_pDepthStencilBuffer.GetAddressOf()));
+	HR(device.GetDevice()->CreateDepthStencilView(m_pDepthStencilBuffer.Get(), nullptr, m_pDepthStencilView.GetAddressOf()));
+
+
+	// 将渲染目标视图和深度/模板缓冲区结合到管线
+	device.GetDeviceContext()->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), m_pDepthStencilView.Get());
+
+	// 设置视口变换
+	m_ScreenViewport.TopLeftX = 0;
+	m_ScreenViewport.TopLeftY = 0;
+	m_ScreenViewport.Width = static_cast<float>(800);
+	m_ScreenViewport.Height = static_cast<float>(600);
+	m_ScreenViewport.MinDepth = 0.0f;
+	m_ScreenViewport.MaxDepth = 1.0f;
+
+	device.GetDeviceContext()->RSSetViewports(1, &m_ScreenViewport);
+
 }
 
 bool FDx11Renderer::InitDirect3D(FGraphicContext::Traits* traits, HWND hwnd)
@@ -595,9 +689,10 @@ bool FDx11Renderer::InitDirect3D(FGraphicContext::Traits* traits, HWND hwnd)
 
 
 
-void  FDx11App::Initialize() 
+void  FDx11App::Prepare() 
 {
-	FDx11Renderer::Initialize();
+	
+	FDx11Renderer::Prepare();
 	InitMainCamera();
 	InitGameObject();
 	InitSinglePass();
@@ -622,7 +717,20 @@ void  FDx11App::InitGameObject()
 
 void FDx11App::InitCommmonConstantBuffer()
 {
-	Ptr<UniformDefault> dirLight = new UniformDefault("dirLight", {});
+
+	//ConstantBufferObject *frame = new ConstantBufferObject(sizeof(CBChangesEveryFrame), device);
+
+	Ptr<ConstantBufferObject> frameCBO = ConstantBufferPool::GetInstance().CreateConstantBuffer("frame", sizeof(CBChangesEveryFrame), device);
+	
+	frameCBO->Upload<CBChangesEveryFrame>(
+		CBChangesEveryFrame{
+		mainCamera->GetViewMatrix(), Mat4(), Vec4f(mainCamera->GetLocalPosition(), 1.0f)
+		}
+	);
+	Ptr<ConstantBufferObject> resizeCBO = ConstantBufferPool::GetInstance().CreateConstantBuffer("onResize", sizeof(CBChangesOnResize), device);
+	resizeCBO->Upload<CBChangesOnResize>(CBChangesOnResize{mainCamera->GetProjMatrix()});
+
+	/*Ptr<UniformDefault> dirLight = new UniformDefault("dirLight", {});
 	UniformBasePtr diffuse = new UniformVec4f("diffuse", Vec4f(0.8f, 0.8f, 0.8f, 1.0f));
 	UniformBasePtr specular = new UniformVec4f("specular", Vec4f(0.1f, 0.1f, 0.1f, 1.0f));
 	UniformBasePtr direction = new UniformVec4f("direction", Vec4f(0.577f, -0.577f, -0.577f, 1.0f));
@@ -630,7 +738,7 @@ void FDx11App::InitCommmonConstantBuffer()
 	dirLight->AddSubUniform(diffuse);
 	dirLight->AddSubUniform(specular);
 	dirLight->AddSubUniform(direction);
-	dirLight->AddSubUniform(ambient);
+	dirLight->AddSubUniform(ambient);*/
 
 	//m_BasicEffect.SetDirLight(dirLight);
 	//m_BasicEffect.SetEyePos(m_pCamera->GetPosition());
@@ -643,29 +751,20 @@ void FDx11App::InitCommmonConstantBuffer()
 	//	Material material;
 	//};
 
-	//struct CBChangesEveryFrame
-	//{
-	//	DirectX::XMMATRIX view;
-	//	DirectX::XMMATRIX world;
-	//	DirectX::XMFLOAT4 eyePos;
-	//	//float pad;                    //16字节对齐
-	//};
-
-	//struct CBChangesOnResize
-	//{
-	//	DirectX::XMMATRIX proj;
-	//};
-
-	//struct CBChangesRarely
-	//{
-	//	DirectionalLight dirLight;
-	//};
+	
 
 }
 
 
 void FDx11App::Draw()
 {
-	ExecutePass(singlePass.get());
+	ExecuteMainPass(singlePass.get());
+	//ExecutePass(singlePass.get());
 	sphereMesh->Draw();
+	mSwapChain->Present(0, 0);
+}
+
+void FDx11App::Update()
+{
+	FDx11Renderer::Update();
 }

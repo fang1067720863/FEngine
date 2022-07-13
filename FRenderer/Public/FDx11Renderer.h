@@ -66,34 +66,38 @@ public:
 	static ComPtr<ID3D11DepthStencilState> DSSNoDepthWriteWithStencil;	// 深度/模板状态：仅深度测试，不写入深度值，对指定模板值的区域进行绘制
 };
 
-class FDx11Renderer : public FRenderer
+class FDx11Renderer
 {
 public:
 	 FDx11Renderer(FGraphicContext::Traits * traits,HWND hwnd);
 
+	 virtual void Prepare();
+	 virtual void Update();
+	 virtual void Draw();
+	 virtual void OnResize();
+	
+	 int Run();
+	
+	 bool InitDirect3D(FGraphicContext::Traits* traits, HWND hwnd);
 	 void InitSinglePass();
+	 void ExecuteMainPass(FDx11Pass* pass);
 	 void ExecutePass(FDx11Pass* pass);
 	 void ClearFrameBuffer(FDx11Pass* pass);
 	 void SetRenderStates();
-
 	 void SetGpuProgram(FDx11GpuProgram* program);
-
-
-	 void Initialize() override;
-	 bool InitDirect3D(FGraphicContext::Traits* traits, HWND hwnd);
-	 int Run();
-	 void OnResize() override;
 	
-	 void Update() override;
-	 void Draw() override;
+	
+	
+	
+
 
 	 Ptr<FDx11Pass> singlePass;
 	 // Direct3D 11
-	 ComPtr<ID3D11Device> mDevice;							// D3D11设备
-	 ComPtr<ID3D11DeviceContext> mDeviceContext;		// D3D11设备上下文
+	
 
 	 FDx11Device device;
-
+	 ComPtr<ID3D11Device> mDevice;							// D3D11设备
+	 ComPtr<ID3D11DeviceContext> mDeviceContext;		// D3D11设备上下文
 	 ComPtr<IDXGISwapChain> mSwapChain;						// D3D11交换链
 
 	 // 常用资源
@@ -105,20 +109,38 @@ public:
 	 float mClientWidth = 800.0;
 	 float mClientHeight = 600.0;
 
-	 
+	 // Traits
 	 bool      m_AppPaused;       // 应用是否暂停
 	 bool      m_Minimized;       // 应用是否最小化
 	 bool      m_Maximized;       // 应用是否最大化
 	 bool      m_Resizing;        // 窗口大小是否变化
-	 bool	  m_Enable4xMsaa;	 // 是否开启4倍多重采样
+	 bool	   m_Enable4xMsaa;	 // 是否开启4倍多重采样
 	 UINT      m_4xMsaaQuality;   // MSAA支持的质量等级
-
 	 FGraphicContext::Traits* mTraits;
+
+	 // window
 	 HWND mHwnd;
 
 	 FTimer mTimer;         // 计时器
+protected:
+	
+};
+struct CBChangesEveryFrame
+{
+	Mat4 view;
+	Mat4 world;
+	Vec4f eyePos;
 };
 
+struct CBChangesOnResize
+{
+	Mat4 proj;
+};
+
+//struct CBChangesRarely
+//{
+//	DirectionalLight dirLight;
+//};
 
 class FDx11App : public FDx11Renderer
 {
@@ -129,8 +151,9 @@ public:
 	void InitGameObject();
 	void InitCommmonConstantBuffer();
 
-	void Initialize() override;
+	void Prepare() override;
 	void Draw()override;
+	void Update() override;
 
 	Ptr<FDx11Mesh> sphereMesh;
 	Ptr<FCamera> mainCamera;

@@ -20,6 +20,9 @@ public:
     Vec2() { _v[0] = 0.0; _v[1] = 0.0; }
     Vec2(scalar_type x, scalar_type y) { _v[0] = x; _v[1] = y; }
 
+    T* data() { return _v; }
+    const T* data() const { return _v; }
+
 
     inline bool operator == (const Vec2& v) const { return _v[0] == v._v[0] && _v[1] == v._v[1]; }
 
@@ -194,6 +197,8 @@ public:
         _v[1] = v2[1];
         _v[2] = zz;
     }
+    T* data() { return _v; }
+    const T* data() const { return _v; }
 
 
     inline bool operator == (const Vec3& v) const { return _v[0] == v._v[0] && _v[1] == v._v[1] && _v[2] == v._v[2]; }
@@ -407,7 +412,8 @@ public:
         _v[2] = v3[2];
         _v[3] = w;
     }
-
+    T* data() { return _v; }
+    const T* data() const { return _v; }
     inline bool operator == (const Vec4& v) const { return _v[0] == v._v[0] && _v[1] == v._v[1] && _v[2] == v._v[2] && _v[3] == v._v[3]; }
 
     inline bool operator != (const Vec4& v) const { return _v[0] != v._v[0] || _v[1] != v._v[1] || _v[2] != v._v[2] || _v[3] != v._v[3]; }
