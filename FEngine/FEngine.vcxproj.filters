@@ -30,6 +30,8 @@
     <ClCompile Include="Private\test.cpp" />
     <ClCompile Include="Private\Geometry.cpp" />
     <ClCompile Include="Private\Camera.cpp" />
+    <ClCompile Include="Private\UtfConverter.cpp" />
+    <ClCompile Include="Private\Event.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Public\Core.h">
@@ -92,5 +94,6 @@
     <ClInclude Include="Public\VecArray.h" />
     <ClInclude Include="Public\Matrix.h" />
     <ClInclude Include="Public\Quat.h" />
+    <ClInclude Include="Public\UtfConverter.h" />
   </ItemGroup>
 </Project>

@@ -44,7 +44,7 @@ HRESULT CreateShaderFromFile(
 		if (errorBlob != nullptr)
 		{
 			const char* errstr = reinterpret_cast<const char*>(errorBlob->GetBufferPointer());
-			//std::cout << errstr << std::endl;
+			int a = 1;
 		}
 		//SAFE_RELEASE(errorBlob);
 		return hr;

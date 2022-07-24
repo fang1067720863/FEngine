@@ -80,7 +80,7 @@
     <LinkIncremental>true</LinkIncremental>
     <ExecutablePath>..\ThirdParty\DirectX\bin\x64;..\ThirdParty\zlib128\bin;..\ThirdParty\libpng1637\bin;$(ExecutablePath)</ExecutablePath>
     <IncludePath>..\ThirdParty\DirectX\Include;Public;Private;..\FRenderer\Public;..\FEngine\Public;$(IncludePath)</IncludePath>
-    <LibraryPath>..\ThirdParty\DirectX\Lib\x64;$(LibraryPath)</LibraryPath>
+    <LibraryPath>..\ThirdParty\DirectX\Lib\x64;..\x64\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -125,7 +125,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d11.lib;d3d12.lib;d3d9.lib;d3dcompiler.lib;d3dx11.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;d3d12.lib;d3d9.lib;d3dcompiler.lib;d3dx11.lib;FEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -145,7 +145,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Private\d3dApp.cpp" />
     <ClCompile Include="Private\FDx11.cpp" />
+    <ClCompile Include="Private\FDx11App.cpp" />
     <ClCompile Include="Private\FDx11BufferObject.cpp" />
     <ClCompile Include="Private\FDx11InputLayout.cpp" />
     <ClCompile Include="Private\FDx11Pass.cpp" />
@@ -159,7 +161,9 @@
     <ClCompile Include="Private\test.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Public\d3dApp.h" />
     <ClInclude Include="Public\FDx11.h" />
+    <ClInclude Include="Public\FDx11App.h" />
     <ClInclude Include="Public\FDx11BufferObject.h" />
     <ClInclude Include="Public\FDx11ConstantBuffer.h" />
     <ClInclude Include="Public\FDx11InpuyLayout.h" />

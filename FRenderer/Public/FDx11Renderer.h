@@ -96,8 +96,8 @@ public:
 	
 
 	 FDx11Device device;
-	 ComPtr<ID3D11Device> mDevice;							// D3D11设备
-	 ComPtr<ID3D11DeviceContext> mDeviceContext;		// D3D11设备上下文
+	 //ComPtr<ID3D11Device> mDevice;							// D3D11设备
+	 //ComPtr<ID3D11DeviceContext> mDeviceContext;		// D3D11设备上下文
 	 ComPtr<IDXGISwapChain> mSwapChain;						// D3D11交换链
 
 	 // 常用资源
@@ -118,6 +118,9 @@ public:
 	 UINT      m_4xMsaaQuality;   // MSAA支持的质量等级
 	 FGraphicContext::Traits* mTraits;
 
+	 
+	
+
 	 // window
 	 HWND mHwnd;
 
@@ -125,40 +128,13 @@ public:
 protected:
 	
 };
-struct CBChangesEveryFrame
-{
-	Mat4 view;
-	Mat4 world;
-	Vec4f eyePos;
-};
 
-struct CBChangesOnResize
-{
-	Mat4 proj;
-};
 
 //struct CBChangesRarely
 //{
 //	DirectionalLight dirLight;
 //};
 
-class FDx11App : public FDx11Renderer
-{
-public:
-	;
-	FDx11App(FGraphicContext::Traits* traits, HWND hwnd) :FDx11Renderer(traits, hwnd) {}
-	void InitMainCamera();
-	void InitGameObject();
-	void InitCommmonConstantBuffer();
-
-	void Prepare() override;
-	void Draw()override;
-	void Update() override;
-
-	Ptr<FDx11Mesh> sphereMesh;
-	Ptr<FCamera> mainCamera;
-
-};
 
 
 

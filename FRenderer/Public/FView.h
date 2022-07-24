@@ -4,6 +4,7 @@
 #include"Scene.h"
 #include"FGraphicWindowWin32.h"
 #include"FDx11Renderer.h"
+#include"FDx11App.h"
 #include"FTimer.h"
 
 //class FView

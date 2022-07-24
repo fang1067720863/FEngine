@@ -5,8 +5,7 @@ struct DirectionalLight
     float4 Ambient;
     float4 Diffuse;
     float4 Specular;
-    float3 Direction;
-    float Pad;
+    float4 Direction;
 };
 
 // µã¹â
@@ -45,7 +44,7 @@ struct Material
 {
     float4 Ambient;
     float4 Diffuse;
-    float4 Specular; // w = SpecPower
+    float4 Specular; 
     float4 Reflect;
 };
 

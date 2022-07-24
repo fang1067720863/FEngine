@@ -37,6 +37,12 @@ public:
 
     void GenVertexInputDesc(VertexElementType type)
     {
+        if (type == 0)
+        {
+            mElementNum = 1;
+            inputLayoutDescs.push_back({ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 });
+            return;
+        }
         for (uint32_t i = 0; i < VertexElementType::BASIC_NUM; i++)
         {
             if (((1 << i) & type) != 0)
@@ -65,7 +71,7 @@ public:
                 vOffset += veDesc.byteSize;
                 desc.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
                 desc.InstanceDataStepRate = 0;
-                inputLayoutDescs.push_back(std::move(desc));
+                inputLayoutDescs.push_back(desc);
             }
         }
        

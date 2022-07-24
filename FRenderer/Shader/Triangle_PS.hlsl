@@ -3,6 +3,6 @@
 // 像素着色器
 float4 PS(VertexOut pIn) : SV_Target
 {
-    return pIn.color;
+    return float4(1.0f,0.0f,0.0f,1.0f);
 }
 

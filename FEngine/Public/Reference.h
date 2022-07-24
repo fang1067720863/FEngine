@@ -148,6 +148,10 @@ public:
 	{
 		return p != nullptr;
 	}
+	bool IsValid() const
+	{
+		return p != nullptr;
+	}
 	friend bool operator==(const FPtr& a, const FPtr& b)
 	{
 		return a.p == b.p;

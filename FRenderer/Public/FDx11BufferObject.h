@@ -180,7 +180,7 @@ public :
 		mCBOMap.insert(std::pair < const std::string, Ptr<ConstantBufferObject>>(name, cbo));
 		return cbo;
 	}
-	Ptr<ConstantBufferObject> GetConstantBuffer(const std::string& name, std::int32_t size)
+	Ptr<ConstantBufferObject> GetConstantBuffer(const std::string& name)
 	{
 		return mCBOMap.at(name);
 	}

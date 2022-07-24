@@ -64,6 +64,7 @@ public:
 	}
 	uint32_t GetIndexELementNum()
 	{
+		if (!_indices) return 0;
 		return _indices->getNumElements();
 	}
 	uint32_t GetVertexELementNum()
@@ -78,20 +79,47 @@ public:
 		{
 			return false;
 		}
+		float gg = 1.0f;
+		unsigned char* test2 = (unsigned char*)(&gg);
 		const uint32_t vertexNum = _positions->getNumElements();
 		const uint32_t stride = 4 * 3 + 4 * 3 + 4 * 2;
 		mVertexStride = stride;
 		unsigned char* posT = (unsigned char*)(_positions->data()->data());
 		unsigned char* norT = (unsigned char*)(_normals->data()->data());
 		unsigned char* tex0T = (unsigned char*)(_texcoords->data()->data());
+		//unsigned int tt = 1.0;
+		//unsigned char* test = (unsigned char*)(&tt);
+		
 		
 		mCompiledVertices = new unsigned char[vertexNum * stride];
 		
 		for (auto i = 0; i < vertexNum; i++) {
 			memcpy(mCompiledVertices + i * stride, posT + 12 * i, 12);
 			memcpy(mCompiledVertices + i * stride +12, norT + 12 * i, 12);
-			memcpy(mCompiledVertices + i * stride+20, tex0T + 8 * i, 8);
+			memcpy(mCompiledVertices + i * stride+24, tex0T + 8 * i, 8);
 		}
+		return true;
+	}
+	bool CompilePos()
+	{
+		if (!_positions)
+		{
+			return false;
+		}
+		const uint32_t vertexNum = _positions->getNumElements();
+		const uint32_t stride = 4 * 3;
+		mVertexStride = stride;
+		/*unsigned char* posT = (unsigned char*)(_positions->data()->data());
+		unsigned char* norT = (unsigned char*)(_normals->data()->data());
+		unsigned char* tex0T = (unsigned char*)(_texcoords->data()->data());*/
+
+		mCompiledVertices = new unsigned char[vertexNum * stride];
+		memcpy(mCompiledVertices, _positions->data()->data(), vertexNum * stride);
+	/*	for (auto i = 0; i < vertexNum; i++) {
+			memcpy(mCompiledVertices + i * stride, posT + 12 * i, 12);
+			memcpy(mCompiledVertices + i * stride + 12, norT + 12 * i, 12);
+			memcpy(mCompiledVertices + i * stride + 20, tex0T + 8 * i, 8);
+		}*/
 		return true;
 	}
 
@@ -142,118 +170,180 @@ public:
 
 	 void build(const FBox& box)
 	 {
-		 float dx = box.mHalfLength;
-		 float dy = box.mHalfWidth;
-		 float dz = box.mHalfHeight;
+		 Vertex3f(-1.0f, -1.0f, -1.0f);
+		 Normal3f(0.0f, -1.0f, 0.0f);
+		 TexCoord2f(0.0f, 0.0f);
+
+		 Vertex3f(-1.0f, 1.0f, -1.0f);
+		 Normal3f(0.0f, 1.0f, 0.0f);
+         TexCoord2f(1.0f, 0.0f);
+
+
+		 Vertex3f(1.0f, 1.0f, -1.0f);
+		 Normal3f(1.0f, 0.0f, 0.0f);
+		 TexCoord2f(1.0f, 0.0f);
+
+		 Vertex3f(1.0f, -1.0f, -1.0f);
+		 Normal3f(1.0f, 0.0f, 0.0f);
+		 TexCoord2f(0.0f, 0.0f);
+
+		 Vertex3f(-1.0f, -1.0f, 1.0f);
+		 Normal3f(0.0f, -1.0f, 0.0f);
+         TexCoord2f(0.0f, 1.0f);
+
+		 Vertex3f(-1.0f, 1.0f, 1.0f);
+		 Normal3f(-1.0f, 0.0f, 0.0f);
+         TexCoord2f(0.0f, 1.0f);
+
+		 Vertex3f(1.0f, 1.0f, 1.0f);
+		 Normal3f(0.0f, 1.0f, 0.0f);
+         TexCoord2f(0.0f, 1.0f);
+
+		 Vertex3f(1.0f, -1.0f, 1.0f);
+		 Normal3f(1.0f, 0.0f, 0.0f);
+		 TexCoord2f(0.0f, 1.0f);
+
+		 unsigned int indices[] = {
+			 // 正面
+			 0, 1, 2,
+			 2, 3, 0,
+			 // 左面
+			 4, 5, 1,
+			 1, 0, 4,
+			 // 顶面
+			 1, 5, 6,
+			 6, 2, 1,
+			 // 背面
+			 7, 6, 5,
+			 5, 4, 7,
+			 // 右面
+			 3, 2, 6,
+			 6, 7, 3,
+			 // 底面
+			 4, 0, 3,
+			 3, 7, 4
+		 };
+		 for (int i = 0; i < 36; i++)
+		 {
+			 _indices->emplace_back(indices[i]);
+		 }
+		 
+
 
 		 // 24 points in box
 		 // create body
-		 Normal3f(0.0f, -1.0f, 0.0f);
-		 TexCoord2f(0.0f, 1.0f);
-		 Vertex3f(-dx, -dy, dz);
+		 //Normal3f(0.0f, -1.0f, 0.0f);
+		 //TexCoord2f(0.0f, 1.0f);
+		 //Vertex3f(-dx, -dy, dz);
 
-		 Normal3f(0.0f, -1.0f, 0.0f);
-		 TexCoord2f(0.0f, 0.0f);
-		 Vertex3f(-dx, -dy, -dz);
+		 //Normal3f(0.0f, -1.0f, 0.0f);
+		 //TexCoord2f(0.0f, 0.0f);
+		 //Vertex3f(-dx, -dy, -dz);
 
-		 Normal3f(0.0f, -1.0f, 0.0f);
-		 TexCoord2f(1.0f, 0.0f);
-		 Vertex3f(dx, -dy, -dz);
+		 //Normal3f(0.0f, -1.0f, 0.0f);
+		 //TexCoord2f(1.0f, 0.0f);
+		 //Vertex3f(dx, -dy, -dz);
 
-		 Normal3f(0.0f, -1.0f, 0.0f);
-		 TexCoord2f(1.0f, 1.0f);
-		 Vertex3f(dx, -dy, dz);
+		 //Normal3f(0.0f, -1.0f, 0.0f);
+		 //TexCoord2f(1.0f, 1.0f);
+		 //Vertex3f(dx, -dy, dz);
 
-		 // +ve y plane
-		 Normal3f(0.0f, 1.0f, 0.0f);
-		 TexCoord2f(0.0f, 1.0f);
-		 Vertex3f(dx, dy, dz);
+		 //// +ve y plane
+		 //Normal3f(0.0f, 1.0f, 0.0f);
+		 //TexCoord2f(0.0f, 1.0f);
+		 //Vertex3f(dx, dy, dz);
 
-		 Normal3f(0.0f, 1.0f, 0.0f);
-		 TexCoord2f(0.0f, 0.0f);
-		 Vertex3f(dx, dy, -dz);
+		 //Normal3f(0.0f, 1.0f, 0.0f);
+		 //TexCoord2f(0.0f, 0.0f);
+		 //Vertex3f(dx, dy, -dz);
 
-		 Normal3f(0.0f, 1.0f, 0.0f);
-		 TexCoord2f(1.0f, 0.0f);
-		 Vertex3f(-dx, dy, -dz);
+		 //Normal3f(0.0f, 1.0f, 0.0f);
+		 //TexCoord2f(1.0f, 0.0f);
+		 //Vertex3f(-dx, dy, -dz);
 
-		 Normal3f(0.0f, 1.0f, 0.0f);
-		 TexCoord2f(1.0f, 1.0f);
-		 Vertex3f(-dx, dy, dz);
+		 //Normal3f(0.0f, 1.0f, 0.0f);
+		 //TexCoord2f(1.0f, 1.0f);
+		 //Vertex3f(-dx, dy, dz);
 
-		 // +ve x plane
-		 Normal3f(1.0f, 0.0f, 0.0f);
-		 TexCoord2f(0.0f, 1.0f);
-		 Vertex3f(dx, -dy, dz);
+		 //// +ve x plane
+		 //Normal3f(1.0f, 0.0f, 0.0f);
+		 //TexCoord2f(0.0f, 1.0f);
+		 //Vertex3f(dx, -dy, dz);
 
-		 Normal3f(1.0f, 0.0f, 0.0f);
-		 TexCoord2f(0.0f, 0.0f);
-		 Vertex3f(dx, -dy, -dz);
+		 //Normal3f(1.0f, 0.0f, 0.0f);
+		 //TexCoord2f(0.0f, 0.0f);
+		 //Vertex3f(dx, -dy, -dz);
 
-		 Normal3f(1.0f, 0.0f, 0.0f);
-		 TexCoord2f(1.0f, 0.0f);
-		 Vertex3f(dx, dy, -dz);
+		 //Normal3f(1.0f, 0.0f, 0.0f);
+		 //TexCoord2f(1.0f, 0.0f);
+		 //Vertex3f(dx, dy, -dz);
 
-		 Normal3f(1.0f, 0.0f, 0.0f);
-		 TexCoord2f(1.0f, 1.0f);
-		 Vertex3f(dx, dy, dz);
+		 //Normal3f(1.0f, 0.0f, 0.0f);
+		 //TexCoord2f(1.0f, 1.0f);
+		 //Vertex3f(dx, dy, dz);
 
-		 // -ve x plane
-		 Normal3f(-1.0f, 0.0f, 0.0f);
-		 TexCoord2f(0.0f, 1.0f);
-		 Vertex3f(-dx, dy, dz);
+		 //// -ve x plane
+		 //Normal3f(-1.0f, 0.0f, 0.0f);
+		 //TexCoord2f(0.0f, 1.0f);
+		 //Vertex3f(-dx, dy, dz);
 
-		 Normal3f(-1.0f, 0.0f, 0.0f);
-		 TexCoord2f(0.0f, 0.0f);
-		 Vertex3f(-dx, dy, -dz);
+		 //Normal3f(-1.0f, 0.0f, 0.0f);
+		 //TexCoord2f(0.0f, 0.0f);
+		 //Vertex3f(-dx, dy, -dz);
 
-		 Normal3f(-1.0f, 0.0f, 0.0f);
-		 TexCoord2f(1.0f, 0.0f);
-		 Vertex3f(-dx, -dy, -dz);
+		 //Normal3f(-1.0f, 0.0f, 0.0f);
+		 //TexCoord2f(1.0f, 0.0f);
+		 //Vertex3f(-dx, -dy, -dz);
 
-		 Normal3f(-1.0f, 0.0f, 0.0f);
-		 TexCoord2f(1.0f, 1.0f);
-		 Vertex3f(-dx, -dy, dz);
+		 //Normal3f(-1.0f, 0.0f, 0.0f);
+		 //TexCoord2f(1.0f, 1.0f);
+		 //Vertex3f(-dx, -dy, dz);
 
-		 //createTop
-		 // +ve z plane
-		 Normal3f(0.0f, 0.0f, 1.0f);
-		 TexCoord2f(0.0f, 1.0f);
-		 Vertex3f(-dx, dy, dz);
+		 ////createTop
+		 //// +ve z plane
+		 //Normal3f(0.0f, 0.0f, 1.0f);
+		 //TexCoord2f(0.0f, 1.0f);
+		 //Vertex3f(-dx, dy, dz);
 
-		 Normal3f(0.0f, 0.0f, 1.0f);
-		 TexCoord2f(0.0f, 0.0f);
-		 Vertex3f(-dx, -dy, dz);
+		 //Normal3f(0.0f, 0.0f, 1.0f);
+		 //TexCoord2f(0.0f, 0.0f);
+		 //Vertex3f(-dx, -dy, dz);
 
-		 Normal3f(0.0f, 0.0f, 1.0f);
-		 TexCoord2f(1.0f, 0.0f);
-		 Vertex3f(dx, -dy, dz);
+		 //Normal3f(0.0f, 0.0f, 1.0f);
+		 //TexCoord2f(1.0f, 0.0f);
+		 //Vertex3f(dx, -dy, dz);
 
-		 Normal3f(0.0f, 0.0f, 1.0f);
-		 TexCoord2f(1.0f, 1.0f);
-		 Vertex3f(dx, dy, dz);
+		 //Normal3f(0.0f, 0.0f, 1.0f);
+		 //TexCoord2f(1.0f, 1.0f);
+		 //Vertex3f(dx, dy, dz);
 
 
-		 //createBottom
-		 Normal3f(0.0f, 0.0f, -1.0f);
-		 TexCoord2f(0.0f, 1.0f);
-		 Vertex3f(dx, dy, -dz);
+		 ////createBottom
+		 //Normal3f(0.0f, 0.0f, -1.0f);
+		 //TexCoord2f(0.0f, 1.0f);
+		 //Vertex3f(dx, dy, -dz);
 
-		 Normal3f(0.0f, 0.0f, -1.0f);
-		 TexCoord2f(0.0f, 0.0f);
-		 Vertex3f(dx, -dy, -dz);
+		 //Normal3f(0.0f, 0.0f, -1.0f);
+		 //TexCoord2f(0.0f, 0.0f);
+		 //Vertex3f(dx, -dy, -dz);
 
-		 Normal3f(0.0f, 0.0f, -1.0f);
-		 TexCoord2f(1.0f, 0.0f);
-		 Vertex3f(-dx, -dy, -dz);
+		 //Normal3f(0.0f, 0.0f, -1.0f);
+		 //TexCoord2f(1.0f, 0.0f);
+		 //Vertex3f(-dx, -dy, -dz);
 
-		 Normal3f(0.0f, 0.0f, -1.0f);
-		 TexCoord2f(1.0f, 1.0f);
-		 Vertex3f(-dx, dy, -dz);
+		 //Normal3f(0.0f, 0.0f, -1.0f);
+		 //TexCoord2f(1.0f, 1.0f);
+		 //Vertex3f(-dx, dy, -dz);
 
-		 End();
+		// End();
 	 }
-	
+	 void buildTriangle()
+	 {
+		 Vertex3f(0.5, 0.5, 0.5);
+		 Vertex3f(0.8, 0.5, 0.5);
+		 Vertex3f(0.5, -0.5, 0.5);
+	 }
+
 	 void End()
 	 {
 		 // Quad Mode
@@ -266,11 +356,11 @@ public:
 
 			 _indices->emplace_back(p0);
 			 _indices->emplace_back(p1);
-			 _indices->emplace_back(p3);
+			 _indices->emplace_back(p2);
 
-			 _indices->emplace_back(p1);
 			 _indices->emplace_back(p2);
 			 _indices->emplace_back(p3);
+			 _indices->emplace_back(p0);
 		 }
 	 }
 	 FGeometry* BuildBox(const FBox& box)
@@ -281,7 +371,16 @@ public:
 		 geom->SetVertexNormalArray(_normals.get());
 		 geom->SetVertexTexcoordArray(_texcoords.get());
 		 geom->SetIndexArray(_indices.get());
+		 //geom->CompilePos();
 		 geom->Compile();
+		 return geom;
+	 }
+	 FGeometry* BuildTriangle()
+	 {
+		 buildTriangle();
+		 FGeometry* geom = new FGeometry();
+		 geom->SetVertexPositionArray(_vertices.get());
+		 geom->CompilePos();
 		 return geom;
 	 }
 	 void Clear()
@@ -293,6 +392,7 @@ private:
 		_vertices = new Vec3fArray();
 		_normals= new Vec3fArray();
 		_texcoords = new Vec2fArray();
+		_colors = new Vec4fArray();
 		_indices = new IndexArray();
 	}
 protected:
@@ -302,13 +402,16 @@ protected:
 	inline void Vertex3f(const Vec3f& v) { _vertices->push_back(v); }
 	inline void Normal3f(const Vec3f& v) { _normals->push_back(v); }
 	inline void TexCoord2f(const Vec2f& v) { _texcoords->push_back(v); }
+	//inline void Color(const Vec4f& v) { _colors->push_back(v); }
 	inline void Vertex3f(float x, float y, float z) { Vertex3f(Vec3f(x, y, z)); }
 	inline void Normal3f(float x, float y, float z) { Normal3f(Vec3f(x, y, z)); }
 	inline void TexCoord2f(float u, float v) { TexCoord2f(Vec2f(u, v)); }
+	//inline void Color(const Vec4f& v) { Color(Vec4f(x, y, z, w)); }
 	
-	Ptr<Vec3fArray> _vertices;
-	Ptr<Vec3fArray> _normals;
+	Vec3fArrayPtr _vertices;
+	Vec3fArrayPtr _normals;
 	Ptr<Vec2fArray> _texcoords;
+	Ptr<Vec4fArray> _colors;
     Ptr<IndexArray> _indices;
 	
 	

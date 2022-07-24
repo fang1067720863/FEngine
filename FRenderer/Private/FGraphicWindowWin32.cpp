@@ -26,31 +26,31 @@ bool FGraphicWindowWin32::Init()
     return false;
 }
 
-LRESULT CALLBACK MainWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
-	HDC         hdc;  //设备环境句柄
-	PAINTSTRUCT ps;
-	RECT        rect;
-	switch (message) {
-		//窗口绘制消息
-	case WM_PAINT:
-		hdc = BeginPaint(hwnd, &ps);
-		GetClientRect(hwnd, &rect);
-		DrawText(
-			hdc,
-			TEXT("你好，欢迎来到C语言中文网"),
-			-1,
-			&rect,
-			DT_SINGLELINE | DT_CENTER | DT_VCENTER
-		);
-		EndPaint(hwnd, &ps);
-		return 0;
-		//窗口销毁消息
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		return 0;
-	}
-	return DefWindowProc(hwnd, message, wParam, lParam);
-}
+//LRESULT CALLBACK MainWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
+//	HDC         hdc;  //设备环境句柄
+//	PAINTSTRUCT ps;
+//	RECT        rect;
+//	switch (message) {
+//		//窗口绘制消息
+//	case WM_PAINT:
+//		hdc = BeginPaint(hwnd, &ps);
+//		GetClientRect(hwnd, &rect);
+//		DrawText(
+//			hdc,
+//			TEXT("你好，欢迎来到C语言中文网"),
+//			-1,
+//			&rect,
+//			DT_SINGLELINE | DT_CENTER | DT_VCENTER
+//		);
+//		EndPaint(hwnd, &ps);
+//		return 0;
+//		//窗口销毁消息
+//	case WM_DESTROY:
+//		PostQuitMessage(0);
+//		return 0;
+//	}
+//	return DefWindowProc(hwnd, message, wParam, lParam);
+//}
 
 bool FGraphicWindowWin32::CreateMainWindow()
 {
@@ -96,7 +96,7 @@ bool FGraphicWindowWin32::SetWindowPosAndStyle()
 {
 	WNDCLASS wc;
 	wc.style = CS_HREDRAW | CS_VREDRAW;
-	wc.lpfnWndProc = MainWndProc;
+	//wc.lpfnWndProc = MainWndProc;
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
 	wc.hInstance = m_hAppInst;

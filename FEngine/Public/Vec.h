@@ -368,12 +368,33 @@ inline Vec3<T> componentMultiply(const Vec3<T>& lhs, const Vec3<T>& rhs)
 }
 
 /** divide rhs components by rhs vector components. */
-template<class T>
+template<typename T>
 inline Vec3<T> componentDivide(const Vec3<T>& lhs, const Vec3<T>& rhs)
 {
     return Vec3<T>(lhs[0] / rhs[0], lhs[1] / rhs[1], lhs[2] / rhs[2]);
 }
-
+template<typename T>
+inline Vec3<T> normalize(const Vec3<T>& lhs)
+{
+    T norm = lhs.length();
+    if (norm > 0.0)
+    {
+        T inv = 1.0f / norm;
+        return Vec3<T>(lhs[0] *inv, lhs[1] * inv, lhs[2] * inv);
+    }
+    else
+    {
+        return Vec3<T>(lhs[0], lhs[1], lhs[2]);
+    }
+    
+}
+template<typename T>
+constexpr Vec3<T> cross(const Vec3<T>& lhs, const Vec3<T>& rhs)
+{
+    return Vec3<T>(lhs[1] * rhs[2] - rhs[1] * lhs[2],
+        lhs[2] * rhs[0] - rhs[2] * lhs[0],
+        lhs[0] * rhs[1] - rhs[0] * lhs[1]);
+}
 const Vec3f X_AXIS(1.0, 0.0, 0.0);
 const Vec3f Y_AXIS(0.0, 1.0, 0.0);
 const Vec3f Z_AXIS(0.0, 0.0, 1.0);

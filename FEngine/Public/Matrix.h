@@ -93,6 +93,19 @@ public:
             value[0][2], value[1][2], value[2][2], value[3][2],
             value[0][3], value[1][3], value[2][3], value[3][3]);
     }
+
+    // todo
+    template<typename T>
+    void rotate(T angle_radians, T x, T y, T z)
+    {
+        const T c = std::cos(angle_radians);
+        const T s = std::sin(angle_radians);
+        const T one_minus_c = 1 - c;
+        return set(x * x * one_minus_c + c, y * x * one_minus_c + z * s, x * z * one_minus_c - y * s, 0,
+            x * y * one_minus_c - z * s, y * y * one_minus_c + c, y * z * one_minus_c + x * s, 0,
+            x * z * one_minus_c + y * s, y * z * one_minus_c - x * s, z * z * one_minus_c + c, 0,
+            0, 0, 0, 1);
+    }
     T* data() { return value[0].data(); }
     const T* data() const { return value[0].data(); }
 };

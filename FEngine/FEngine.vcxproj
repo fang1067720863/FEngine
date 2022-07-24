@@ -40,7 +40,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -165,6 +165,7 @@
     <ClInclude Include="Public\ShaderParameter.h" />
     <ClInclude Include="Public\ShaderResource.h" />
     <ClInclude Include="Public\Texture.h" />
+    <ClInclude Include="Public\UtfConverter.h" />
     <ClInclude Include="Public\Vec.h" />
     <ClInclude Include="Public\VecArray.h" />
     <ClInclude Include="Public\View.h" />
@@ -173,8 +174,10 @@
   <ItemGroup>
     <ClCompile Include="Private\Camera.cpp" />
     <ClCompile Include="Private\Core.cpp" />
+    <ClCompile Include="Private\Event.cpp" />
     <ClCompile Include="Private\Geometry.cpp" />
     <ClCompile Include="Private\test.cpp" />
+    <ClCompile Include="Private\UtfConverter.cpp" />
     <ClCompile Include="Private\View.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

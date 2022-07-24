@@ -14,15 +14,15 @@ cbuffer m_CBOnResize : register(b1)
 {
 	matrix g_Proj;  // 该教程往后将使用默认的列主矩阵，但需要在C++代码端预先将矩阵进行转置。
 }
+cbuffer CBChangesRarely : register(b2)
+{
+	DirectionalLight g_DirLight;
+}
+cbuffer CBChangesEveryObjectDrawing : register(b3)
+{
+	Material g_Material;
+}
 
-//cbuffer CBChangesEveryObjectDrawing : register(b2)
-//{
-//	Material g_Material;
-//}
-//cbuffer CBChangesRarely : register(b3)
-//{
-//	DirectionalLight g_DirLight;
-//}
 
 
 struct VertexPosNormalTex

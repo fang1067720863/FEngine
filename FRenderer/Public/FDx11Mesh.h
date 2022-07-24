@@ -4,7 +4,7 @@
 #include"FDx11BufferObject.h"
 #include"FDx11InpuyLayout.h"
 
-#include"Material.h"
+//#include"Material.h"
 #include"VecArray.h"
 #include"Ptr.h"
 #include"Geometry.h"
@@ -15,12 +15,12 @@ class FDx11Mesh:public FNode
 {
 public:
 	friend class FMeshBuilder;
-	typedef std::shared_ptr<Material> MaterialPtr;
+	//typedef std::shared_ptr<Material> MaterialPtr;
 	typedef Ptr<VertexBufferObject> VBOPtr;
 	typedef Ptr<IndexBufferObject> IBOPtr;
 	
 
-	FDx11Mesh(FGeometry* geom, const FDx11Device& _device):FNode(""),device(_device) {
+	FDx11Mesh(FGeometry* geom, const FDx11Device& _device, bool useIndex = true):FNode(""),device(_device),mUseIndex(useIndex) {
 		Init(geom);
 	}
 
@@ -28,7 +28,7 @@ public:
 	VertexBufferObject* GetVBO() { return mVBO.get(); }
 	IndexBufferObject* GetIBO() { return mIBO.get(); }
 	bool UseIndex() { return mUseIndex; }
-
+	bool mUseIndex;
 	void Init(FGeometry* geom)
 	{
 		// Init Dx11 InputLayout&Topology
@@ -38,7 +38,11 @@ public:
 
 		// Init Dx11 VBO IBO
 		mVBO = new VertexBufferObject(geom->GetCompiledVertexDataSize(), geom->GetCompiledVertexData(), device, geom->GetVertexStride(),geom->GetVertexELementNum());
-		mIBO = new IndexBufferObject(geom->GetCompiledIndexDataSize(), geom->GetCompiledIndexData(), device, geom->GetIndexELementNum());
+		if (mUseIndex)
+		{
+			mIBO = new IndexBufferObject(geom->GetCompiledIndexDataSize(), geom->GetCompiledIndexData(), device, geom->GetIndexELementNum());
+		}
+		
 		
 	}
 
@@ -67,10 +71,10 @@ protected:
 	const FDx11Device& device;
 	//Ptr<FDx11VertexInputLayout> mInputLayout = nullptr;
 	D3D_PRIMITIVE_TOPOLOGY mTopology;
-	bool mUseIndex = true;
+	
 
 	VBOPtr mVBO;
 	IBOPtr mIBO;
-	MaterialPtr mMaterial;
+	//MaterialPtr mMaterial;
 };
 

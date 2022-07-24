@@ -131,6 +131,6 @@ bool FDx11Pass::InitGpuProgram()
 bool FDx11Pass::InitVertexInputLayout()
 {
 	//magic
-	mVInputLayout = new FDx11VertexInputLayout(VertexElementType::POS_NOR_TEXO, mGpuProgram.get() ,mDevice);
+	mVInputLayout = new FDx11VertexInputLayout(VertexElementType::POSITION, mGpuProgram.get() ,mDevice);
 	return true;
 }

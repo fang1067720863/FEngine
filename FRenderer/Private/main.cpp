@@ -9,6 +9,7 @@
 
 
 
+
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE prevInstance,
 	_In_ LPSTR cmdLine, _In_ int showCmd)
 {
@@ -27,14 +28,16 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE prevInstance,
 	/*FCore coreApp(hInstance);
 	coreApp.Realize();*/
 
-	FGraphicWindowWin32 window(hInstance);
+	//FGraphicWindowWin32 window(hInstance);
 
-	FDx11App application(window.GetTraits(), window.GetMainWnd());
-	application.Prepare();
-	application.Run();
+	FDx11App theApp(hInstance, L"Rendering a Triangle", 1280, 720);
+	if (!theApp.Init())
+		return 0;
+
+	theApp.Run();
 
 
-	system("pause");
+	//system("pause");
 	return 0;
 }
 

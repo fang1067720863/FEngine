@@ -3,6 +3,7 @@
 #include<iostream>
 #include"ShaderParameter.h"
 #include"Geometry.h"
+#include"UtfConverter.h"
 
 class Apple:public FReference {
 
@@ -27,9 +28,17 @@ void TestPtr()
 	apple = new Apple();
 	std::cout << "----------------------------------" << std::endl;
 }
+void TestUtf()
+{
+	/*std::wstring wstr;
+	convert_utf(std::string("fdsa"), wstr);
+	std::string str;
+	convert_utf( wstr,str);
+	std::cout <<str;*/
+}
 int main()
 {
-	TestPtr();
+	TestUtf();
 
 		
     //Ptr<UniformDefault> light = new UniformDefault("light");
