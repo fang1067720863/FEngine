@@ -95,51 +95,51 @@ public:
             //{ KEY_Begin = 0xFF58, /* BOL */
 
            
-            {VK_OEM_COMMA, KEY_Comma},
-            {VK_OEM_MINUS, KEY_Minus},
-            {VK_OEM_PERIOD, KEY_Period},
-            {VK_OEM_2, KEY_Slash},
-            {':', KEY_Colon},
-            {VK_OEM_1, KEY_Semicolon},
-            {'<', KEY_Less},
-            {VK_OEM_PLUS, KEY_Equals}, // + isn't an unmodded key, why does windows map is as a virtual??
-            {'>', KEY_Greater},
-            {'?', KEY_Question},
-            {'@', KEY_At},
-            {VK_OEM_4, KEY_Leftbracket},
-            {VK_OEM_5, KEY_Backslash},
-            {VK_OEM_6, KEY_Rightbracket},
-            {'|', KEY_Caret},
-            {'_', KEY_Underscore},
-            {0xc0, KEY_Backquote},
+            //{VK_OEM_COMMA, KEY_Comma},
+            //{VK_OEM_MINUS, KEY_Minus},
+            //{VK_OEM_PERIOD, KEY_Period},
+            //{VK_OEM_2, KEY_Slash},
+            //{':', KEY_Colon},
+            //{VK_OEM_1, KEY_Semicolon},
+            //{'<', KEY_Less},
+            //{VK_OEM_PLUS, KEY_Equals}, // + isn't an unmodded key, why does windows map is as a virtual??
+            //{'>', KEY_Greater},
+            //{'?', KEY_Question},
+            //{'@', KEY_At},
+            //{VK_OEM_4, KEY_Leftbracket},
+            //{VK_OEM_5, KEY_Backslash},
+            //{VK_OEM_6, KEY_Rightbracket},
+            //{'|', KEY_Caret},
+            //{'_', KEY_Underscore},
+            //{0xc0, KEY_Backquote},
 
-            {VK_BACK, KEY_BackSpace}, /* back space, back char */
-            {VK_TAB, KEY_Tab},
-            //    KEY_Linefeed = 0xFF0A, /* Linefeed, LF */
-            {VK_CLEAR, KEY_Clear},
-            {VK_RETURN, KEY_Return}, /* Return, enter */
-            {VK_PAUSE, KEY_Pause},   /* Pause, hold */
-            {VK_SCROLL, KEY_Scroll_Lock},
-            //    KEY_Sys_Req = 0xFF15,
-            {VK_ESCAPE, KEY_Escape},
-            {VK_DELETE, KEY_Delete}, /* Delete, rubout */
+            //{VK_BACK, KEY_BackSpace}, /* back space, back char */
+            //{VK_TAB, KEY_Tab},
+            ////    KEY_Linefeed = 0xFF0A, /* Linefeed, LF */
+            //{VK_CLEAR, KEY_Clear},
+            //{VK_RETURN, KEY_Return}, /* Return, enter */
+            //{VK_PAUSE, KEY_Pause},   /* Pause, hold */
+            //{VK_SCROLL, KEY_Scroll_Lock},
+            ////    KEY_Sys_Req = 0xFF15,
+            //{VK_ESCAPE, KEY_Escape},
+            //{VK_DELETE, KEY_Delete}, /* Delete, rubout */
 
-            /* Misc Functions */
+            ///* Misc Functions */
 
-            {VK_SELECT, KEY_Select}, /* Select, mark */
-            {VK_PRINT, KEY_Print},
-            {VK_EXECUTE, KEY_Execute}, /* Execute, run, do */
-            {VK_INSERT, KEY_Insert},   /* Insert, insert here */
-            //{ KEY_Undo = 0xFF65,    /* Undo, oops */
-            //KEY_Redo = 0xFF66,    /* redo, again */
-            {VK_APPS, KEY_Menu}, /* On Windows, this is VK_APPS, the context-menu key */
-            // KEY_Find = 0xFF68,    /* Find, search */
-            {VK_CANCEL, KEY_Cancel}, /* Cancel, stop, abort, exit */
-            {VK_HELP, KEY_Help},     /* Help */
-            //{ KEY_Break = 0xFF6B,
-            //KEY_Mode_switch = 0xFF7E,   /* Character set switch */
-            //KEY_Script_switch = 0xFF7E, /* Alias for mode_switch */
-            {VK_NUMLOCK, KEY_Num_Lock},
+            //{VK_SELECT, KEY_Select}, /* Select, mark */
+            //{VK_PRINT, KEY_Print},
+            //{VK_EXECUTE, KEY_Execute}, /* Execute, run, do */
+            //{VK_INSERT, KEY_Insert},   /* Insert, insert here */
+            ////{ KEY_Undo = 0xFF65,    /* Undo, oops */
+            ////KEY_Redo = 0xFF66,    /* redo, again */
+            //{VK_APPS, KEY_Menu}, /* On Windows, this is VK_APPS, the context-menu key */
+            //// KEY_Find = 0xFF68,    /* Find, search */
+            //{VK_CANCEL, KEY_Cancel}, /* Cancel, stop, abort, exit */
+            //{VK_HELP, KEY_Help},     /* Help */
+            ////{ KEY_Break = 0xFF6B,
+            ////KEY_Mode_switch = 0xFF7E,   /* Character set switch */
+            ////KEY_Script_switch = 0xFF7E, /* Alias for mode_switch */
+            //{VK_NUMLOCK, KEY_Num_Lock},
 
             /* Keypad Functions, keypad numbers cleverly chosen to map to ascii */
 
@@ -171,7 +171,7 @@ public:
             //KEY_KP_Decimal = 0xFFAE,
             //KEY_KP_Divide = 0xFFAF,
 
-            {VK_NUMPAD0, KEY_KP_0},
+      /*      {VK_NUMPAD0, KEY_KP_0},
             {VK_NUMPAD1, KEY_KP_1},
             {VK_NUMPAD2, KEY_KP_2},
             {VK_NUMPAD3, KEY_KP_3},
@@ -180,7 +180,7 @@ public:
             {VK_NUMPAD6, KEY_KP_6},
             {VK_NUMPAD7, KEY_KP_7},
             {VK_NUMPAD8, KEY_KP_8},
-            {VK_NUMPAD9, KEY_KP_9},
+            {VK_NUMPAD9, KEY_KP_9},*/
 
             /*
         * Auxiliary Functions; note the duplicate definitions for left and right
@@ -189,7 +189,7 @@ public:
         * We've not found a keyboard with more than 35 function keys total.
         */
 
-            {VK_F1, KEY_F1},
+        /*    {VK_F1, KEY_F1},
             {VK_F2, KEY_F2},
             {VK_F3, KEY_F3},
             {VK_F4, KEY_F4},
@@ -212,7 +212,7 @@ public:
             {VK_F21, KEY_F21},
             {VK_F22, KEY_F22},
             {VK_F23, KEY_F23},
-            {VK_F24, KEY_F24},
+            {VK_F24, KEY_F24},*/
 
             //KEY_F25 = 0xFFD6,
             //KEY_F26 = 0xFFD7,
@@ -228,19 +228,19 @@ public:
 
             /* Modifiers */
 
-            {VK_LSHIFT, KEY_Shift_L},     /* Left shift */
-            {VK_RSHIFT, KEY_Shift_R},     /* Right shift */
-            {VK_LCONTROL, KEY_Control_L}, /* Left control */
-            {VK_RCONTROL, KEY_Control_R}, /* Right control */
-            {VK_CAPITAL, KEY_Caps_Lock},  /* Caps lock */
-            //KEY_Shift_Lock = 0xFFE6, /* Shift lock */
+            //{VK_LSHIFT, KEY_Shift_L},     /* Left shift */
+            //{VK_RSHIFT, KEY_Shift_R},     /* Right shift */
+            //{VK_LCONTROL, KEY_Control_L}, /* Left control */
+            //{VK_RCONTROL, KEY_Control_R}, /* Right control */
+            //{VK_CAPITAL, KEY_Caps_Lock},  /* Caps lock */
+            ////KEY_Shift_Lock = 0xFFE6, /* Shift lock */
 
-            //KEY_Meta_L = 0xFFE7,  /* Left meta */
-            //KEY_Meta_R = 0xFFE8,  /* Right meta */
-            {VK_LMENU, KEY_Alt_L},  /* Left alt */
-            {VK_RMENU, KEY_Alt_R},  /* Right alt */
-            {VK_LWIN, KEY_Super_L}, /* Left super */
-            {VK_RWIN, KEY_Super_R}  /* Right super */
+            ////KEY_Meta_L = 0xFFE7,  /* Left meta */
+            ////KEY_Meta_R = 0xFFE8,  /* Right meta */
+            //{VK_LMENU, KEY_Alt_L},  /* Left alt */
+            //{VK_RMENU, KEY_Alt_R},  /* Right alt */
+            //{VK_LWIN, KEY_Super_L}, /* Left super */
+            //{VK_RWIN, KEY_Super_R}  /* Right super */
             //KEY_Hyper_L = 0xFFED, /* Left hyper */
             //KEY_Hyper_R = 0xFFEE  /* Right hyper */
         };
@@ -288,10 +288,10 @@ public:
             break;
         }
 
-        if (keyState[VK_CAPITAL] & 0x01) modifierMask |= vsg::KeyModifier::MODKEY_CapsLock;
-        if (keyState[VK_NUMLOCK] & 0x01) modifierMask |= vsg::KeyModifier::MODKEY_NumLock;
+        //if (keyState[VK_CAPITAL] & 0x01) modifierMask |= vsg::KeyModifier::MODKEY_CapsLock;
+        //if (keyState[VK_NUMLOCK] & 0x01) modifierMask |= vsg::KeyModifier::MODKEY_NumLock;
 
-        keyModifier = static_cast<vsg::KeyModifier>(modifierMask);
+        //keyModifier = static_cast<vsg::KeyModifier>(modifierMask);
 
         // our actual keystroke is what we get after the ::ToAscii call
         char asciiKey[2];

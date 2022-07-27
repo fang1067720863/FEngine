@@ -70,6 +70,11 @@ public:
         Vec3f newPos = mEye + side * dt;
         lookAt(newPos, newPos + mForward, mUp);
     }
+    void GoUp(float dt)
+    {
+        Vec3f newPos = mEye + mUp * dt;
+        lookAt(newPos, newPos + mForward, mUp);
+    }
     void SetFrustum(const Frustum& frustum)
     {
         SetFrustum(frustum.mFovY, frustum.mAspect, frustum.mNearZ, frustum.mFarZ);
@@ -92,14 +97,15 @@ public:
     {
         T f = static_cast<T>(1.0 / std::tan(fovy_radians * 0.5));
         T r = static_cast<T>(1.0 / (zFar - zNear));
-      /*  return Matrix4<T>(f / aspectRatio, 0, 0, 0,
+      /*  vulkan_perspective_matrix = return Matrix4<T>(f / aspectRatio, 0, 0, 0,
             0, -f, 0, 0,
             0, 0, zNear * r, -1,
             0, 0, (zFar * zNear) * r, 0);*/
-      /*  return Matrix4<T>(f / aspectRatio, 0, 0, 0,
+      /*  dx_perspective_matrix = return Matrix4<T>(f / aspectRatio, 0, 0, 0,
             0, f, 0, 0,
             0, 0, zFar * r, 1,
             0, 0, -(zFar * zNear) * r, 0);*/
+        // transpose
         return Matrix4<T>(f / aspectRatio, 0, 0, 0,
             0, f, 0, 0,
             0, 0, zFar * r, -(zFar * zNear) * r,

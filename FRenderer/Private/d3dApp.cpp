@@ -46,7 +46,8 @@ D3DApp::D3DApp(HINSTANCE hInstance, const std::wstring& windowName, int initWidt
     m_pSwapChain(nullptr),
     m_pDepthStencilBuffer(nullptr),
     m_pRenderTargetView(nullptr),
-    m_pDepthStencilView(nullptr)
+    m_pDepthStencilView(nullptr),
+    _keyBoardMap(new KeyboardMap())
 {
     ZeroMemory(&m_ScreenViewport, sizeof(D3D11_VIEWPORT));
 
@@ -326,19 +327,14 @@ LRESULT D3DApp::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_KEYUP:
     case WM_SYSKEYUP:
     {
-       /* KeySymbol keySymbol, modifiedKeySymbol;
-        vsg::KeyModifier keyModifier;
-        if (_keyboard->getKeySymbol(wParam, lParam, keySymbol, modifiedKeySymbol, keyModifier))
+        KeySymbol keySymbol, modifiedKeySymbol;
+        KeyModifier keyModifier = KeyModifier::MODKEY_Alt;
+        if (_keyBoardMap->getKeySymbol(wParam, lParam, keySymbol, modifiedKeySymbol, keyModifier))
         {
+            Ptr<Event> evt = new KeyPressEvent(keySymbol, keyModifier);
             int32_t repeatCount = (lParam & 0xffff);
-            bufferedEvents.emplace_back(vsg::KeyPressEvent::create(this, event_time, keySymbol, modifiedKeySymbol, keyModifier, repeatCount));
-        }*/
-        KeySymbol keySymbol = KeySymbol::KEY_W;
-        KeyModifier modifiedKeySymbol = KeyModifier::MODKEY_Alt;
-
-        Ptr<Event> evt = new KeyPressEvent(keySymbol, modifiedKeySymbol);
-        bufferdEvents.emplace_back(evt);
-        //bufferdEvents.push_back(evt);
+            bufferdEvents.emplace_back(evt); 
+        }
         break;
     }
     }

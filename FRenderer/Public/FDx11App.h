@@ -9,6 +9,7 @@
 #include"Camera.h"
 #include"EventHandler.h"
 #include"d3dApp.h"
+#include"UtfConverter.h"
 
 struct CBChangesEveryFrame
 {
@@ -41,23 +42,13 @@ class FDx11App : public D3DApp
 {
 public:
 
-	void InitMainCamera();
-	bool InitSinglePass();
-
-	Ptr<FDx11Mesh> boxMesh;
-	Ptr<FDx11Mesh> triangleMesh;
-	Ptr<FCamera> mainCamera;
-
 	Ptr<FDx11Pass> forwardPass;
 
-	ComPtr<ID3D11InputLayout> m_pVertexLayout;	// 顶点输入布局
-	ComPtr<ID3D11Buffer> m_pVertexBuffer;		// 顶点缓冲区
-	ComPtr<ID3D11VertexShader> m_pVertexShader;	// 顶点着色器
-	ComPtr<ID3D11PixelShader> m_pPixelShader;
+	bool InitSinglePass();
 	void ExecuteMainPass(FDx11Pass* pass);
-	//void ExecutePass(FDx11Pass* gBufferPass);
-	void SetGpuProgram(FDx11GpuProgram* program);
+
 	void ClearFrameBuffer(FDx11Pass* GBufferPass);
+	void InitCommmonConstantBuffer();
 	// 像素着色器
 	FDx11App(HINSTANCE hInstance, const std::wstring& windowName, int initWidth, int initHeight);
 	
@@ -66,21 +57,19 @@ public:
 
 	}
 
-	bool Init()
+	bool Init() override
 	{
-
 		if (!D3DApp::Init())
 			return false;
 
+		FindGlobalPath();
 		if (!InitSinglePass())
 			return false;
-		/*if (!InitEffect())
-			return false;*/
-		if (!InitResource())
+		if (!InitGameObject())
 			return false;
+		
 		InitCommmonConstantBuffer();
 		
-
 		return true;
 	}
 	void OnResize()
@@ -89,11 +78,14 @@ public:
 	}
 	void UpdateScene(float dt) override;
 	
-	
+	bool InitGameObject();
 
-	bool InitResource();
-	void InitCommmonConstantBuffer();
 	void DrawScene() override;
 	Ptr<EventHandler> flyController;
+
+private:
+	Ptr<FDx11Mesh> boxMesh;
+	Ptr<FDx11Mesh> triangleMesh;
+	Ptr<FCamera> mainCamera;
 
 };

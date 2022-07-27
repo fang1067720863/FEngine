@@ -10,8 +10,8 @@ extern void ConvertUtf(const std::wstring& src, std::string& utf8);
 
 
 extern bool FileExists(const wchar_t* path);
-
-
+static std::string GLOBAL_PATH;
+extern bool FindGlobalPath();
 class File
 {
     File(const std::string& file)

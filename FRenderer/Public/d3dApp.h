@@ -7,6 +7,7 @@
 #include"FDx11.h"
 #include<list>
 #include"Event.h"
+#include"EventQueue.h"
 //#include "CpuTimer.h"
 
 class D3DApp
@@ -70,5 +71,6 @@ protected:
     int m_ClientHeight;                                   // 视口高度
     typedef std::list<Ptr<Event>> BufferdEvents;
     BufferdEvents bufferdEvents;
+    Ptr<KeyboardMap> _keyBoardMap;
 
 };

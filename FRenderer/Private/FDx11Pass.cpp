@@ -100,7 +100,7 @@ bool FDx11Pass::InitRenderTexture(ID3D11Device* device)
 	depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	depthStencilDesc.SampleDesc.Count = 1;
 	depthStencilDesc.SampleDesc.Quality = 0;
-	//if (m_Enable4xMsaa)
+	//if (m_Enable4xMsaa) 
 	//	depthStencilDesc.SampleDesc.Count = 4;
 	//	depthStencilDesc.SampleDesc.Quality = m_4xMsaaQuality - 1;
 

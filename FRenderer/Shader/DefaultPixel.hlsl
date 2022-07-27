@@ -9,7 +9,7 @@ float4 PS(VertexPosHWNormalTex pIn) : SV_Target
 {
     // 若不使用纹理，则使用默认白色
     float4 texColor = float4(1.0f, 0.0f, 0.0f, 1.0f);
-    //texColor = g_DiffuseMap.Sample(g_Sam, pIn.Tex);
+    texColor = g_DiffuseMap.Sample(g_Sam, pIn.Tex);
    
     // 标准化法向量
     float3 normal= normalize(pIn.NormalW);

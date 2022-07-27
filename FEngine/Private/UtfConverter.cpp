@@ -106,3 +106,18 @@ bool FileExists(const wchar_t* path)
     return false;
 #endif
 }
+
+
+
+bool FindGlobalPath()
+{
+    std::wstring shaderFile = ConvertUtf(std::string("Shader\\DefaultVertex.hlsl"));
+    if (FileExists(shaderFile.c_str()))
+    {
+        GLOBAL_PATH = "\\";
+    }
+    else {
+        GLOBAL_PATH = "D://GitProject//FEngine//FRenderer//";
+    }
+    return true;
+}

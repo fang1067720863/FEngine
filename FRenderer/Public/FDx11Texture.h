@@ -129,6 +129,7 @@ protected:
             desc.ArraySize = 6;
         }
         desc.MipLevels = 1;
+        device->CreateTexture2D(&depthStencilDesc, nullptr, m_pDepthStencilBuffer.GetAddressOf())
     }
     void _create3DTex() {}
     void _create3DResourceView() {}

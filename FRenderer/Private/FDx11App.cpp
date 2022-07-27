@@ -1,4 +1,5 @@
 #include"FDx11App.h"
+#include<D3DX11tex.h>
 
 void FDx11App::ExecuteMainPass(FDx11Pass* pass)
 {
@@ -15,93 +16,37 @@ void FDx11App::ExecuteMainPass(FDx11Pass* pass)
 	//SetRenderStates(gBufferPass->GetRenderStates());
 	//SetRenderStates();
 	//m_pDevice.GetDeviceContext()->IASetInputLayout(pass->GetGpuProgram()->inputLayout.Get());
+	
+	// inputLayout
 	m_pDevice.GetDeviceContext()->IASetInputLayout(pass->GetGpuProgram()->inputLayout.Get());
 	// shader & shader resource
-	SetGpuProgram(pass->GetGpuProgram());
-	// vertex inputlayout
-	//evice.GetDeviceContext()->IASetInputLayout(pass->GetInputLayout()->GetD3D11InputLayout());
+	pass->GetGpuProgram()->UseProgram();
+	
 
 }
 
 void FDx11App::UpdateScene(float dt)
 {
+	// handle events
 	while (!bufferdEvents.empty())
 	{
 		Ptr<Event> evt = bufferdEvents.front();
 		evt->Handled(*flyController);
-		//flyController->Handle(*(evt.get()));
 		bufferdEvents.pop_front();
 	}
+
+	triangleMesh->Update(dt);
+
+
 	Ptr<ConstantBufferObject> frameCBO = ConstantBufferPool::GetInstance().GetConstantBuffer("frame");
-
-	//static float phi = 0.0f, theta = 0.0f;
-	//phi += 0.3f * dt, theta += 0.01f * dt;
-	Mat4 mat;
-	//mat.rotate(theta, 0.0f, 1.0f, 0.0f);
-
 	frameCBO->Upload<CBChangesEveryFrame>(
 		CBChangesEveryFrame{
-		mainCamera->GetViewMatrix(), mat, Vec4f(mainCamera->GetEyePos(),1.0f)
+		mainCamera->GetViewMatrix(), triangleMesh->GetWorldTransform(), Vec4f(mainCamera->GetEyePos(),1.0f)
 		}
 	);
 
 }
 
-void FDx11App::SetGpuProgram(FDx11GpuProgram* program)
-{
-	// shader
-	m_pDevice.GetDeviceContext()->VSSetShader(program->GetVertexShader(), nullptr, 0);
-	m_pDevice.GetDeviceContext()->PSSetShader(program->GetPixelShader(), nullptr, 0);
-
-	// 一个slot 只设置一块resource element ,不设置成Array magicNumber = 1
-	// shader resource constant buffer
-	unsigned int num = program->GetConstantBufferNum();
-	for (unsigned int i = 0; i < num; i++)
-	{
-		ID3D11Buffer* bufferArray[1];
-		ConstantBufferObject* cbo = program->GetContantBufferObject(0);
-		bufferArray[0] = cbo->GetBufferView();
-
-		UINT slot = i;
-		m_pDevice.GetDeviceContext()->VSSetConstantBuffers(slot, 1, bufferArray);
-	}
-	ID3D11Buffer* bufferArray[1];
-	bufferArray[0] = ConstantBufferPool::GetInstance().GetConstantBuffer("frame")->GetBufferView();
-	m_pDevice.GetDeviceContext()->VSSetConstantBuffers(0, 1, bufferArray);
-	m_pDevice.GetDeviceContext()->PSSetConstantBuffers(0, 1, bufferArray);
-	ID3D11Buffer* bufferArray2[1];
-	bufferArray2[0] = ConstantBufferPool::GetInstance().GetConstantBuffer("onResize")->GetBufferView();
-	m_pDevice.GetDeviceContext()->VSSetConstantBuffers(1, 1, bufferArray2);
-	m_pDevice.GetDeviceContext()->PSSetConstantBuffers(1, 1, bufferArray2);
-	ID3D11Buffer* bufferArray3[1];
-	bufferArray3[0] = ConstantBufferPool::GetInstance().GetConstantBuffer("light")->GetBufferView();
-	m_pDevice.GetDeviceContext()->VSSetConstantBuffers(2, 1, bufferArray3);
-	m_pDevice.GetDeviceContext()->PSSetConstantBuffers(2, 1, bufferArray3);
-	ID3D11Buffer* bufferArray4[1];
-	bufferArray4[0] = ConstantBufferPool::GetInstance().GetConstantBuffer("material")->GetBufferView();
-	m_pDevice.GetDeviceContext()->VSSetConstantBuffers(3, 1, bufferArray4);
-	m_pDevice.GetDeviceContext()->PSSetConstantBuffers(3, 1, bufferArray4);
-
-	// shader resource texture
-	num = program->GetTextureNum();
-	for (unsigned int i = 0; i < num; i++)
-	{
-
-		UINT slot = i;
-		UINT num = 1;
-		m_pDevice.GetDeviceContext()->PSSetShaderResources(slot, num, program->GetGpuTextureView(i));
-	}
-
-	// shader resource sampler
-	num = program->GetSamplerNum();
-	for (unsigned int i = 0; i < num; i++)
-	{
-		UINT slot = i;
-		UINT num = 1;
-		m_pDevice.GetDeviceContext()->PSSetSamplers(slot, num, program->GetSamplerView(i));
-	}
-
-}
 
 void FDx11App::ClearFrameBuffer(FDx11Pass* GBufferPass)
 {
@@ -135,12 +80,7 @@ FDx11App::FDx11App(HINSTANCE hInstance, const std::wstring& windowName, int init
 	: D3DApp(hInstance, windowName, initWidth, initHeight)
 {
 }
-void FDx11App::InitMainCamera()
-{
-	mainCamera = new FCamera(Frustum(), "MainCamera");
-	mainCamera->lookAt<float>(Vec3f(-4.0f, 0.0f, 0.0f), Vec3f(0.0, 0.0, 0.0), Vec3f(0.0, 1.0, 0.0));
-	flyController = new FlyCameraController(mainCamera);
-}
+
 bool FDx11App::InitSinglePass()
 {
 	forwardPass = new FDx11Pass(1, m_ScreenViewport,m_pDevice);
@@ -166,35 +106,68 @@ void FDx11App::InitCommmonConstantBuffer()
 
 	Ptr<ConstantBufferObject> materialCBO = ConstantBufferPool::GetInstance().CreateConstantBuffer("material", sizeof(Material), m_pDevice);
 	materialCBO->Upload<Material>(Material{ Vec4f(0.1,0.1,0.1,1.0),Vec4f(0.2,0.2,0.2,1.0),Vec4f(0.7,0.7,0.7,1.0),Vec4f(0.5,0.5,0.5,1.0) });
+
+	FDx11GpuProgram::GpuTextureView textureView;
 	
+	const std::string texPath = GLOBAL_PATH+"Model\\JZ14.jpg";
+		
+	HR(D3DX11CreateShaderResourceViewFromFile(m_pDevice.GetDevice(), ConvertUtf(texPath).c_str(), NULL, NULL, textureView.GetAddressOf(), NULL));
+
+	ComPtr<ID3D11SamplerState> SSLinearWrap = nullptr;
+	D3D11_SAMPLER_DESC sampDesc;
+	ZeroMemory(&sampDesc, sizeof(sampDesc));
+
+	// 线性过滤模式
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampDesc.MinLOD = 0;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	HR(m_pDevice.GetDevice()->CreateSamplerState(&sampDesc, SSLinearWrap.GetAddressOf()));
+
+	forwardPass->GetGpuProgram()->AddConstantBuffer(frameCBO);
+	forwardPass->GetGpuProgram()->AddConstantBuffer(resizeCBO);
+	forwardPass->GetGpuProgram()->AddConstantBuffer(lightCBO);
+	forwardPass->GetGpuProgram()->AddConstantBuffer(materialCBO);
+	forwardPass->GetGpuProgram()->AddTextureResource(textureView);
+	forwardPass->GetGpuProgram()->AddSamplerResource(SSLinearWrap);
+
 }
+
+
+
+
+bool FDx11App::InitGameObject()
+{
+	mainCamera = new FCamera(Frustum(), "MainCamera");
+	mainCamera->lookAt<float>(Vec3f(-4.0f, 0.0f, 0.0f), Vec3f(0.0, 0.0, 0.0), Vec3f(0.0, 1.0, 0.0));
+	
+	flyController = new FlyCameraController(mainCamera);
+
+	Ptr<FGeometry> boxGeom = ShapeGeometryBuilder::instance().BuildBox(FBox(Vec3f(1.0,1.0,1.0)));
+	triangleMesh = new FDx11Mesh(boxGeom.get(), m_pDevice);
+	FNode* mesh = triangleMesh.get();
+	// ()是真正执行才能确定的参数  []是只后要处理的对象 
+	triangleMesh->SetUpdateCallback([mesh](float dt) {
+		static float theta = 0.0f;
+		theta += 0.01f * dt;
+		mesh->rotate(theta, 0.0f, 1.0f, 0.0f);
+
+		});
+
+	return true;
+}
+
 void FDx11App::DrawScene()
 {
-
-	//UINT stride = sizeof(VertexPosColor);	// 跨越字节数
-	//UINT offset = 0;						// 起始偏移量
 	static float black[4] = { 0.0f, 0.0f, 0.0f, 1.0f };	// RGBA = (0,0,0,255)
-	//m_pd3dDevice
 	m_pDevice.deviceContext->ClearRenderTargetView(m_pRenderTargetView.Get(), black);
 	m_pDevice.deviceContext->ClearDepthStencilView(m_pDepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	ExecuteMainPass(forwardPass.get());
 
-
-	//m_pDevice.deviceContext->IASetVertexBuffers(0, 1, m_pVertexBuffer.GetAddressOf(), &stride, &offset);
-	//m_pDevice.deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	//m_pDevice.deviceContext->IASetInputLayout(m_pVertexLayout.Get());
-	//m_pDevice.deviceContext->Draw(3, 0);
 	triangleMesh->Draw();
 
 	HR(m_pSwapChain->Present(0, 0));
-}
-
-bool FDx11App::InitResource()
-{
-	InitMainCamera();
-	Ptr<FGeometry> boxGeom = ShapeGeometryBuilder::instance().BuildBox(FBox(Vec3f(1.0,1.0,1.0)));
-	triangleMesh = new FDx11Mesh(boxGeom.get(), m_pDevice);
-
-
-	return true;
 }

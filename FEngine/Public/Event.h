@@ -1,7 +1,7 @@
 #pragma once
 #include"Reference.h"
 
-enum class KeySymbol : uint16_t
+enum KeySymbol : uint16_t
 {
     KEY_Undefined = 0x0,
 

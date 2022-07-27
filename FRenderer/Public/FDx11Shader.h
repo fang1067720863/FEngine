@@ -30,22 +30,29 @@ const D3D11_INPUT_ELEMENT_DESC PNT_InputElement[3] = {
 
 class FDx11GpuProgram:public FReference {
 public:
+	typedef Ptr<ConstantBufferObject> ConstantBufferObjectPtr;
+	typedef std::vector<ConstantBufferObjectPtr> CboArray;
+	typedef ComPtr <ID3D11ShaderResourceView> GpuTextureView;
+	typedef std::vector <GpuTextureView> GpuTextureViewArray;
+	typedef ComPtr <ID3D11SamplerState> GpuSamplerView;
+	typedef std::vector <GpuSamplerView> GpuSamplerViewArray;
 
 	FDx11GpuProgram(const FDx11Device& _device) :device(_device) { Init(); }
 	ComPtr<ID3D11InputLayout> inputLayout;
 	bool Init()
 	{
 
-		std::wstring shaderFile = ConvertUtf(std::string("Shader\\DefaultVertex.hlsl"));
-		//std::string shaderPath;
-		if (FileExists(shaderFile.c_str()))
-		{
-			shaderPath = "Shader\\";
-			std::cout << "shaderexist";
-		}
-		else {
-			shaderPath = "D://GitProject//FEngine//FRenderer//Shader//";
-		}
+		//std::wstring shaderFile = ConvertUtf(std::string("Shader\\DefaultVertex.hlsl"));
+		////std::string shaderPath;
+		//if (FileExists(shaderFile.c_str()))
+		//{
+		//	shaderPath = "Shader\\";
+		//	std::cout << "shaderexist";
+		//}
+		//else {
+		//	shaderPath = "D://GitProject//FEngine//FRenderer//Shader//";
+		//}
+		std::string shaderPath = GLOBAL_PATH + "Shader//";
 		vsFileName = "DefaultVertex";
 		psFileName = "DefaultPixel";
 		const std::string hlslExt = ".hlsl";
@@ -62,6 +69,64 @@ public:
 		return true;
 	}
 
+	bool UseProgram()
+	{
+		device.GetDeviceContext()->VSSetShader(GetVertexShader(), nullptr, 0);
+		device.GetDeviceContext()->PSSetShader(GetPixelShader(), nullptr, 0);
+
+		// 一个slot 只设置一块resource element ,不设置成Array magicNumber = 1
+		// shader resource constant buffer
+		unsigned int num = GetConstantBufferNum();
+		for (unsigned int i = 0; i < num; i++)
+		{
+			ID3D11Buffer* bufferArray[1];
+			ConstantBufferObject* cbo = GetContantBufferObject(i);
+			bufferArray[0] = cbo->GetBufferView();
+
+			UINT slot = i;
+			device.GetDeviceContext()->VSSetConstantBuffers(slot, 1, bufferArray);
+			device.GetDeviceContext()->PSSetConstantBuffers(slot, 1, bufferArray);
+		}
+
+		// shader resource texture
+		num = GetTextureNum();
+		for (unsigned int i = 0; i < num; i++)
+		{
+
+			UINT slot = i;
+			UINT num = 1;
+			device.GetDeviceContext()->PSSetShaderResources(slot, num, GetGpuTextureView(i));
+		}
+
+		// shader resource sampler
+		num = GetSamplerNum();
+		for (unsigned int i = 0; i < num; i++)
+		{
+			UINT slot = i;
+			UINT num = 1;
+			device.GetDeviceContext()->PSSetSamplers(slot, num, GetSamplerView(i));
+		}
+		return true;
+	}
+	
+	bool AddConstantBuffer(ConstantBufferObjectPtr cbo)
+	{
+		mCboList.push_back(cbo);
+		return true;
+	}
+
+	bool AddTextureResource(GpuTextureView texturePtr)
+	{
+		mTextureArrayView.push_back(texturePtr); 
+		return true;
+		//emplace_back std::move(smartPtr) ? 
+	}
+	bool AddSamplerResource(GpuSamplerView samplerPtr)
+	{
+		mSamplerArrayView.push_back(samplerPtr);
+		return true;
+	}
+	
 	ID3DBlob* GetD3DBlob() { return blob.Get(); }
 
 
@@ -88,12 +153,12 @@ public:
 
 	UINT GetConstantBufferNum () const
 	{
-		return mConstantBufferNum;
+		return mCboList.size();
 	}
 
 	UINT GetTextureNum() const
 	{
-		return mTextureNum;
+		return mTextureArrayView.size();
 	}
 
 	ID3D11ShaderResourceView** GetGpuTextureView(unsigned int i)
@@ -103,7 +168,7 @@ public:
 
 	UINT GetSamplerNum() const
 	{
-		return mSamplerNum;
+		return mSamplerArrayView.size();
 	}
 
 	ID3D11SamplerState** GetSamplerView(unsigned int i)
@@ -112,12 +177,6 @@ public:
 	}
 
 protected:
-	typedef Ptr<ConstantBufferObject> ConstantBufferObjectPtr;
-	typedef std::vector<ConstantBufferObjectPtr> CboArray;
-	typedef ComPtr <ID3D11ShaderResourceView> GpuTextureView;
-	typedef std::vector <GpuTextureView> GpuTextureViewArray;
-	typedef ComPtr <ID3D11SamplerState> GpuSamplerView;
-	typedef std::vector <GpuSamplerView> GpuSamplerViewArray;
 
 	// definition
 	ComPtr<ID3D11VertexShader> mVertexShader;
@@ -137,7 +196,6 @@ protected:
 
 	UINT mSamplerNum;
 	GpuSamplerViewArray mSamplerArrayView;
-
 
 	ComPtr<ID3DBlob> blob;
 

@@ -164,19 +164,28 @@ public:
 
 class ConstantBufferObject : public Dx11BufferObject
 {
+	friend class ConstantBufferPool;
+	enum CB_SHADER_STAGE : uint16_t
+	{
+		VS_STAGE = 1 << 0,
+		PS_STAGE = 1 << 1,
+		VS_PS_STAGE = VS_STAGE + PS_STAGE
+	};
 public:
-	ConstantBufferObject(uint32_t byteSize, const FDx11Device& _device):Dx11BufferObject(byteSize, D3D11_BIND_CONSTANT_BUFFER, _device)
+	ConstantBufferObject(uint32_t byteSize,  const FDx11Device& _device,CB_SHADER_STAGE shaderStage = VS_PS_STAGE):Dx11BufferObject(byteSize, D3D11_BIND_CONSTANT_BUFFER, _device), mShaderStage(shaderStage)
 	{
 
 	}
+	CB_SHADER_STAGE mShaderStage;
 };
 
 class ConstantBufferPool 
 {
+	using CBS = ConstantBufferObject::CB_SHADER_STAGE;
 public :
-	Ptr<ConstantBufferObject> CreateConstantBuffer(const std::string name, std::int32_t size, const FDx11Device& _device)
+	Ptr<ConstantBufferObject> CreateConstantBuffer(const std::string name, std::int32_t size, const FDx11Device& _device, CBS cbs= CBS::VS_PS_STAGE)
 	{
-		Ptr<ConstantBufferObject> cbo = new ConstantBufferObject(size, _device);
+		Ptr<ConstantBufferObject> cbo = new ConstantBufferObject(size, _device, cbs);
 		mCBOMap.insert(std::pair < const std::string, Ptr<ConstantBufferObject>>(name, cbo));
 		return cbo;
 	}
