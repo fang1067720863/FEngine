@@ -1,5 +1,5 @@
 #pragma once
-//#include"FDx11Renderer.h"
+
 #include"FDx11RenderTarget.h"
 
 #include"FDx11Mesh.h"
@@ -10,6 +10,7 @@
 #include"EventHandler.h"
 #include"d3dApp.h"
 #include"UtfConverter.h"
+#include"Group.h"
 
 struct CBChangesEveryFrame
 {
@@ -30,14 +31,11 @@ struct Light
 	Vec4f specular;
 	Vec4f direction;
 };
-struct Material
-{
-	Vec4f Ambient;
-	Vec4f Diffuse;
-	Vec4f Specular;
-	Vec4f Reflect;
-};
 
+
+
+
+class GLTFModel;
 class FDx11App : public D3DApp
 {
 public:
@@ -85,7 +83,11 @@ public:
 
 private:
 	Ptr<FDx11Mesh> boxMesh;
-	Ptr<FDx11Mesh> triangleMesh;
+	Ptr<FGroup> sceneGroup;
 	Ptr<FCamera> mainCamera;
+
+	std::shared_ptr<GLTFModel> gltfModel;
+
+	//std::shared_ptr<GLTFModel> gltfModel;
 
 };

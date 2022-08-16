@@ -4,6 +4,7 @@
 #include"ShaderParameter.h"
 #include"Geometry.h"
 #include"UtfConverter.h"
+#include"GltfReader.h"
 
 class Apple:public FReference {
 
@@ -30,11 +31,9 @@ void TestPtr()
 }
 void TestUtf()
 {
-	/*std::wstring wstr;
-	convert_utf(std::string("fdsa"), wstr);
-	std::string str;
-	convert_utf( wstr,str);
-	std::cout <<str;*/
+	GltfReader reader;
+	std::shared_ptr<GLTFModel> gltfModel;
+	reader.loadAssets("D:\\GitProject\\FEngine\\Assets\\PbrBox\\BoomBox.gltf", *gltfModel.get());
 }
 int main()
 {

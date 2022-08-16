@@ -10,7 +10,7 @@ extern void ConvertUtf(const std::wstring& src, std::string& utf8);
 
 
 extern bool FileExists(const wchar_t* path);
-static std::string GLOBAL_PATH;
+static std::string GLOBAL_PATH = "D://GitProject//FEngine//FRenderer//";
 extern bool FindGlobalPath();
 class File
 {

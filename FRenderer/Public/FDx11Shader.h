@@ -27,6 +27,13 @@ const D3D11_INPUT_ELEMENT_DESC PNT_InputElement[3] = {
 	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 };
 
+const D3D11_INPUT_ELEMENT_DESC vertexDesc_disjoint[3] =
+{
+  {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,      0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+  {"COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT,   1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+  {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,         2, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+};
+
 
 class FDx11GpuProgram:public FReference {
 public:
@@ -41,29 +48,18 @@ public:
 	ComPtr<ID3D11InputLayout> inputLayout;
 	bool Init()
 	{
-
-		//std::wstring shaderFile = ConvertUtf(std::string("Shader\\DefaultVertex.hlsl"));
-		////std::string shaderPath;
-		//if (FileExists(shaderFile.c_str()))
-		//{
-		//	shaderPath = "Shader\\";
-		//	std::cout << "shaderexist";
-		//}
-		//else {
-		//	shaderPath = "D://GitProject//FEngine//FRenderer//Shader//";
-		//}
 		std::string shaderPath = GLOBAL_PATH + "Shader//";
 		vsFileName = "DefaultVertex";
 		psFileName = "DefaultPixel";
 		const std::string hlslExt = ".hlsl";
 		const std::string csoExt = ".cso";
 
-		
 		//Triangle_VS
 		HR(CreateShaderFromFile(ConvertUtf(shaderPath + vsFileName + csoExt).c_str(), ConvertUtf(shaderPath + vsFileName + hlslExt).c_str(), "VS", "vs_5_0", blob.ReleaseAndGetAddressOf()));
 		HR(device.GetDevice()->CreateVertexShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, mVertexShader.GetAddressOf()));
 		// 创建顶点布局
 		HR(device.GetDevice()->CreateInputLayout(PNT_InputElement, ARRAYSIZE(PNT_InputElement), blob->GetBufferPointer(), blob->GetBufferSize(), inputLayout.GetAddressOf()));
+		//HR(device.GetDevice()->CreateInputLayout(PNT_InputElement, ARRAYSIZE(PNT_InputElement), blob->GetBufferPointer(), blob->GetBufferSize(), inputLayout.GetAddressOf()));
 		HR(CreateShaderFromFile(ConvertUtf(shaderPath + psFileName + csoExt).c_str(), ConvertUtf(shaderPath + psFileName + hlslExt).c_str(), "PS", "ps_5_0", blob.ReleaseAndGetAddressOf()));
 		HR(device.GetDevice()->CreatePixelShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, mPixelShader.GetAddressOf()));
 		return true;

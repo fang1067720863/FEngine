@@ -6,7 +6,7 @@
 #include<d3d11.h>
 #include<string>
 #include<string_view>
-using namespace std;
+
 
 
 HRESULT CreateShaderFromFile(

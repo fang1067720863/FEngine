@@ -1,10 +1,14 @@
 #pragma once
+
+#include<vector>
 typedef struct VBufferDescriptor
 {
 	uint32_t registerSlot = 0;
 	uint32_t numBuffers = 1;
 	uint32_t stride = 0;             //cellSize
 	uint32_t offset = 0;
+	std::vector<uint32_t> strides;
+	std::vector<uint32_t> offsets;
 	uint32_t count = 0;
 	uint32_t startVertexLocation = 0;
 }VBufferDescriptor;

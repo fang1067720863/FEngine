@@ -36,6 +36,10 @@ public:
     constexpr explicit Quat(const Quat<R>& v) :
         value{ static_cast<T>(v.x), static_cast<T>(v.y), static_cast<T>(v.z), static_cast<T>(v.w) } {}
 
+    template<typename R>
+    constexpr  Quat(R x, R y, R z, R w) :
+        value{ static_cast<T>(x), static_cast<T>(y), static_cast<T>(z), static_cast<T>(w) } {}
+
     constexpr Quat& operator=(const Quat&) = default;
 
     constexpr std::size_t size() const { return 4; }

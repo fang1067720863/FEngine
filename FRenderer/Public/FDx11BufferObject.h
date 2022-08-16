@@ -3,8 +3,8 @@
 #include<string>
 #include"Buffer.h"
 #include"FDx11.h"
-
-//IASetVertexBuffers
+#include<D3DX11tex.h>
+#include"UtfConverter.h"
 
 
 
@@ -126,7 +126,7 @@ public:
 	   
 	}
 
-	VertexBufferObject(uint32_t byteSize, void* data, const FDx11Device& _device,  uint32_t stride, uint32_t vertexNum, uint32_t componentNum = 1) :
+	VertexBufferObject( uint32_t byteSize, void* data, const FDx11Device& _device,  uint32_t stride, uint32_t vertexNum, uint32_t componentNum = 1) :
 		Dx11BufferObject(byteSize, data, D3D11_BIND_VERTEX_BUFFER, _device)
 	{
 		descriptor.numBuffers = componentNum;
@@ -139,6 +139,60 @@ public:
 
 	VBufferDescriptor descriptor;
 
+};
+
+struct VertexAttribute
+{
+	uint32_t byteSize{ 0 };
+	uint32_t stride{ 0 };
+	void* data{ nullptr };
+};
+
+struct VextexData
+{
+	std::vector<VertexAttribute> _attributes;
+	uint32_t componentNum;
+	uint32_t vertexNum; 
+};
+class DisJointVertexBufferObject :public FReference
+{
+public:
+	DisJointVertexBufferObject(const VextexData& vData, const FDx11Device& _device):device(_device)
+	{
+		size_t num = vData.componentNum;
+		mVbos.resize(num);
+		descriptor.strides.resize(num);
+		descriptor.offsets.resize(num);
+
+		uint32_t offset = 0;
+		for (uint32_t i = 0; i < num; i++)
+		{
+			const VertexAttribute& attr = vData._attributes[i];
+			Ptr<VertexBufferObject> vbo=new VertexBufferObject(attr.byteSize, attr.data, _device, attr.stride,vData.vertexNum);
+			mVbos.push_back(vbo);   // ???
+			descriptor.strides.push_back(attr.stride);
+			descriptor.offsets.push_back(offset);
+			offset += attr.stride;      
+		}
+
+	}
+
+	std::vector<Ptr<VertexBufferObject>> mVbos;
+	const FDx11Device& device;
+	VBufferDescriptor descriptor;
+
+	ID3D11Buffer** GetBufferViewAddress() { 
+		std::vector<ID3D11Buffer*> buffers(mVbos.size());
+		for (int i = 0; i < mVbos.size(); i++)
+		{
+			buffers.push_back(mVbos[i]->GetBufferView());
+		}
+		return buffers.data();
+		
+	}
+	ID3D11Buffer* GetBufferView(uint32_t i) { return mVbos[i]->GetBufferView(); }
+	/*std::vector<uint32_t> strides;
+	std::vector<uint32_t> offsets;*/
 };
 
 class IndexBufferObject : public Dx11BufferObject
@@ -172,26 +226,28 @@ class ConstantBufferObject : public Dx11BufferObject
 		VS_PS_STAGE = VS_STAGE + PS_STAGE
 	};
 public:
-	ConstantBufferObject(uint32_t byteSize,  const FDx11Device& _device,CB_SHADER_STAGE shaderStage = VS_PS_STAGE):Dx11BufferObject(byteSize, D3D11_BIND_CONSTANT_BUFFER, _device), mShaderStage(shaderStage)
+	ConstantBufferObject(uint32_t byteSize,  const FDx11Device& _device, const std::string& slot):Dx11BufferObject(byteSize, D3D11_BIND_CONSTANT_BUFFER, _device), bufferSlot(slot)
 	{
 
 	}
-	CB_SHADER_STAGE mShaderStage;
+	//CB_SHADER_STAGE mShaderStage;
+	std::string bufferSlot;
+	const std::string& GetBufferSlot() const { return bufferSlot; }
 };
 
 class ConstantBufferPool 
 {
 	using CBS = ConstantBufferObject::CB_SHADER_STAGE;
 public :
-	Ptr<ConstantBufferObject> CreateConstantBuffer(const std::string name, std::int32_t size, const FDx11Device& _device, CBS cbs= CBS::VS_PS_STAGE)
+	Ptr<ConstantBufferObject> CreateConstantBuffer(const std::string& name, std::int32_t size, const FDx11Device& _device)
 	{
-		Ptr<ConstantBufferObject> cbo = new ConstantBufferObject(size, _device, cbs);
+		Ptr<ConstantBufferObject> cbo = new ConstantBufferObject(size, _device, name);
 		mCBOMap.insert(std::pair < const std::string, Ptr<ConstantBufferObject>>(name, cbo));
 		return cbo;
 	}
-	Ptr<ConstantBufferObject> GetConstantBuffer(const std::string& name)
+	Ptr<ConstantBufferObject> GetConstantBuffer(const std::string& bufferSlot)
 	{
-		return mCBOMap.at(name);
+		return mCBOMap.at(bufferSlot);
 	}
 	static ConstantBufferPool& GetInstance()
 	{
@@ -204,4 +260,121 @@ private:
 	ConstantBufferPool() = default;
 	~ConstantBufferPool() = default;
 
+};
+
+static int32_t TEXTURE_GLOBAL_SLOT = 0;
+class ShaderResoucePool
+{
+	
+public:
+	typedef int32_t TextureSlot ;
+	typedef ComPtr <ID3D11ShaderResourceView> ResouceViewPtr;
+	typedef std::unordered_map<TextureSlot, ResouceViewPtr> ResouceMap;
+	
+
+	TextureSlot CreateTextureView(const std::wstring& fileName, const FDx11Device& _device)
+	{
+		ResouceViewPtr textureView;
+		HR(D3DX11CreateShaderResourceViewFromFile(_device.GetDevice(), fileName.c_str(), NULL, NULL, textureView.GetAddressOf(), NULL));
+		TEXTURE_GLOBAL_SLOT++;
+		resourceMap.insert(std::pair <TextureSlot, ResouceViewPtr>(TEXTURE_GLOBAL_SLOT, textureView));
+		return TEXTURE_GLOBAL_SLOT;
+	}
+
+	TextureSlot CreateTextureView(const std::string& fileName, const FDx11Device& _device)
+	{
+		return CreateTextureView(ConvertUtf(fileName), _device);
+	}
+	static ShaderResoucePool& Instance()
+	{
+		static ShaderResoucePool instance;
+		return instance;
+	}
+	ResouceViewPtr GetTextureView(TextureSlot slot)
+	{
+		return resourceMap.at(slot);
+	}
+public:
+
+	ShaderResoucePool() = default;
+	
+	ResouceMap resourceMap;
+};
+
+
+class SamplerResoucePool
+{
+
+public:
+	enum class SamplerType: uint16_t
+	{
+		SSLinearWrap,			            // 线性过滤
+	    SSAnistropicWrap		                // 各项异性过滤
+	};
+	typedef SamplerType SamplerSlot;
+	typedef ComPtr <ID3D11SamplerState> ResouceViewPtr;
+	typedef std::unordered_map<SamplerSlot, ResouceViewPtr> ResouceMap;
+
+	ResouceViewPtr FindorCreateTextureView(SamplerSlot slot, const FDx11Device& _device)
+	{
+		if (resourceMap.find(slot) != resourceMap.end())
+		{
+			return resourceMap.at(slot);
+		}
+	
+		if (slot == SamplerSlot::SSLinearWrap)
+		{
+			ResouceViewPtr samplerLinearWrap;
+
+			//ComPtr<ID3D11SamplerState> SSLinearWrap = nullptr;
+			D3D11_SAMPLER_DESC sampDesc;
+			ZeroMemory(&sampDesc, sizeof(sampDesc));
+
+			// 线性过滤模式
+			sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+			sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+			sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+			sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+			sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+			sampDesc.MinLOD = 0;
+			sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+			HR(_device.GetDevice()->CreateSamplerState(&sampDesc, samplerLinearWrap.GetAddressOf()));
+			resourceMap.insert(std::pair <SamplerSlot, ResouceViewPtr>(SamplerType::SSLinearWrap, samplerLinearWrap));
+		}
+		else
+		{
+			ResouceViewPtr samplerAnistropicWrap;
+			D3D11_SAMPLER_DESC sampDesc;
+			// 各向异性过滤模式
+			sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+			sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+			sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+			sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+			sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+			sampDesc.MaxAnisotropy = 4;
+			sampDesc.MinLOD = 0;
+			sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+			HR(_device.GetDevice()->CreateSamplerState(&sampDesc, samplerAnistropicWrap.GetAddressOf()));
+			resourceMap.insert(std::pair <SamplerSlot, ResouceViewPtr>(SamplerType::SSAnistropicWrap, samplerAnistropicWrap));
+		}
+		return GetSamplerState(slot);
+	
+	}
+	static SamplerResoucePool& Instance()
+	{
+		static SamplerResoucePool instance;
+		return instance;
+	}
+	ResouceViewPtr GetSamplerState(SamplerSlot slot)
+	{
+		return resourceMap.at(slot);
+	}
+public:
+
+	SamplerResoucePool()
+	{
+	
+	}
+
+	ResouceMap resourceMap;
 };

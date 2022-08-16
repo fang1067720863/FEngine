@@ -1,6 +1,7 @@
 #pragma once
 
 #include"FMath.h"
+#include<vector>
 template<class T>
 class Vec2
 {
@@ -197,6 +198,10 @@ public:
         _v[1] = v2[1];
         _v[2] = zz;
     }
+    template<typename R>
+    constexpr Vec3(R x, R y, R z) :
+        _v{ static_cast<T>(x), static_cast<T>(y), static_cast<T>(z) } {}
+
     T* data() { return _v; }
     const T* data() const { return _v; }
 
@@ -425,6 +430,8 @@ public:
         _v[2] = z;
         _v[3] = w;
     }
+    template<typename R>
+    Vec4(const std::vector<R>& v):_v{ static_cast<T>(v[0]), static_cast<T>(v[1]), static_cast<T>(v[2]), static_cast<T>(v[3]) } {}
 
     Vec4(const Vec3<T>& v3, scalar_type w)
     {
@@ -433,6 +440,24 @@ public:
         _v[2] = v3[2];
         _v[3] = w;
     }
+
+    template<typename R>
+    constexpr explicit Vec4(const Vec4<R>& v) :
+        _v{ static_cast<T>(v[0]), static_cast<T>(v[1]), static_cast<T>(v[2]), static_cast<T>(v[3]) } {}
+
+    template<typename R>
+    constexpr Vec4(R x, R y, R z, R w) :
+        _v{ static_cast<T>(x), static_cast<T>(y), static_cast<T>(z), static_cast<T>(w) } {}
+   
+    //template<typename R>
+    //inline bool operator = (const std::vector<R>& v) const {
+    //    assert(v.size() == 4);
+    //    _v[0] = v[0];
+    //    _v[1] = v[1];
+    //    _v[2] = v[2];
+    //    _v[3] = v[3];
+    //}
+
     T* data() { return _v; }
     const T* data() const { return _v; }
     inline bool operator == (const Vec4& v) const { return _v[0] == v._v[0] && _v[1] == v._v[1] && _v[2] == v._v[2] && _v[3] == v._v[3]; }

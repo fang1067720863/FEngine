@@ -6,10 +6,16 @@
 #include<string>
 #include<functional>
 
+#define PROPERTY(T,var) public: \
+inline void Set##var(const T& _var){m##var=_var;}\
+T Get##var() const{return m##var;}\
+private: T m##var;
+
 class FNode:public FObject
 {
 	using NodeUpdateCallback = std::function<void(float dt)>;
 public:
+	
 	FNode() :mName("")
 	{
 
@@ -18,22 +24,17 @@ public:
 	{
 
 	}
-	inline void const SetName(const std::string& name) { mName = name; }    //…Ë÷√√˚≥∆
-	inline const Vec3f GetLocalPosition() const { return mPosition; }
-	inline const Vec3f GetLocalScale() const { return mScale; }
 	inline const Mat4 GetWorldTransform() const { return mWorldTransform; }
-	inline void rotate(float angle_radians, float x, float y, float z) {
+
+	inline void SetRotate(float angle_radians, float x, float y, float z) {
 		mWorldTransform.rotate(angle_radians, x, y, z);
 	}
 
-	void SetLocalPosition(const Vec3f& pos) { mPosition = pos; dirty = true; }
-	void SetLocalScale(const Vec3f& scale) { dirty = true; }
-	//void SetLocalRotation(const Vec3f& euler) { mRotation = Quatf(); dirty = true;}
 	void Update(float dt)
 	{
 		if (dirty)
 		{
-
+			mLocalTransform = translate(mPosition) * rotate(mRotation) * scale(mScale);
 		}
 		if (updateCB)
 		{
@@ -41,16 +42,23 @@ public:
 		}
 	}
 
+	virtual void Draw()
+	{
+
+	}
+
 	void SetUpdateCallback(NodeUpdateCallback cb) { updateCB = cb; }
 
 private:
-	Mat4 mLocalTransform;
-	Mat4 mWorldTransform;
-	Vec3f mPosition;
-	Vec3f mScale;
-	Quatf mRotation;
-	bool dirty;
-	std::string mName;
+
+	PROPERTY(std::string, Name)
+	PROPERTY(Mat4, LocalTransform)
+	PROPERTY(Vec3f, Position)
+	PROPERTY(Vec3f, Scale)
+	PROPERTY(Quatf, Rotation)
+
+	Mat4  mWorldTransform;
+	bool  dirty{ true };
 	NodeUpdateCallback updateCB;
 };
 

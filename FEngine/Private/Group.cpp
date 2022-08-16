@@ -13,9 +13,10 @@ unsigned int FGroup::GetNodeNum() const
 	return 0;
 }
 
-unsigned int FGroup::AddChild(FNode* pChild)
+size_t FGroup::AddChild(const Ptr<FNode>& pChild)
 {
-	return 0;
+	m_pChildren.push_back(pChild);
+	return m_pChildren.size()-1;
 }
 
 unsigned int FGroup::DeleteChild(FNode* pChild)
@@ -30,6 +31,17 @@ bool FGroup::DeleteChild(unsigned int i)
 
 FNode* FGroup::GetChild(unsigned int i) const
 {
+	return nullptr;
+}
+FNode* FGroup::GetChild(const std::string& name)const
+{
+	for (auto& child : m_pChildren)
+	{
+		if (child->GetName() == name)
+		{
+			return child.get();
+		}
+	}
 	return nullptr;
 }
 

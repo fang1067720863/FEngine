@@ -47,5 +47,9 @@
     <ClInclude Include="Public\FDx11RenderState.h" />
     <ClInclude Include="Public\FDx11App.h" />
     <ClInclude Include="Public\d3dApp.h" />
+    <ClInclude Include="Public\FDx11Driver.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shader\Pbr.hlsli" />
   </ItemGroup>
 </Project>

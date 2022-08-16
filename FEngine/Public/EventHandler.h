@@ -21,12 +21,12 @@ public:
 		case KeySymbol::KEY_w :
 			_camera->Walk(0.1);
 			break;
-		case KeySymbol::KEY_A:
-		case KeySymbol::KEY_a:
-			_camera->Walk(-0.1);
-			break;
 		case KeySymbol::KEY_S:
 		case KeySymbol::KEY_s:
+			_camera->Walk(-0.1);
+			break;
+		case KeySymbol::KEY_A:
+		case KeySymbol::KEY_a:
 			_camera->Strafe(-0.1);
 			break;
 		case KeySymbol::KEY_D:

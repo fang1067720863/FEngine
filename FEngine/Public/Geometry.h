@@ -1,7 +1,7 @@
 #pragma once
 
 #include"VecArray.h"
-#include"Ptr.h"
+#include"Node.h"
 #include"CommonType.h"
 
 class FShape:public FReference
@@ -19,10 +19,24 @@ public:
 	float mHalfLength;
 	float mHalfHeight;
 };
-class FGeometry: public FReference
+
+struct PbrMaterialMetalRoughness
+{
+	Vec4f baseColorFactor{ 1.0f, 1.0f, 1.0f, 1.0f };
+	Vec4f emissiveFactor{ 0.0f, 0.0f, 0.0f, 1.0f };
+	Vec4f diffuseFactor{ 1.0f, 1.0f, 1.0f, 1.0f };
+	Vec4f specularFactor{ 0.0f, 0.0f, 0.0f, 1.0f };
+	float metallicFactor{ 1.0f };
+	float roughnessFactor{ 1.0f };
+	float alphaMask{ 1.0f };
+	float alphaMaskCutoff{ 0.5f };
+};
+
+class FGeometry: public FNode
 {
 public:
 	FGeometry() = default;
+	FGeometry(const std::string& name) :FNode(name) {}
 	~FGeometry()
 	{
 		if (mCompiledVertices)
@@ -71,7 +85,7 @@ public:
 	{
 		return _positions->getNumElements();
 	}
-
+	void SetMaterialSlot(uint32_t slot) { materialSlot = slot; }
 	//hack
 	bool Compile()
 	{
@@ -86,13 +100,13 @@ public:
 		mVertexStride = stride;
 		unsigned char* posT = (unsigned char*)(_positions->data()->data());
 		unsigned char* norT = (unsigned char*)(_normals->data()->data());
-		unsigned char* tex0T = (unsigned char*)(_texcoords->data()->data());
-		//unsigned int tt = 1.0;
-		//unsigned char* test = (unsigned char*)(&tt);
-		
+		unsigned char* tex0T = (unsigned char*)(_texcoords->data()->data());		
 		
 		mCompiledVertices = new unsigned char[vertexNum * stride];
-		
+		if (!mCompiledVertices)
+		{
+			int a = 1;
+		}
 		for (auto i = 0; i < vertexNum; i++) {
 			memcpy(mCompiledVertices + i * stride, posT + 12 * i, 12);
 			memcpy(mCompiledVertices + i * stride +12, norT + 12 * i, 12);
@@ -109,17 +123,8 @@ public:
 		const uint32_t vertexNum = _positions->getNumElements();
 		const uint32_t stride = 4 * 3;
 		mVertexStride = stride;
-		/*unsigned char* posT = (unsigned char*)(_positions->data()->data());
-		unsigned char* norT = (unsigned char*)(_normals->data()->data());
-		unsigned char* tex0T = (unsigned char*)(_texcoords->data()->data());*/
-
 		mCompiledVertices = new unsigned char[vertexNum * stride];
 		memcpy(mCompiledVertices, _positions->data()->data(), vertexNum * stride);
-	/*	for (auto i = 0; i < vertexNum; i++) {
-			memcpy(mCompiledVertices + i * stride, posT + 12 * i, 12);
-			memcpy(mCompiledVertices + i * stride + 12, norT + 12 * i, 12);
-			memcpy(mCompiledVertices + i * stride + 20, tex0T + 8 * i, 8);
-		}*/
 		return true;
 	}
 
@@ -133,12 +138,54 @@ public:
 
 	void* GetCompiledIndexData() { return static_cast<void*>(_indices->data()); }
 	unsigned int GetCompiledIndexDataSize() { return (_indices->getNumElements())*4; }
+
+	bool CreateRenderableMesh(){
+	
+		//_mesh = engine->GetRHIDriver()->CreateMesh(*this);
+	}
+
+	const PbrMaterialMetalRoughness& const GetMaterial()
+	{
+		return *pbrMeterial.get();
+	}
+	struct MaterialMap
+	{
+		struct Map
+		{
+			std::string uri;
+
+		};
+		Map baseColorMap;
+		Map metalRoughnessMap;
+		Map aoMap;
+		Map normalMap;
+		Map emissiveMap;
+	};
+	shared_ptr <MaterialMap>  GetMaterialMap()
+	{
+		return pbrMeterialMap;
+	}
+	//mGeomtry->MaterialMap.baseColorMap.uri
+
 protected:
 	Ptr<Vec3fArray> _positions;
 	Ptr<Vec3fArray> _normals;
 	Ptr<Vec2fArray> _texcoords;
 	Ptr<IndexArray> _indices;
 
+	//struct RenderableMesh : FReference
+	//{
+	//	virtual void Draw() {}
+	//};
+	//Ptr<RenderableMesh> _mesh;
+
+	//void Draw()
+	//{
+	//	_mesh->Draw();
+	//}
+
+	shared_ptr<PbrMaterialMetalRoughness> pbrMeterial; 
+	shared_ptr <MaterialMap> pbrMeterialMap;
 	enum IndexType {
 		Triange,
 		Quad
@@ -148,6 +195,7 @@ protected:
 	bool mCompiled = false;
 	unsigned int mVertexStride = 0;
 	unsigned char* mCompiledVertices = nullptr;
+	uint32_t materialSlot = 0;
 };
 
 class ShapeGeometryBuilder
@@ -339,9 +387,9 @@ public:
 	 }
 	 void buildTriangle()
 	 {
-		 Vertex3f(0.5, 0.5, 0.5);
-		 Vertex3f(0.8, 0.5, 0.5);
-		 Vertex3f(0.5, -0.5, 0.5);
+		 Vertex3f(0.5f, 0.5f, 0.5f);
+		 Vertex3f(0.8f, 0.5f, 0.5f);
+		 Vertex3f(0.5f, -0.5f, 0.5f);
 	 }
 
 	 void End()
@@ -415,5 +463,5 @@ protected:
     Ptr<IndexArray> _indices;
 	
 	
-
+	
 };

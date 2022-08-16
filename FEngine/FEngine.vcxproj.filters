@@ -4,47 +4,59 @@
     <Filter Include="EventSystem">
       <UniqueIdentifier>{737b7dd8-9c7a-4b18-bd76-dcff03bffcc8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="RPI">
-      <UniqueIdentifier>{0bda4777-bda3-44c4-8628-785f2ad0bd22}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="GraphicsWindow">
-      <UniqueIdentifier>{1e19138c-d022-4ca7-80cb-618dbc3ea191}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Scene">
       <UniqueIdentifier>{68e78f95-faa5-49b5-8ae6-0f6d1a2de9c0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Infras">
       <UniqueIdentifier>{e76d452c-35fa-455b-a629-0c4ec7e4a11a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Renderer">
-      <UniqueIdentifier>{eba93bc8-76fe-4dda-9de6-19eeaa984ea2}</UniqueIdentifier>
+    <Filter Include="Math">
+      <UniqueIdentifier>{24b1fd91-dcbf-4d95-8255-9afe2f1c5748}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="deprecate">
+      <UniqueIdentifier>{9427a449-1eb6-4fe0-bb41-16507ddda251}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FileUtil">
+      <UniqueIdentifier>{96bd3b79-10a6-449c-aecf-e66502554e3e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics">
+      <UniqueIdentifier>{1e19138c-d022-4ca7-80cb-618dbc3ea191}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Core.cpp">
-      <Filter>GraphicsWindow</Filter>
+      <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Private\View.cpp">
-      <Filter>GraphicsWindow</Filter>
+      <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Private\test.cpp" />
-    <ClCompile Include="Private\Geometry.cpp" />
-    <ClCompile Include="Private\Camera.cpp" />
-    <ClCompile Include="Private\UtfConverter.cpp" />
-    <ClCompile Include="Private\Event.cpp" />
+    <ClCompile Include="Private\UtfConverter.cpp">
+      <Filter>FileUtil</Filter>
+    </ClCompile>
+    <ClCompile Include="Private\Geometry.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Private\Camera.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Private\Event.cpp">
+      <Filter>EventSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Private\Group.cpp" />
+    <ClCompile Include="Private\Node.cpp" />
+    <ClCompile Include="Private\Scene.cpp" />
+    <ClCompile Include="Private\GltfReader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Public\Core.h">
-      <Filter>GraphicsWindow</Filter>
+      <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Public\GraphicViewWin32.h">
-      <Filter>GraphicsWindow</Filter>
-    </ClInclude>
-    <ClInclude Include="Public\Image.h">
-      <Filter>RPI</Filter>
+      <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Public\View.h">
-      <Filter>GraphicsWindow</Filter>
+      <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Public\Event.h">
       <Filter>EventSystem</Filter>
@@ -61,39 +73,54 @@
     <ClInclude Include="Public\Handle.h">
       <Filter>Infras</Filter>
     </ClInclude>
-    <ClInclude Include="Public\Material.h">
-      <Filter>RPI</Filter>
-    </ClInclude>
-    <ClInclude Include="Public\Shader.h">
-      <Filter>RPI</Filter>
-    </ClInclude>
-    <ClInclude Include="Public\ShaderInput.h">
-      <Filter>RPI</Filter>
-    </ClInclude>
-    <ClInclude Include="Public\ShaderResource.h">
-      <Filter>RPI</Filter>
-    </ClInclude>
     <ClInclude Include="Public\Reference.h">
       <Filter>Infras</Filter>
     </ClInclude>
-    <ClInclude Include="Model.h">
-      <Filter>RPI</Filter>
+    <ClInclude Include="Public\Quat.h">
+      <Filter>Math</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>RPI</Filter>
+    <ClInclude Include="Public\FMath.h">
+      <Filter>Math</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer.h">
-      <Filter>Renderer</Filter>
+    <ClInclude Include="Public\Matrix.h">
+      <Filter>Math</Filter>
     </ClInclude>
-    <ClInclude Include="Public\Texture.h" />
-    <ClInclude Include="Public\ShaderParameter.h" />
-    <ClInclude Include="Public\BufferDescription.h" />
-    <ClInclude Include="Public\Light.h" />
-    <ClInclude Include="Public\Vec.h" />
-    <ClInclude Include="Public\FMath.h" />
-    <ClInclude Include="Public\VecArray.h" />
-    <ClInclude Include="Public\Matrix.h" />
-    <ClInclude Include="Public\Quat.h" />
-    <ClInclude Include="Public\UtfConverter.h" />
+    <ClInclude Include="Public\Vec.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\VecArray.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\ShaderParameter.h">
+      <Filter>deprecate</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Light.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\UtfConverter.h">
+      <Filter>FileUtil</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Texture.h">
+      <Filter>deprecate</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\BufferDescription.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Image.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Material.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Shader.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\ShaderInput.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\ShaderResource.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\GltfReader.h" />
   </ItemGroup>
 </Project>

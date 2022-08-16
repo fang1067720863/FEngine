@@ -78,7 +78,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\FInfras\Public;..\FEventSystem\Public;..\ThirdParty\googleTest\include;$(IncludePath)</IncludePath>
+    <IncludePath>..\FInfras\Public;..\FEventSystem\Public;..\ThirdParty\googleTest\include;..\ThirdParty\tinygltf;$(IncludePath)</IncludePath>
     <LibraryPath>..\ThirdParty\googleTest\lib\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -119,6 +119,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\FInfras\Public;..\FEventSystem\Public;..\FEngine\Public;..\ThirdParty\googleTest\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -143,13 +144,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Mesh.h" />
-    <ClInclude Include="Model.h" />
     <ClInclude Include="Public\BufferDescription.h" />
     <ClInclude Include="Public\CameraManipulator.h" />
     <ClInclude Include="Public\Event.h" />
     <ClInclude Include="Public\EventHandler.h" />
     <ClInclude Include="Public\EventQueue.h" />
+    <ClInclude Include="Public\GltfReader.h" />
     <ClInclude Include="Public\GraphicViewWin32.h" />
     <ClInclude Include="Public\Handle.h" />
     <ClInclude Include="Public\Image.h" />
@@ -169,13 +169,16 @@
     <ClInclude Include="Public\Vec.h" />
     <ClInclude Include="Public\VecArray.h" />
     <ClInclude Include="Public\View.h" />
-    <ClInclude Include="Renderer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Camera.cpp" />
     <ClCompile Include="Private\Core.cpp" />
     <ClCompile Include="Private\Event.cpp" />
     <ClCompile Include="Private\Geometry.cpp" />
+    <ClCompile Include="Private\GltfReader.cpp" />
+    <ClCompile Include="Private\Group.cpp" />
+    <ClCompile Include="Private\Node.cpp" />
+    <ClCompile Include="Private\Scene.cpp" />
     <ClCompile Include="Private\test.cpp" />
     <ClCompile Include="Private\UtfConverter.cpp" />
     <ClCompile Include="Private\View.cpp" />
