@@ -3,6 +3,7 @@
 
 #include"FDx11BufferObject.h"
 #include"FDx11InpuyLayout.h"
+#include"FDx11ResourceFactory.h"
 
 //#include"Material.h"
 #include"VecArray.h"
@@ -64,7 +65,8 @@ public:
 		{
 			mIBO = new IndexBufferObject(geom->GetCompiledIndexDataSize(), geom->GetCompiledIndexData(), device, geom->GetIndexELementNum());
 		}
-		InitNormalMaterial();
+		//InitNormalMaterial();
+		InitPbrMaterial();
 		
 	}
 	struct MaterialSlot
@@ -99,7 +101,7 @@ public:
 		// set Material Params
 		for (auto uniformSlot : mMaterialSlot.uniformSlots)
 		{
-			auto buffer = ConstantBufferPool::GetInstance().GetConstantBuffer(uniformSlot.bufferSlot);
+			auto buffer = ConstantBufferPool::Instance().GetResource(uniformSlot.bufferSlot);
 			ID3D11Buffer* bufferArray[1];
 			bufferArray[0] = buffer->GetBufferView();
 			if (uniformSlot.vsStage)
@@ -113,14 +115,14 @@ public:
 		}
 		for (auto textureSlot : mMaterialSlot.textureSlots)
 		{
-			auto texture = ShaderResoucePool::Instance().GetTextureView(textureSlot.resourceSlot);
+			auto texture = ShaderResoucePool::Instance().GetResource(textureSlot.resourceSlot);
 			ID3D11ShaderResourceView* srArray[1];
 			srArray[0] = texture.Get();
 			device.GetDeviceContext()->PSSetShaderResources(textureSlot.slotId, textureSlot.num, srArray);
 		}
 		for (auto samplerSlot : mMaterialSlot.samplerSlots)
 		{
-			auto sampler = SamplerResoucePool::Instance().FindorCreateTextureView(SamplerResoucePool::SamplerType::SSLinearWrap,device);
+			auto sampler = SamplerResoucePool::Instance().GetResource(SamplerType::SSLinearWrap);
 			ID3D11SamplerState* samplerArray[1];
 			samplerArray[0] = sampler.Get();
 			device.GetDeviceContext()->PSSetSamplers(0, samplerSlot.num, samplerArray);
@@ -129,7 +131,7 @@ public:
 
 	void InitNormalMaterial()
 	{
-		Ptr<ConstantBufferObject> materialCBO = ConstantBufferPool::GetInstance().CreateConstantBuffer("material", sizeof(Material), device);
+		Ptr<ConstantBufferObject> materialCBO = ConstantBufferPool::Instance().CreateDeviceResource("material", sizeof(Material), device);
 
 		materialCBO->Upload<Material>(Material{ Vec4f(0.1,0.1,0.1,1.0),Vec4f(0.2,0.2,0.2,1.0),Vec4f(0.7,0.7,0.7,1.0),Vec4f(0.5,0.5,0.5,1.0) });
 
@@ -138,7 +140,7 @@ public:
 		
 		auto path = GLOBAL_PATH + "Model//TexturesCom_Brick_BlocksBare_1K_albedo.tif";
 		
-		int32_t resourceSlot = ShaderResoucePool::Instance().CreateTextureView(path, device);
+		int32_t resourceSlot = ShaderResoucePool::Instance().CreateDeviceResource(path, device);
 		int32_t mapSlot = 0;  // fixed in pbr shader
 		mMaterialSlot.textureSlots.push_back(MaterialSlot::TextureSlot{ mapSlot, 1, resourceSlot });
 
@@ -147,31 +149,36 @@ public:
 	
 	void InitPbrMaterial()
 	{
-		Ptr<ConstantBufferObject> materialCBO = ConstantBufferPool::GetInstance().CreateConstantBuffer("pbrMaterial", sizeof(PbrMaterialMetalRoughness), device);
+		Ptr<ConstantBufferObject> materialCBO = ConstantBufferPool::Instance().CreateDeviceResource("pbrMaterial", sizeof(PbrMaterialMetalRoughness), device);
 		
-		materialCBO->Upload<PbrMaterialMetalRoughness>(mGeomtry->GetMaterial());
+		int32_t materialSlot = mGeomtry->materialSlot;
+		int32_t materialMapSlot = mGeomtry->materialMapSlot;
 
-		const uint32_t PbrMaterialParamSlot = 4; // fixed in pbr shader
+		MaterialMapPtr mapPtr = MaterialMapBuilder::Instance().GetResource(materialMapSlot);
+		
+		materialCBO->Upload<PbrMaterialMetalRoughness>(*(MaterialBuilder::Instance().GetResource(materialSlot).get()));
+
+		const uint32_t PbrMaterialParamSlot = 3; // fixed in pbr shader
 		mMaterialSlot.uniformSlots.push_back(MaterialSlot::UniformSlot{ PbrMaterialParamSlot, false, true, 1, materialCBO->GetBufferSlot() });
 
-		int32_t resourceSlot =ShaderResoucePool::Instance().CreateTextureView(mGeomtry->GetMaterialMap()->baseColorMap.uri, device);
-		int32_t mapSlot = 3;  // fixed in pbr shader
+		int32_t resourceSlot =ShaderResoucePool::Instance().CreateDeviceResource(mapPtr->baseColorMap.uri, device);
+		int32_t mapSlot = 0;  // fixed in pbr shader
 		mMaterialSlot.textureSlots.push_back(MaterialSlot::TextureSlot{ mapSlot, 1, resourceSlot });
 
-		resourceSlot = ShaderResoucePool::Instance().CreateTextureView(mGeomtry->GetMaterialMap()->metalRoughnessMap.uri, device);
+		resourceSlot = ShaderResoucePool::Instance().CreateDeviceResource(mapPtr->metalRoughnessMap.uri, device);
+		mapSlot = 1;  // fixed in pbr shader
+		mMaterialSlot.textureSlots.push_back(MaterialSlot::TextureSlot{ mapSlot, 1, resourceSlot });
+
+		resourceSlot = ShaderResoucePool::Instance().CreateDeviceResource(mapPtr->normalMap.uri, device);
+		mapSlot = 2;  // fixed in pbr shader
+		mMaterialSlot.textureSlots.push_back(MaterialSlot::TextureSlot{ mapSlot, 1, resourceSlot });
+
+		resourceSlot = ShaderResoucePool::Instance().CreateDeviceResource(mapPtr->aoMap.uri, device);
+		mapSlot = 3;  // fixed in pbr shader
+		mMaterialSlot.textureSlots.push_back(MaterialSlot::TextureSlot{ mapSlot, 1, resourceSlot });
+
+		resourceSlot = ShaderResoucePool::Instance().CreateDeviceResource(mapPtr->emissiveMap.uri, device);
 		mapSlot = 4;  // fixed in pbr shader
-		mMaterialSlot.textureSlots.push_back(MaterialSlot::TextureSlot{ mapSlot, 1, resourceSlot });
-
-		resourceSlot = ShaderResoucePool::Instance().CreateTextureView(mGeomtry->GetMaterialMap()->normalMap.uri, device);
-		mapSlot = 5;  // fixed in pbr shader
-		mMaterialSlot.textureSlots.push_back(MaterialSlot::TextureSlot{ mapSlot, 1, resourceSlot });
-
-		resourceSlot = ShaderResoucePool::Instance().CreateTextureView(mGeomtry->GetMaterialMap()->aoMap.uri, device);
-		mapSlot = 6;  // fixed in pbr shader
-		mMaterialSlot.textureSlots.push_back(MaterialSlot::TextureSlot{ mapSlot, 1, resourceSlot });
-
-		resourceSlot = ShaderResoucePool::Instance().CreateTextureView(mGeomtry->GetMaterialMap()->emissiveMap.uri, device);
-		mapSlot = 7;  // fixed in pbr shader
 		mMaterialSlot.textureSlots.push_back(MaterialSlot::TextureSlot{ mapSlot, 1, resourceSlot });
 
 		mMaterialSlot.samplerSlots.push_back(MaterialSlot::SamplerSlot{ 0, 1, 1 });
@@ -197,13 +204,8 @@ public:
 	
 	}
 
-
-
-	
-
 protected:
 	const FDx11Device& device;
-	//Ptr<FDx11VertexInputLayout> mInputLayout = nullptr;
 	D3D_PRIMITIVE_TOPOLOGY mTopology;
 	
 

@@ -48,6 +48,35 @@ struct Material
     float4 Reflect;
 };
 
+struct PbrMaterial
+{
+    float4 baseColorFactor;
+    float3 emissiveFactor;
+
+    float metallicFactor;
+    float roughnessFactor;
+    float alphaMask;
+    float alphaMaskCutoff;
+    float aoStrength;
+};
+
+
+struct PbrSpecularGloniness
+{
+    float4 baseColorFactor;
+    float4 emissiveFactor;
+    float4 Reflect;
+
+    //Vec4f baseColorFactor{ 1.0f, 1.0f, 1.0f, 1.0f };
+    //Vec4f emissiveFactor{ 0.0f, 0.0f, 0.0f, 1.0f };
+    //Vec4f diffuseFactor{ 1.0f, 1.0f, 1.0f, 1.0f };
+    //Vec4f specularFactor{ 0.0f, 0.0f, 0.0f, 1.0f };
+    //float metallicFactor{ 1.0f };
+    //float roughnessFactor{ 1.0f };
+    //float alphaMask{ 1.0f };
+    //float alphaMaskCutoff{ 0.5f };
+};
+
 
 
 void ComputeDirectionalLight(Material mat, DirectionalLight L,
@@ -62,7 +91,7 @@ void ComputeDirectionalLight(Material mat, DirectionalLight L,
     spec = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
     // 光向量与照射方向相反
-    float3 lightVec = -L.Direction;
+    float3 lightVec = -L.Direction.xyz;
 
     // 添加环境光
     ambient = mat.Ambient * L.Ambient;

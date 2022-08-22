@@ -172,6 +172,7 @@
     <ClInclude Include="Public\FDx11Pass.h" />
     <ClInclude Include="Public\FDx11Renderer.h" />
     <ClInclude Include="Public\FDx11RenderTarget.h" />
+    <ClInclude Include="Public\FDx11ResourceFactory.h" />
     <ClInclude Include="Public\FDx11Shader.h" />
     <ClInclude Include="Public\FDx11Texture.h" />
     <ClInclude Include="Public\FDx11Util.h" />

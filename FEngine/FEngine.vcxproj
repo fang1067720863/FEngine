@@ -149,6 +149,7 @@
     <ClInclude Include="Public\Event.h" />
     <ClInclude Include="Public\EventHandler.h" />
     <ClInclude Include="Public\EventQueue.h" />
+    <ClInclude Include="Public\Factory.h" />
     <ClInclude Include="Public\GltfReader.h" />
     <ClInclude Include="Public\GraphicViewWin32.h" />
     <ClInclude Include="Public\Handle.h" />

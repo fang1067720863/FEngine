@@ -3,6 +3,7 @@
 #include"VecArray.h"
 #include"Node.h"
 #include"CommonType.h"
+#include"Material.h"
 
 class FShape:public FReference
 {
@@ -20,17 +21,6 @@ public:
 	float mHalfHeight;
 };
 
-struct PbrMaterialMetalRoughness
-{
-	Vec4f baseColorFactor{ 1.0f, 1.0f, 1.0f, 1.0f };
-	Vec4f emissiveFactor{ 0.0f, 0.0f, 0.0f, 1.0f };
-	Vec4f diffuseFactor{ 1.0f, 1.0f, 1.0f, 1.0f };
-	Vec4f specularFactor{ 0.0f, 0.0f, 0.0f, 1.0f };
-	float metallicFactor{ 1.0f };
-	float roughnessFactor{ 1.0f };
-	float alphaMask{ 1.0f };
-	float alphaMaskCutoff{ 0.5f };
-};
 
 class FGeometry: public FNode
 {
@@ -85,7 +75,7 @@ public:
 	{
 		return _positions->getNumElements();
 	}
-	void SetMaterialSlot(uint32_t slot) { materialSlot = slot; }
+	
 	//hack
 	bool Compile()
 	{
@@ -139,33 +129,8 @@ public:
 	void* GetCompiledIndexData() { return static_cast<void*>(_indices->data()); }
 	unsigned int GetCompiledIndexDataSize() { return (_indices->getNumElements())*4; }
 
-	bool CreateRenderableMesh(){
-	
-		//_mesh = engine->GetRHIDriver()->CreateMesh(*this);
-	}
-
-	const PbrMaterialMetalRoughness& const GetMaterial()
-	{
-		return *pbrMeterial.get();
-	}
-	struct MaterialMap
-	{
-		struct Map
-		{
-			std::string uri;
-
-		};
-		Map baseColorMap;
-		Map metalRoughnessMap;
-		Map aoMap;
-		Map normalMap;
-		Map emissiveMap;
-	};
-	shared_ptr <MaterialMap>  GetMaterialMap()
-	{
-		return pbrMeterialMap;
-	}
-	//mGeomtry->MaterialMap.baseColorMap.uri
+	int32_t materialSlot = -1;
+	int32_t materialMapSlot = -1;
 
 protected:
 	Ptr<Vec3fArray> _positions;
@@ -173,19 +138,6 @@ protected:
 	Ptr<Vec2fArray> _texcoords;
 	Ptr<IndexArray> _indices;
 
-	//struct RenderableMesh : FReference
-	//{
-	//	virtual void Draw() {}
-	//};
-	//Ptr<RenderableMesh> _mesh;
-
-	//void Draw()
-	//{
-	//	_mesh->Draw();
-	//}
-
-	shared_ptr<PbrMaterialMetalRoughness> pbrMeterial; 
-	shared_ptr <MaterialMap> pbrMeterialMap;
 	enum IndexType {
 		Triange,
 		Quad
@@ -195,7 +147,7 @@ protected:
 	bool mCompiled = false;
 	unsigned int mVertexStride = 0;
 	unsigned char* mCompiledVertices = nullptr;
-	uint32_t materialSlot = 0;
+	
 };
 
 class ShapeGeometryBuilder

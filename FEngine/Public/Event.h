@@ -144,6 +144,7 @@ public:
     KeyModifier modifier = {};
     virtual void Handled(EventHandler& visitor) { visitor.Handle(*this); }
 };
+
 class KeyPressEvent : public KeyEvent
 {
 public:
@@ -173,5 +174,17 @@ public:
     int32_t _in_x; 
     int32_t _in_y; 
     ButtonMask _in_buttonMask;
+    virtual void Handled(EventHandler& visitor) { visitor.Handle(*this); }
+};
+class MouseMoveEvent : public Event
+{
+public:
+    using time_point = float;
+
+    MouseMoveEvent(int32_t in_x, int32_t in_y, time_point tp)
+        :_in_x(in_x), _in_y(in_y), _time_stick(tp) {}
+    int32_t _in_x;
+    int32_t _in_y;
+    time_point _time_stick;
     virtual void Handled(EventHandler& visitor) { visitor.Handle(*this); }
 };

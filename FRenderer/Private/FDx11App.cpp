@@ -71,19 +71,19 @@ bool FDx11App::InitSinglePass()
 void FDx11App::InitCommmonConstantBuffer()
 {
 
-	Ptr<ConstantBufferObject> frameCBO = ConstantBufferPool::GetInstance().CreateConstantBuffer("frame", sizeof(CBChangesEveryFrame), m_pDevice);
+	Ptr<ConstantBufferObject> frameCBO = ConstantBufferPool::Instance().CreateDeviceResource("frame", sizeof(CBChangesEveryFrame), m_pDevice);
 
 	frameCBO->Upload<CBChangesEveryFrame>(
 		CBChangesEveryFrame{
 		mainCamera->GetViewMatrix(), Mat4(), Vec4f(-4.0,0.0,0.0,1.0f)
 		}
 	);
-	Ptr<ConstantBufferObject> resizeCBO = ConstantBufferPool::GetInstance().CreateConstantBuffer("onResize", sizeof(CBChangesOnResize), m_pDevice);
+	Ptr<ConstantBufferObject> resizeCBO = ConstantBufferPool::Instance().CreateDeviceResource("onResize", sizeof(CBChangesOnResize), m_pDevice);
 	resizeCBO->Upload<CBChangesOnResize>(CBChangesOnResize{ mainCamera->GetProjMatrix() });
 
 	// todo 修改rpi主动修改rhi
-	Ptr<ConstantBufferObject> lightCBO = ConstantBufferPool::GetInstance().CreateConstantBuffer("light", sizeof(Light), m_pDevice);
-	lightCBO->Upload<Light>(Light{ Vec4f(1.0,1.0,1.0,1.0),Vec4f(0.8,0.8,0.8,1.0),Vec4f(0.7,0.7,0.7,1.0),Vec4f(0.5,0.5,0.0,1.0) });
+	Ptr<ConstantBufferObject> lightCBO = ConstantBufferPool::Instance().CreateDeviceResource("light", sizeof(Light), m_pDevice);
+	lightCBO->Upload<Light>(Light{ Vec4f(1.0,1.0,1.0,1.0),Vec4f(1.0,1.0,1.0,1.0),Vec4f(0.7,0.7,0.7,1.0),Vec4f(0.5,0.5,0.0,1.0) });
 
 	//Ptr<ConstantBufferObject> materialCBO = ConstantBufferPool::GetInstance().CreateConstantBuffer("material", sizeof(Material), m_pDevice);
 	//materialCBO->Upload<Material>(Material{ Vec4f(0.1,0.1,0.1,1.0),Vec4f(0.2,0.2,0.2,1.0),Vec4f(0.7,0.7,0.7,1.0),Vec4f(0.5,0.5,0.5,1.0) });
@@ -135,22 +135,22 @@ bool FDx11App::InitGameObject()
 
 	sceneGroup = new FGroup("SceneData");
 
-	Ptr<FGeometry> boxGeom = ShapeGeometryBuilder::instance().BuildBox(FBox(Vec3f(1.0,1.0,1.0)));
-	Ptr<FNode> triangle = new FDx11Mesh(boxGeom.get(), m_pDevice);
-	triangle->SetName("triangle");
-	FNode* mesh = triangle.get();
-	// ()是真正执行才能确定的参数  []是只后要处理的对象 
-	/*triangle->SetUpdateCallback([mesh](float dt) {
-		static float theta = 0.0f;
-		theta += 0.01f * dt;
-		mesh->SetRotate(theta, 0.0f, 1.0f, 0.0f);
-	});*/
-	sceneGroup->AddChild(triangle);
-	//GltfReader reader;
-	//gltfModel = make_shared<GLTFModel>();
-	//reader.loadAssets("D:\\GitProject\\FEngine\\Assets\\PbrBox\\BoomBox.gltf", *gltfModel.get());
-	//Ptr<FNode> gltfMesh = new FDx11Mesh(dynamic_cast<FGeometry*>((gltfModel->node).get()), m_pDevice);
-	//sceneGroup->AddChild(gltfMesh);
+	//Ptr<FGeometry> boxGeom = ShapeGeometryBuilder::instance().BuildBox(FBox(Vec3f(1.0,1.0,1.0)));
+	//Ptr<FNode> triangle = new FDx11Mesh(boxGeom.get(), m_pDevice);
+	//triangle->SetName("triangle");
+	//FNode* mesh = triangle.get();
+	//// ()是真正执行才能确定的参数  []是只后要处理的对象 
+	///*triangle->SetUpdateCallback([mesh](float dt) {
+	//	static float theta = 0.0f;
+	//	theta += 0.01f * dt;
+	//	mesh->SetRotate(theta, 0.0f, 1.0f, 0.0f);
+	//});*/
+	//sceneGroup->AddChild(triangle);
+	GltfReader reader;
+	gltfModel = make_shared<GLTFModel>();
+	reader.loadAssets("D:\\GitProject\\FEngine\\Assets\\PbrBox\\BoomBox.gltf", *gltfModel.get());
+	Ptr<FNode> gltfMesh = new FDx11Mesh(dynamic_cast<FGeometry*>((gltfModel->node).get()), m_pDevice);
+	sceneGroup->AddChild(gltfMesh);
 	return true;
 }
 
@@ -177,11 +177,11 @@ void FDx11App::UpdateScene(float dt)
 	sceneGroup->Update(dt);
 
 
-	Ptr<ConstantBufferObject> frameCBO = ConstantBufferPool::GetInstance().GetConstantBuffer("frame");
+	Ptr<ConstantBufferObject> frameCBO = ConstantBufferPool::Instance().GetResource("frame");
 	frameCBO->Upload<CBChangesEveryFrame>(
 		CBChangesEveryFrame{
 		mainCamera->GetViewMatrix(), 
-		scale(1.0f,1.0f,1.0f),
+		scale(20.0f,20.0f,20.0f),
 		Vec4f(mainCamera->GetEyePos(),1.0f)
 		}
 	);

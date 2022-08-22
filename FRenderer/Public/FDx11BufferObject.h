@@ -235,146 +235,80 @@ public:
 	const std::string& GetBufferSlot() const { return bufferSlot; }
 };
 
-class ConstantBufferPool 
-{
-	using CBS = ConstantBufferObject::CB_SHADER_STAGE;
-public :
-	Ptr<ConstantBufferObject> CreateConstantBuffer(const std::string& name, std::int32_t size, const FDx11Device& _device)
-	{
-		Ptr<ConstantBufferObject> cbo = new ConstantBufferObject(size, _device, name);
-		mCBOMap.insert(std::pair < const std::string, Ptr<ConstantBufferObject>>(name, cbo));
-		return cbo;
-	}
-	Ptr<ConstantBufferObject> GetConstantBuffer(const std::string& bufferSlot)
-	{
-		return mCBOMap.at(bufferSlot);
-	}
-	static ConstantBufferPool& GetInstance()
-	{
-		static ConstantBufferPool instance;
-		return instance;
-	}
-private:
-	typedef std::unordered_map<std::string, Ptr<ConstantBufferObject>> CBOMap;
-	CBOMap mCBOMap;
-	ConstantBufferPool() = default;
-	~ConstantBufferPool() = default;
 
-};
-
-static int32_t TEXTURE_GLOBAL_SLOT = 0;
-class ShaderResoucePool
-{
-	
-public:
-	typedef int32_t TextureSlot ;
-	typedef ComPtr <ID3D11ShaderResourceView> ResouceViewPtr;
-	typedef std::unordered_map<TextureSlot, ResouceViewPtr> ResouceMap;
-	
-
-	TextureSlot CreateTextureView(const std::wstring& fileName, const FDx11Device& _device)
-	{
-		ResouceViewPtr textureView;
-		HR(D3DX11CreateShaderResourceViewFromFile(_device.GetDevice(), fileName.c_str(), NULL, NULL, textureView.GetAddressOf(), NULL));
-		TEXTURE_GLOBAL_SLOT++;
-		resourceMap.insert(std::pair <TextureSlot, ResouceViewPtr>(TEXTURE_GLOBAL_SLOT, textureView));
-		return TEXTURE_GLOBAL_SLOT;
-	}
-
-	TextureSlot CreateTextureView(const std::string& fileName, const FDx11Device& _device)
-	{
-		return CreateTextureView(ConvertUtf(fileName), _device);
-	}
-	static ShaderResoucePool& Instance()
-	{
-		static ShaderResoucePool instance;
-		return instance;
-	}
-	ResouceViewPtr GetTextureView(TextureSlot slot)
-	{
-		return resourceMap.at(slot);
-	}
-public:
-
-	ShaderResoucePool() = default;
-	
-	ResouceMap resourceMap;
-};
-
-
-class SamplerResoucePool
-{
-
-public:
-	enum class SamplerType: uint16_t
-	{
-		SSLinearWrap,			            // 线性过滤
-	    SSAnistropicWrap		                // 各项异性过滤
-	};
-	typedef SamplerType SamplerSlot;
-	typedef ComPtr <ID3D11SamplerState> ResouceViewPtr;
-	typedef std::unordered_map<SamplerSlot, ResouceViewPtr> ResouceMap;
-
-	ResouceViewPtr FindorCreateTextureView(SamplerSlot slot, const FDx11Device& _device)
-	{
-		if (resourceMap.find(slot) != resourceMap.end())
-		{
-			return resourceMap.at(slot);
-		}
-	
-		if (slot == SamplerSlot::SSLinearWrap)
-		{
-			ResouceViewPtr samplerLinearWrap;
-
-			//ComPtr<ID3D11SamplerState> SSLinearWrap = nullptr;
-			D3D11_SAMPLER_DESC sampDesc;
-			ZeroMemory(&sampDesc, sizeof(sampDesc));
-
-			// 线性过滤模式
-			sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-			sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-			sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-			sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-			sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-			sampDesc.MinLOD = 0;
-			sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-			HR(_device.GetDevice()->CreateSamplerState(&sampDesc, samplerLinearWrap.GetAddressOf()));
-			resourceMap.insert(std::pair <SamplerSlot, ResouceViewPtr>(SamplerType::SSLinearWrap, samplerLinearWrap));
-		}
-		else
-		{
-			ResouceViewPtr samplerAnistropicWrap;
-			D3D11_SAMPLER_DESC sampDesc;
-			// 各向异性过滤模式
-			sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
-			sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-			sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-			sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-			sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-			sampDesc.MaxAnisotropy = 4;
-			sampDesc.MinLOD = 0;
-			sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-			HR(_device.GetDevice()->CreateSamplerState(&sampDesc, samplerAnistropicWrap.GetAddressOf()));
-			resourceMap.insert(std::pair <SamplerSlot, ResouceViewPtr>(SamplerType::SSAnistropicWrap, samplerAnistropicWrap));
-		}
-		return GetSamplerState(slot);
-	
-	}
-	static SamplerResoucePool& Instance()
-	{
-		static SamplerResoucePool instance;
-		return instance;
-	}
-	ResouceViewPtr GetSamplerState(SamplerSlot slot)
-	{
-		return resourceMap.at(slot);
-	}
-public:
-
-	SamplerResoucePool()
-	{
-	
-	}
-
-	ResouceMap resourceMap;
-};
+//class SamplerResoucePool
+//{
+//
+//public:
+//	enum class SamplerType: uint16_t
+//	{
+//		SSLinearWrap,			            // 线性过滤
+//	    SSAnistropicWrap		                // 各项异性过滤
+//	};
+//	typedef SamplerType SamplerSlot;
+//	typedef ComPtr <ID3D11SamplerState> ResouceViewPtr;
+//	typedef std::unordered_map<SamplerSlot, ResouceViewPtr> ResouceMap;
+//
+//	ResouceViewPtr FindorCreateTextureView(SamplerSlot slot, const FDx11Device& _device)
+//	{
+//		if (resourceMap.find(slot) != resourceMap.end())
+//		{
+//			return resourceMap.at(slot);
+//		}
+//	
+//		if (slot == SamplerSlot::SSLinearWrap)
+//		{
+//			ResouceViewPtr samplerLinearWrap;
+//
+//			//ComPtr<ID3D11SamplerState> SSLinearWrap = nullptr;
+//			D3D11_SAMPLER_DESC sampDesc;
+//			ZeroMemory(&sampDesc, sizeof(sampDesc));
+//
+//			// 线性过滤模式
+//			sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+//			sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+//			sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+//			sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+//			sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+//			sampDesc.MinLOD = 0;
+//			sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+//			HR(_device.GetDevice()->CreateSamplerState(&sampDesc, samplerLinearWrap.GetAddressOf()));
+//			resourceMap.insert(std::pair <SamplerSlot, ResouceViewPtr>(SamplerType::SSLinearWrap, samplerLinearWrap));
+//		}
+//		else
+//		{
+//			ResouceViewPtr samplerAnistropicWrap;
+//			D3D11_SAMPLER_DESC sampDesc;
+//			// 各向异性过滤模式
+//			sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+//			sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+//			sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+//			sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+//			sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+//			sampDesc.MaxAnisotropy = 4;
+//			sampDesc.MinLOD = 0;
+//			sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+//			HR(_device.GetDevice()->CreateSamplerState(&sampDesc, samplerAnistropicWrap.GetAddressOf()));
+//			resourceMap.insert(std::pair <SamplerSlot, ResouceViewPtr>(SamplerType::SSAnistropicWrap, samplerAnistropicWrap));
+//		}
+//		return GetSamplerState(slot);
+//	
+//	}
+//	static SamplerResoucePool& Instance()
+//	{
+//		static SamplerResoucePool instance;
+//		return instance;
+//	}
+//	ResouceViewPtr GetSamplerState(SamplerSlot slot)
+//	{
+//		return resourceMap.at(slot);
+//	}
+//public:
+//
+//	SamplerResoucePool()
+//	{
+//	
+//	}
+//
+//	ResouceMap resourceMap;
+//};

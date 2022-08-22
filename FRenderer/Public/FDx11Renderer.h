@@ -79,6 +79,7 @@ public:
 	 int Run();
 	
 	 bool InitDirect3D(FGraphicContext::Traits* traits, HWND hwnd);
+	 void InitSamplerResourcePool();
 	 void InitSinglePass();
 	 void ExecuteMainPass(FDx11Pass* pass);
 	 void ExecutePass(FDx11Pass* pass);

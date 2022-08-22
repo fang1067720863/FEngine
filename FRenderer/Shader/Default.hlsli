@@ -1,8 +1,5 @@
 #include"light.hlsli"
 
-Texture2D g_DiffuseMap : register(t0);
-SamplerState g_Sam : register(s0);
-//TextureCube g_TexCube : register(t1);
 
 
 cbuffer m_CBFrame : register(b0)
@@ -19,11 +16,6 @@ cbuffer CBChangesRarely : register(b2)
 {
 	DirectionalLight g_DirLight;
 }
-cbuffer CBChangesEveryObjectDrawing : register(b3)
-{
-	Material g_Material;
-}
-
 
 
 struct VertexPosNormalTex

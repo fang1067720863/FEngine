@@ -122,5 +122,6 @@
       <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Public\GltfReader.h" />
+    <ClInclude Include="Public\Factory.h" />
   </ItemGroup>
 </Project>

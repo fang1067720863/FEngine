@@ -1,6 +1,7 @@
 
 #include"FDx11Renderer.h"
 #include"FDx11RenderState.h"
+#include"FDx11ResourceFactory.h"
 //#include<D3Dcommon.h>
 
 
@@ -304,6 +305,7 @@ void FDx11Renderer::Prepare()
 {
 	
 	InitDirect3D(mTraits, mHwnd);
+	InitSamplerResourcePool();
 	ZeroMemory(&m_ScreenViewport, sizeof(D3D11_VIEWPORT));
 	m_ScreenViewport.TopLeftX = 0;
 	m_ScreenViewport.TopLeftY = 0;
@@ -402,10 +404,11 @@ void FDx11Renderer::SetGpuProgram(FDx11GpuProgram* program)
 		device.GetDeviceContext()->VSSetConstantBuffers(slot, 1, bufferArray);
 	}
 	ID3D11Buffer* bufferArray[1];
-	bufferArray[0] = ConstantBufferPool::GetInstance().GetConstantBuffer("frame")->GetBufferView();
+
+	bufferArray[0] = ConstantBufferPool::Instance().GetResource("frame")->GetBufferView();
 	device.GetDeviceContext()->VSSetConstantBuffers(0, 1, bufferArray);
 	ID3D11Buffer* bufferArray2[1];
-	bufferArray2[0] = ConstantBufferPool::GetInstance().GetConstantBuffer("onResize")->GetBufferView();
+	bufferArray2[0] = ConstantBufferPool::Instance().GetResource("onResize")->GetBufferView();
 	device.GetDeviceContext()->VSSetConstantBuffers(1, 1, bufferArray2);
 
 	// shader resource texture
@@ -513,7 +516,40 @@ int FDx11Renderer::Run()
 
 
 
+void FDx11Renderer::InitSamplerResourcePool()
+{
+	ComPtr<ID3D11SamplerState> samplerLinearWrap;
 
+	D3D11_SAMPLER_DESC sampDesc;
+	ZeroMemory(&sampDesc, sizeof(sampDesc));
+
+	// 线性过滤模式
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampDesc.MinLOD = 0;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	HR(device.GetDevice()->CreateSamplerState(&sampDesc, samplerLinearWrap.GetAddressOf()));
+
+	SamplerResoucePool::Instance().CreateResouce(SamplerType::SSLinearWrap, samplerLinearWrap);
+
+	ComPtr<ID3D11SamplerState> samplerAnistropicWrap;
+	
+	// 各向异性过滤模式
+	sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampDesc.MaxAnisotropy = 4;
+	sampDesc.MinLOD = 0;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	HR(device.GetDevice()->CreateSamplerState(&sampDesc, samplerAnistropicWrap.GetAddressOf()));
+	SamplerResoucePool::Instance().CreateResouce(SamplerType::SSAnistropicWrap, samplerAnistropicWrap);
+
+}
 void FDx11Renderer::OnResize()
 {
 	assert(device.GetDeviceContext());

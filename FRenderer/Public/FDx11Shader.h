@@ -50,7 +50,7 @@ public:
 	{
 		std::string shaderPath = GLOBAL_PATH + "Shader//";
 		vsFileName = "DefaultVertex";
-		psFileName = "DefaultPixel";
+		psFileName = "PbrPS";
 		const std::string hlslExt = ".hlsl";
 		const std::string csoExt = ".cso";
 
