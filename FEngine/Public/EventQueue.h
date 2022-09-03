@@ -304,3 +304,77 @@ public:
 protected:
     VirtualKeyToKeySymbolMap _keycodeMap;
 };
+
+
+
+class BufferedEventQueue
+{
+public:
+    typedef Ptr<Event> EventPtr;
+    typedef std::list<EventPtr> BufferdEvents;
+    BufferedEventQueue()
+    {
+        _keyBoardMap = new KeyboardMap();
+    }
+
+   // bool PushEvent(EventPtr evt) { bufferdEvents.push_back(evt); lastEvt = evt; }
+    EventPtr TakeoutEvent() { EventPtr evt = bufferdEvents.front(); bufferdEvents.pop_front(); return evt; }
+    inline bool Empty() { return bufferdEvents.empty(); }
+
+    void GetKeySymbol(WPARAM wParam, LPARAM lParam, KeySymbol& keySymbol, KeySymbol& modifiedKeySymbol, KeyModifier& keyModifier){
+        _keyBoardMap->getKeySymbol(wParam, lParam, keySymbol, modifiedKeySymbol, keyModifier);
+    }
+    void TransformMouseXY(int& x, int& y)
+    {
+        const int width = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+        const int height = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+       /* std::cout << "orginx" << x << " " << y << std::endl;
+        x = static_cast<int>((float(x) / 65535.0f) * width);
+        y = static_cast<int>((float(y) / 65535.0f) * height);*/
+        
+        int tempX = x - relativeX;
+        int tempY = y - relativeY;
+        relativeX = x;
+        relativeY = y;
+        x = tempX; y = tempY;
+    }
+
+    bool MouseMotion(int32_t mx, int32_t my, float delta)
+    {
+        //std::cout << "mx" << mx << " " << my << std::endl;
+        Ptr<Event> evt = new MouseMoveEvent(mx, my, delta);
+        bufferdEvents.emplace_back(evt);
+        return true;
+    }
+    bool MouseDrag(int32_t mx, int32_t my, float delta, int btn)
+    {
+       
+        Ptr<Event> evt = new MouseDragEvent(mx, my, delta,btn);
+        bufferdEvents.emplace_back(evt);
+        return true;
+    }
+
+    bool KeyUp(WPARAM wParam, LPARAM lParam, KeySymbol& keySymbol, KeySymbol& modifiedKeySymbol, KeyModifier& keyModifier)
+    {
+        if (_keyBoardMap->getKeySymbol(wParam, lParam, keySymbol, modifiedKeySymbol, keyModifier))
+        {
+            Ptr<Event> evt = new KeyPressEvent(keySymbol, keyModifier);
+            int32_t repeatCount = (lParam & 0xffff);
+            bufferdEvents.emplace_back(evt);
+            return true;
+        }
+        return false;
+    }
+    inline void SetDragBtn(int btn) { draggedBtn = btn; }
+    inline int GetDragBtn() { return draggedBtn; }
+    inline bool isDragged() { return draggedBtn != -1; }
+    inline void CancelDrag() { draggedBtn = -1; }
+    
+private:
+   
+    int32_t relativeX;
+    int32_t relativeY;
+    int32_t draggedBtn{ -1 };
+    Ptr<KeyboardMap> _keyBoardMap;
+    BufferdEvents bufferdEvents;
+};

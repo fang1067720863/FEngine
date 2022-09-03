@@ -67,7 +67,40 @@ bool FDx11App::InitSinglePass()
 	forwardPass = new FDx11Pass(1, m_ScreenViewport,m_pDevice);
 	return true;
 }
+void FDx11App::InitSamplerResourcePool()
+{
+	ComPtr<ID3D11SamplerState> samplerLinearWrap;
 
+	D3D11_SAMPLER_DESC sampDesc;
+	ZeroMemory(&sampDesc, sizeof(sampDesc));
+
+	// 线性过滤模式
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampDesc.MinLOD = 0;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	HR(m_pDevice.GetDevice()->CreateSamplerState(&sampDesc, samplerLinearWrap.GetAddressOf()));
+
+	SamplerResoucePool::Instance().CreateResouce(SamplerType::SSLinearWrap, samplerLinearWrap);
+
+	ComPtr<ID3D11SamplerState> samplerAnistropicWrap;
+
+	// 各向异性过滤模式
+	sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampDesc.MaxAnisotropy = 4;
+	sampDesc.MinLOD = 0;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	HR(m_pDevice.GetDevice()->CreateSamplerState(&sampDesc, samplerAnistropicWrap.GetAddressOf()));
+	SamplerResoucePool::Instance().CreateResouce(SamplerType::SSAnistropicWrap, samplerAnistropicWrap);
+
+}
 void FDx11App::InitCommmonConstantBuffer()
 {
 
@@ -129,11 +162,18 @@ void FDx11App::InitCommmonConstantBuffer()
 bool FDx11App::InitGameObject()
 {
 	mainCamera = new FCamera(Frustum(), "MainCamera");
-	mainCamera->lookAt<float>(Vec3f(-4.0f, 0.0f, 0.0f), Vec3f(0.0, 0.0, 0.0), Vec3f(0.0, 1.0, 0.0));
+	//mainCamera->lookAt<float>(Vec3f(-4.0f, 0.0f, 0.0f), Vec3f(0.0, 0.0, 0.0), Vec3f(0.0, 1.0, 0.0));
 	
 	flyController = new FlyCameraController(mainCamera);
-
+	FlyCameraController* controller = dynamic_cast<FlyCameraController*>(flyController.get());
+	if (controller)
+	{
+		controller->SetHomePosition(Vec3f(4.0f, 0.0f, 0.0f), Vec3f(0.0, 0.0, 0.0));
+		//std::cout << "111111111111111111";
+	}
+	
 	sceneGroup = new FGroup("SceneData");
+
 
 	//Ptr<FGeometry> boxGeom = ShapeGeometryBuilder::instance().BuildBox(FBox(Vec3f(1.0,1.0,1.0)));
 	//Ptr<FNode> triangle = new FDx11Mesh(boxGeom.get(), m_pDevice);
@@ -168,11 +208,11 @@ void FDx11App::DrawScene()
 void FDx11App::UpdateScene(float dt)
 {
 	// handle events
-	while (!bufferdEvents.empty())
+	
+	while (!eventQueue.Empty())
 	{
-		Ptr<Event> evt = bufferdEvents.front();
+		Ptr<Event> evt = eventQueue.TakeoutEvent();
 		evt->Handled(*flyController);
-		bufferdEvents.pop_front();
 	}
 	sceneGroup->Update(dt);
 
@@ -180,8 +220,8 @@ void FDx11App::UpdateScene(float dt)
 	Ptr<ConstantBufferObject> frameCBO = ConstantBufferPool::Instance().GetResource("frame");
 	frameCBO->Upload<CBChangesEveryFrame>(
 		CBChangesEveryFrame{
-		mainCamera->GetViewMatrix(), 
-		scale(20.0f,20.0f,20.0f),
+		mainCamera->GetViewMatrix(),
+		scale(20.0f,20.0f,20.0f) * rotate(3.14f, Vec3<float>(0.0f,1.0f,0.0f)),
 		Vec4f(mainCamera->GetEyePos(),1.0f)
 		}
 	);

@@ -192,6 +192,7 @@ public:
     /** Constructor that sets all components of the vector to zero */
     Vec3() { _v[0] = 0.0f; _v[1] = 0.0f; _v[2] = 0.0f; }
     Vec3(scalar_type x, scalar_type y, scalar_type z) { _v[0] = x; _v[1] = y; _v[2] = z; }
+    Vec3(scalar_type value) { _v[0] = value; _v[1] = value; _v[2] = value; }
     Vec3(const Vec2<T>& v2, scalar_type zz)
     {
         _v[0] = v2[0];
@@ -399,6 +400,11 @@ constexpr Vec3<T> cross(const Vec3<T>& lhs, const Vec3<T>& rhs)
     return Vec3<T>(lhs[1] * rhs[2] - rhs[1] * lhs[2],
         lhs[2] * rhs[0] - rhs[2] * lhs[0],
         lhs[0] * rhs[1] - rhs[0] * lhs[1]);
+}
+template<typename T>
+constexpr Vec3<T> operator^(const Vec3<T>& lhs, const Vec3<T>& rhs)
+{
+    return cross(lhs, rhs);
 }
 const Vec3f X_AXIS(1.0, 0.0, 0.0);
 const Vec3f Y_AXIS(0.0, 1.0, 0.0);

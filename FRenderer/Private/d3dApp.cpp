@@ -1,6 +1,7 @@
 #include "d3dApp.h"
 
 #include"FDx11.h"
+#include <windowsx.h>
 #include <sstream>
 
 #pragma warning(disable: 6031)
@@ -46,8 +47,7 @@ D3DApp::D3DApp(HINSTANCE hInstance, const std::wstring& windowName, int initWidt
     m_pSwapChain(nullptr),
     m_pDepthStencilBuffer(nullptr),
     m_pRenderTargetView(nullptr),
-    m_pDepthStencilView(nullptr),
-    _keyBoardMap(new KeyboardMap())
+    m_pDepthStencilView(nullptr)
 {
     ZeroMemory(&m_ScreenViewport, sizeof(D3D11_VIEWPORT));
 
@@ -203,6 +203,8 @@ void D3DApp::OnResize()
 
 LRESULT D3DApp::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+
+
     switch (msg)
     {
         // WM_ACTIVATE is sent when the window is activated or deactivated.  
@@ -314,14 +316,41 @@ LRESULT D3DApp::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_LBUTTONDOWN:
     case WM_MBUTTONDOWN:
     case WM_RBUTTONDOWN:
-        aa = 2;
-        return 0;
+    {
+        float delta = Timer::Instance().DeltaTime();
+        int32_t mx = GET_X_LPARAM(lParam);
+        int32_t my = GET_Y_LPARAM(lParam);
+        int button;
+        eventQueue.TransformMouseXY(mx, my);
+        if (msg == WM_LBUTTONDOWN)      button = 0;
+        else if (msg == WM_MBUTTONDOWN) button = 1;
+        else button = 2;
+        eventQueue.SetDragBtn(button);
+        eventQueue.MouseDrag(mx, my, delta,button);
+        break;
+    }
+       
     case WM_LBUTTONUP:
     case WM_MBUTTONUP:
     case WM_RBUTTONUP:
-        return 0;
+    {eventQueue.CancelDrag(); }
+       
     case WM_MOUSEMOVE:
-        return 0;
+    {
+        if (eventQueue.isDragged())
+        {
+            float delta = Timer::Instance().DeltaTime();
+            int32_t mx = GET_X_LPARAM(lParam);
+            int32_t my = GET_Y_LPARAM(lParam);
+
+            eventQueue.TransformMouseXY(mx, my);
+            eventQueue.MouseDrag(mx, my, delta, eventQueue.GetDragBtn());
+        }
+       
+
+    }
+
+      
     case WM_KEYDOWN:
     case WM_SYSKEYDOWN:
     case WM_KEYUP:
@@ -329,12 +358,8 @@ LRESULT D3DApp::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     {
         KeySymbol keySymbol, modifiedKeySymbol;
         KeyModifier keyModifier = KeyModifier::MODKEY_Alt;
-        if (_keyBoardMap->getKeySymbol(wParam, lParam, keySymbol, modifiedKeySymbol, keyModifier))
-        {
-            Ptr<Event> evt = new KeyPressEvent(keySymbol, keyModifier);
-            int32_t repeatCount = (lParam & 0xffff);
-            bufferdEvents.emplace_back(evt); 
-        }
+
+        eventQueue.KeyUp(wParam, lParam, keySymbol, modifiedKeySymbol, keyModifier);
         break;
     }
     }

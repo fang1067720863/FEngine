@@ -7,6 +7,9 @@
 #include<vector>
 #include<wrl/client.h>
 #include<DirectXMath.h>
+
+
+
 struct Frustum
 {
     float mNearZ = 0.5f;
@@ -29,52 +32,13 @@ public:
         SetFrustum(frustum);
     }
     Mat4 mViewMatrix;
+    Mat4 mProjMatrix;
     Vec3f mEye;
     Vec3f mForward;
     Vec3f mUp;
 
-    Mat4 mProjMatrix;
 
-    template<class T>
-    constexpr void  lookAt(const Vec3<T>& eye, const Vec3<T>& center, const Vec3<T>& up)
-    {
-        using vec_type = Vec3<T>;
 
-        vec_type forward = normalize(center - eye);
-        vec_type up_normal = normalize(up);
-        vec_type side = normalize(cross(forward, up_normal));
-        vec_type u = normalize(cross(side, forward));
-        mEye = eye;
-        mForward = forward;
-        mUp = up;
-       
-        float x1 = -eye * side;
-        float x2 = -eye * u;
-        float x3 = -eye * forward;
-        mViewMatrix.set
-            (side[0], u[0], -forward[0], 0,
-                side[1], u[1], -forward[1], 0,
-                side[2], u[2], -forward[2], 0,
-                x1, x2, x3, 1);
-        mViewMatrix.transpose();
-    }
-
-    void Walk(float dt)
-    {
-        Vec3f newPos = mEye + mForward * dt;
-        lookAt(newPos, newPos + mForward, mUp);
-    }
-    void Strafe(float dt)
-    {
-        Vec3f side = normalize <float> (cross<float>(mForward, mUp));
-        Vec3f newPos = mEye + side * dt;
-        lookAt(newPos, newPos + mForward, mUp);
-    }
-    void GoUp(float dt)
-    {
-        Vec3f newPos = mEye + mUp * dt;
-        lookAt(newPos, newPos + mForward, mUp);
-    }
     void SetFrustum(const Frustum& frustum)
     {
         SetFrustum(frustum.mFovY, frustum.mAspect, frustum.mNearZ, frustum.mFarZ);
@@ -82,6 +46,7 @@ public:
         DirectX::XMMATRIX  a = DirectX::XMMatrixPerspectiveFovLH(frustum.mFovY, frustum.mAspect, frustum.mNearZ, frustum.mFarZ);
         DirectX::XMFLOAT4X4 res;
         XMStoreFloat4x4(&res, a);
+        
     }
     void SetFrustum(float fovy_radians, float aspectRatio, float zNear, float zFar)
     {
@@ -91,6 +56,8 @@ public:
     const Mat4& GetViewMatrix()const { return mViewMatrix; }
     const Mat4& GetProjMatrix()const { return mProjMatrix; }
     const Vec3f& GetEyePos()const { return mEye; }
+
+    void SetViewMatrix(const Mat4& mat) { mViewMatrix = mat; mViewMatrix.transpose(); }
 
     template<class T>
     constexpr Matrix4<T> perspective(T fovy_radians, T aspectRatio, T zNear, T zFar)

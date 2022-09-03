@@ -47,6 +47,7 @@ public:
 
 	void ClearFrameBuffer(FDx11Pass* GBufferPass);
 	void InitCommmonConstantBuffer();
+	void InitSamplerResourcePool();
 	// ÏñËØ×ÅÉ«Æ÷
 	FDx11App(HINSTANCE hInstance, const std::wstring& windowName, int initWidth, int initHeight);
 	
@@ -55,10 +56,14 @@ public:
 
 	}
 
+	
+
+
 	bool Init() override
 	{
 		if (!D3DApp::Init())
 			return false;
+		InitSamplerResourcePool();
 
 		FindGlobalPath();
 		if (!InitSinglePass())

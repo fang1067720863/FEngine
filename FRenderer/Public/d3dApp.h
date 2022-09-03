@@ -8,7 +8,7 @@
 #include<list>
 #include"Event.h"
 #include"EventQueue.h"
-//#include "CpuTimer.h"
+#include"Timer.h"
 
 class D3DApp
 {
@@ -47,7 +47,7 @@ protected:
     UINT      m_4xMsaaQuality;   // MSAA支持的质量等级
 
 
-    //CpuTimer m_Timer;            // 计时器
+    Timer m_Timer;            // 计时器
 
     // 使用模板别名(C++11)简化类型名
     template <class T>
@@ -69,8 +69,12 @@ protected:
     std::wstring m_MainWndCaption;                        // 主窗口标题
     int m_ClientWidth;                                    // 视口宽度
     int m_ClientHeight;                                   // 视口高度
-    typedef std::list<Ptr<Event>> BufferdEvents;
+  /*  typedef std::list<Ptr<Event>> BufferdEvents;
     BufferdEvents bufferdEvents;
-    Ptr<KeyboardMap> _keyBoardMap;
+    Ptr<KeyboardMap> _keyBoardMap;*/
+
+    BufferedEventQueue eventQueue;
 
 };
+
+

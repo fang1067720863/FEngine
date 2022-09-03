@@ -4,7 +4,7 @@
 #include "stdlib.h"
 #include <crtdbg.h>
 
-#include"FView.h"
+#include"FDx11App.h"
 #include<fstream>
 
 
@@ -25,17 +25,15 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE prevInstance,
 	_CrtDumpMemoryLeaks();
 	//_CrtSetBreakAlloc(179);
 
-	/*FCore coreApp(hInstance);
-	coreApp.Realize();*/
+	AllocConsole();
+	freopen("CONOUT$", "w", stdout);
 
-	//FGraphicWindowWin32 window(hInstance);
-
-	FDx11App theApp(hInstance, L"Rendering a Triangle", 1280, 720);
+	FDx11App theApp(hInstance, L" Gltf Viewer", 1280, 720);
 	if (!theApp.Init())
 		return 0;
 
 	theApp.Run();
-
+	FreeConsole();
 
 	//system("pause");
 	return 0;

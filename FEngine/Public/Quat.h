@@ -124,8 +124,34 @@ public:
     //    z = axis.z * sinhalfangle * inversenorm;
     //    w = coshalfangle;
     //}
+    void makeRotate(value_type angle, value_type x, value_type y, value_type z)
+    {
+        const value_type epsilon = 0.0000001;
 
-    template<typename T>
+        value_type length = sqrt(x * x + y * y + z * z);
+        if (length < epsilon)
+        {
+            // ~zero length axis, so reset rotation to zero.
+            *this = Quat();
+            return;
+        }
+
+        value_type inversenorm = 1.0 / length;
+        value_type coshalfangle = cos(0.5 * angle);
+        value_type sinhalfangle = sin(0.5 * angle);
+
+        value[0] = x * sinhalfangle * inversenorm;
+        value[1] = y * sinhalfangle * inversenorm;
+        value[2] = z * sinhalfangle * inversenorm;
+        value[3] = coshalfangle;
+    }
+
+
+    void makeRotate(value_type angle, const Vec3<value_type>& axis)
+    {
+        makeRotate(angle, axis[0], axis[1], axis[2]);
+    }
+   
     T length () const 
     {
         return std::sqrt(value[0] * value[0] + value[1] * value[1] + value[2] * value[2] + value[3] * value[3]);
@@ -201,11 +227,18 @@ constexpr T dot(const Quat<T>& lhs, const Quat<T>& rhs)
     return lhs[0] * rhs[0] + lhs[1] * rhs[1] + lhs[2] * rhs[2] + lhs[3] * rhs[3];
 }
 
+/// Conjugate
+template<typename T>
+inline Quat<T> conj(const Quat<T>& _v) 
+{
+    return Quat<T>(-_v[0], -_v[1], -_v[2], _v[3]);
+}
+
 template<typename T>
 constexpr Quat<T> inverse(const Quat<T>& v)
 {
-    Quat<T> c = conj(v);
-    T inverse_len = static_cast<T>(1.0) / length(v);
+    Quat<T> c(conj(v));
+    T inverse_len = static_cast<T>(1.0) / v.length();
     return Quat<T>(c[0] * inverse_len, c[1] * inverse_len, c[2] * inverse_len, c[3] * inverse_len);
 }
 

@@ -166,6 +166,7 @@
     <ClInclude Include="Public\ShaderParameter.h" />
     <ClInclude Include="Public\ShaderResource.h" />
     <ClInclude Include="Public\Texture.h" />
+    <ClInclude Include="Public\Timer.h" />
     <ClInclude Include="Public\UtfConverter.h" />
     <ClInclude Include="Public\Vec.h" />
     <ClInclude Include="Public\VecArray.h" />
@@ -181,6 +182,7 @@
     <ClCompile Include="Private\Node.cpp" />
     <ClCompile Include="Private\Scene.cpp" />
     <ClCompile Include="Private\test.cpp" />
+    <ClCompile Include="Private\Timer.cpp" />
     <ClCompile Include="Private\UtfConverter.cpp" />
     <ClCompile Include="Private\View.cpp" />
   </ItemGroup>

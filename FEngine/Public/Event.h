@@ -120,6 +120,8 @@ enum class ButtonMask :uint16_t {
 class Event;
 class MouseScrollEvent;
 class KeyPressEvent;
+class MouseMoveEvent;
+class MouseDragEvent;
 class EventHandler : public FReference
 {
 public:
@@ -127,6 +129,8 @@ public:
     virtual bool Handle(const Event& event) { return false; }
     virtual bool Handle(const MouseScrollEvent& event) { return false; }
     virtual bool Handle(const KeyPressEvent& event) { return false; }
+    virtual bool Handle(const MouseMoveEvent& event) { return false; }
+    virtual bool Handle(const MouseDragEvent& event) { return false; }
    
 };
 class Event: public FReference
@@ -186,5 +190,16 @@ public:
     int32_t _in_x;
     int32_t _in_y;
     time_point _time_stick;
+    virtual void Handled(EventHandler& visitor) { visitor.Handle(*this); }
+};
+
+class MouseDragEvent : public MouseMoveEvent
+{
+public:
+    MouseDragEvent(int32_t in_x, int32_t in_y, time_point tp, int32_t button) :MouseMoveEvent(in_x, in_y, tp) {
+        btn = static_cast<ButtonMask>(1 << button);
+    }
+
+    ButtonMask btn;
     virtual void Handled(EventHandler& visitor) { visitor.Handle(*this); }
 };
