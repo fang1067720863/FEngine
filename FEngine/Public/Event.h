@@ -122,6 +122,7 @@ class MouseScrollEvent;
 class KeyPressEvent;
 class MouseMoveEvent;
 class MouseDragEvent;
+
 class EventHandler : public FReference
 {
 public:
@@ -165,7 +166,14 @@ public:
 
 class MouseScrollEvent : public KeyEvent
 {
+    using time_point = float;
 public:
+    MouseScrollEvent(ScrollingMotion motion, time_point tp):_motion(motion), _time_stick(tp)
+    {
+
+    }
+    ScrollingMotion _motion;
+    time_point _time_stick;
     virtual void Handled(EventHandler& visitor) { visitor.Handle(*this); }
 };
 

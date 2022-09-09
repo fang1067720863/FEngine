@@ -11,26 +11,7 @@
 #include"d3dApp.h"
 #include"UtfConverter.h"
 #include"Group.h"
-
-struct CBChangesEveryFrame
-{
-	Mat4 view;
-	Mat4 world;
-	Vec4f eyePos;
-};
-
-struct CBChangesOnResize
-{
-	Mat4 proj;
-};
-
-struct Light
-{
-	Vec4f ambient;
-	Vec4f diffuse;
-	Vec4f specular;
-	Vec4f direction;
-};
+#include"Constant.h"
 
 
 
@@ -41,6 +22,7 @@ class FDx11App : public D3DApp
 public:
 
 	Ptr<FDx11Pass> forwardPass;
+	Ptr<FDx11Pass> skyPass;
 
 	bool InitSinglePass();
 	void ExecuteMainPass(FDx11Pass* pass);

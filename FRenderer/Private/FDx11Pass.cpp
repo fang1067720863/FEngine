@@ -13,10 +13,11 @@ FDx11Pass::FDx11Pass(unsigned int numViews, const D3D11_VIEWPORT& vp, const FDx1
 		mRTTextures.push_back(ComPtr<ID3D11Texture2D>());
 		mRTV.push_back(ComPtr<ID3D11RenderTargetView>());
 	}*/
-	InitPass(mDevice.GetDevice());
+	//InitPass(mDevice.GetDevice());
 }
-bool FDx11Pass::InitPass(ID3D11Device* device)
+bool FDx11Pass::InitPass(const std::string& vs, const std::string& ps)
 {
+	ID3D11Device* device = mDevice.GetDevice();
 	if (!InitRenderTexture(device))
 	{
 		return false;
@@ -29,7 +30,7 @@ bool FDx11Pass::InitPass(ID3D11Device* device)
 	{
 		return false;
 	}
-	if (!InitGpuProgram())
+	if (!InitGpuProgram(vs,ps))
 	{
 		return false;
 	}
@@ -121,9 +122,9 @@ bool FDx11Pass::InitRenderState()
 	return true;
 }
 
-bool FDx11Pass::InitGpuProgram()
+bool FDx11Pass::InitGpuProgram(const std::string& vs, const std::string& ps)
 {
-	mGpuProgram = new FDx11GpuProgram(mDevice);
+	mGpuProgram = new FDx11GpuProgram(mDevice,vs,ps);
 	return true;
 
 }

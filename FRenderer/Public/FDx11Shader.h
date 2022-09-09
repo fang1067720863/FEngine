@@ -44,13 +44,15 @@ public:
 	typedef ComPtr <ID3D11SamplerState> GpuSamplerView;
 	typedef std::vector <GpuSamplerView> GpuSamplerViewArray;
 
-	FDx11GpuProgram(const FDx11Device& _device) :device(_device) { Init(); }
+	FDx11GpuProgram(const FDx11Device& _device,const std::string& _vsName, const std::string& _psName )
+		:device(_device), vsFileName(_vsName), psFileName(_psName) { Init(); }
 	ComPtr<ID3D11InputLayout> inputLayout;
+
 	bool Init()
 	{
 		std::string shaderPath = GLOBAL_PATH + "Shader//";
-		vsFileName = "DefaultVertex";
-		psFileName = "PbrPS";
+	/*	vsFileName = "DefaultVertex";
+		psFileName = "PbrPS";*/
 		const std::string hlslExt = ".hlsl";
 		const std::string csoExt = ".cso";
 

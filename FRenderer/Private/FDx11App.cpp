@@ -65,6 +65,7 @@ FDx11App::FDx11App(HINSTANCE hInstance, const std::wstring& windowName, int init
 bool FDx11App::InitSinglePass()
 {
 	forwardPass = new FDx11Pass(1, m_ScreenViewport,m_pDevice);
+	forwardPass->InitPass("DefaultVertex", "PbrPS");
 	return true;
 }
 void FDx11App::InitSamplerResourcePool()
@@ -103,12 +104,13 @@ void FDx11App::InitSamplerResourcePool()
 }
 void FDx11App::InitCommmonConstantBuffer()
 {
+	
 
 	Ptr<ConstantBufferObject> frameCBO = ConstantBufferPool::Instance().CreateDeviceResource("frame", sizeof(CBChangesEveryFrame), m_pDevice);
 
 	frameCBO->Upload<CBChangesEveryFrame>(
 		CBChangesEveryFrame{
-		mainCamera->GetViewMatrix(), Mat4(), Vec4f(-4.0,0.0,0.0,1.0f)
+		mainCamera->GetViewMatrix(), Vec4f(mainCamera->GetEyePos(), 1.0f)
 		}
 	);
 	Ptr<ConstantBufferObject> resizeCBO = ConstantBufferPool::Instance().CreateDeviceResource("onResize", sizeof(CBChangesOnResize), m_pDevice);
@@ -118,45 +120,17 @@ void FDx11App::InitCommmonConstantBuffer()
 	Ptr<ConstantBufferObject> lightCBO = ConstantBufferPool::Instance().CreateDeviceResource("light", sizeof(Light), m_pDevice);
 	lightCBO->Upload<Light>(Light{ Vec4f(1.0,1.0,1.0,1.0),Vec4f(1.0,1.0,1.0,1.0),Vec4f(0.7,0.7,0.7,1.0),Vec4f(0.5,0.5,0.0,1.0) });
 
-	//Ptr<ConstantBufferObject> materialCBO = ConstantBufferPool::GetInstance().CreateConstantBuffer("material", sizeof(Material), m_pDevice);
-	//materialCBO->Upload<Material>(Material{ Vec4f(0.1,0.1,0.1,1.0),Vec4f(0.2,0.2,0.2,1.0),Vec4f(0.7,0.7,0.7,1.0),Vec4f(0.5,0.5,0.5,1.0) });
+	Ptr<ConstantBufferObject> worldCBO = ConstantBufferPool::Instance().CreateDeviceResource("world", sizeof(CBEveryObject), m_pDevice);
+	worldCBO->Upload<CBEveryObject>(CBEveryObject{ Mat4() });
 
-	//FDx11GpuProgram::GpuTextureView textureView;
-	//
-	//
-	//const std::string texPath = GLOBAL_PATH+"Model\\TexturesCom_Brick_BlocksBare_1K_albedo.tif";
-	//	
-	//HR(D3DX11CreateShaderResourceViewFromFile(m_pDevice.GetDevice(), ConvertUtf(texPath).c_str(), NULL, NULL, textureView.GetAddressOf(), NULL));
-	//
-	//ComPtr<ID3D11SamplerState> SSLinearWrap = nullptr;
-	//D3D11_SAMPLER_DESC sampDesc;
-	//ZeroMemory(&sampDesc, sizeof(sampDesc));
-
-	//// 线性过滤模式
-	//sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	//sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	//sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	//sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	//sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	//sampDesc.MinLOD = 0;
-	//sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	//HR(m_pDevice.GetDevice()->CreateSamplerState(&sampDesc, SSLinearWrap.GetAddressOf()));
 
 	forwardPass->GetGpuProgram()->AddConstantBuffer(frameCBO);
 	forwardPass->GetGpuProgram()->AddConstantBuffer(resizeCBO);
 	forwardPass->GetGpuProgram()->AddConstantBuffer(lightCBO);
-	//forwardPass->GetGpuProgram()->AddConstantBuffer(materialCBO);
-	//forwardPass->GetGpuProgram()->AddTextureResource(textureView);
-	//forwardPass->GetGpuProgram()->AddSamplerResource(SSLinearWrap);
+	forwardPass->GetGpuProgram()->AddConstantBuffer(worldCBO);
+
 
 }
-
-
-//bool GpuProgramCreateTextureResource(FDx11GpuProgram* program, const std::string& imagePath)
-//{
-//	FDx11GpuProgram::GpuTextureView texturePtr = 
-//}
-
 
 
 bool FDx11App::InitGameObject()
@@ -169,7 +143,6 @@ bool FDx11App::InitGameObject()
 	if (controller)
 	{
 		controller->SetHomePosition(Vec3f(4.0f, 0.0f, 0.0f), Vec3f(0.0, 0.0, 0.0));
-		//std::cout << "111111111111111111";
 	}
 	
 	sceneGroup = new FGroup("SceneData");
@@ -201,6 +174,8 @@ void FDx11App::DrawScene()
 	m_pDevice.deviceContext->ClearDepthStencilView(m_pDepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	ExecuteMainPass(forwardPass.get());
 	sceneGroup->Draw();
+	//ExecuteMainPass(skyPass.get());
+	//sceneGroup->Draw();
 
 	HR(m_pSwapChain->Present(0, 0));
 }
@@ -221,7 +196,7 @@ void FDx11App::UpdateScene(float dt)
 	frameCBO->Upload<CBChangesEveryFrame>(
 		CBChangesEveryFrame{
 		mainCamera->GetViewMatrix(),
-		scale(20.0f,20.0f,20.0f) * rotate(3.14f, Vec3<float>(0.0f,1.0f,0.0f)),
+		//scale(20.0f,20.0f,20.0f) * rotate(3.14f, Vec3<float>(0.0f,1.0f,0.0f)),
 		Vec4f(mainCamera->GetEyePos(),1.0f)
 		}
 	);

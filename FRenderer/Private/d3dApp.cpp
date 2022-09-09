@@ -346,11 +346,17 @@ LRESULT D3DApp::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             eventQueue.TransformMouseXY(mx, my);
             eventQueue.MouseDrag(mx, my, delta, eventQueue.GetDragBtn());
         }
+        break;
        
 
     }
-
-      
+    case WM_MOUSEWHEEL:
+    {
+        ////////////////////
+        float delta = Timer::Instance().DeltaTime();
+        eventQueue.MouseScroll(GET_WHEEL_DELTA_WPARAM(wParam) < 0 ? ScrollingMotion::SCROLL_DOWN : ScrollingMotion::SCROLL_UP, delta);
+        break;
+    }
     case WM_KEYDOWN:
     case WM_SYSKEYDOWN:
     case WM_KEYUP:

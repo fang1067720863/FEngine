@@ -353,6 +353,12 @@ public:
         bufferdEvents.emplace_back(evt);
         return true;
     }
+    bool MouseScroll(ScrollingMotion motion, float delta)
+    {
+        Ptr<Event> evt = new MouseScrollEvent(motion, delta);
+        bufferdEvents.emplace_back(evt);
+        return true;
+    }
 
     bool KeyUp(WPARAM wParam, LPARAM lParam, KeySymbol& keySymbol, KeySymbol& modifiedKeySymbol, KeyModifier& keyModifier)
     {

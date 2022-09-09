@@ -2,7 +2,6 @@
 
 
 #include"FDx11Shader.h"
-
 #include"Reference.h"
 
 #define MAX_MULTIPLE_RENDER_TARGETS 8
@@ -14,7 +13,7 @@ public:
 
 	FDx11Pass(const FDx11Device& _device, const D3D11_VIEWPORT& vp);
 	FDx11Pass(unsigned int numViews,  const D3D11_VIEWPORT& vp,const FDx11Device& _device);
-	bool InitPass(ID3D11Device* device);
+	bool InitPass(const std::string& vs, const std::string& ps);
 	// render target view
 	unsigned int GetNumViews() { return mNumViews; }
 	ID3D11RenderTargetView** GetRenderTargetViewAddress() {
@@ -64,7 +63,7 @@ protected:
 
 	bool InitRenderState();
 
-	bool InitGpuProgram();
+	bool InitGpuProgram(const std::string& vs, const std::string& ps);
 
 	bool InitVertexInputLayout();
 
@@ -85,5 +84,7 @@ protected:
 	FPtr<FDx11VertexInputLayout> mVInputLayout;
 
 	const FDx11Device& mDevice;
+
+	std::string mProgram;
 	//RenderStateSet* mRenderStates;
 };

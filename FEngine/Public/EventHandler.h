@@ -62,6 +62,22 @@ protected:
 		return false;
 
 	}
+	virtual bool Handle(const MouseScrollEvent& event)
+	{
+		
+		Zoom((event._motion == ScrollingMotion::SCROLL_UP ? 1.0f : -1.0f) * 0.1f);
+		UpdateCamera();
+		return true;
+	}
+	virtual bool Handle(const MouseDragEvent& event)
+	{
+		double pitch = 0.005 * (event._in_x < 0 ? -1.0 : 1.0);
+		double yaw = 0.005 * (event._in_y < 0 ? -1.0 : 1.0);
+		RotateYawAndPitch(_rotation, pitch, yaw);
+		UpdateCamera();
+		return false;
+	}
+	
 	void UpdateCamera()
 	{
 		_camera->SetViewMatrix(GetInverseMatrix());
@@ -94,24 +110,23 @@ protected:
 
 	void Walk(float distance)
 	{
-		_eye += _rotation * Vec3f(distance, 0.0f, 0.0f);
+		_eye +=  Vec3f(distance, 0.0f, 0.0f);
 	}
 	void Strafe(float distance)
 	{
-		_eye += _rotation * Vec3f(0.0f, 0.0f, distance);
+		_eye +=  Vec3f(0.0f, 0.0f, distance);
 	}
 	void GoUp(float distance)
 	{
-		_eye += _rotation * Vec3f(0.0f, distance, 0.0f);
+		_eye +=  Vec3f(0.0f, distance, 0.0f);
 	}
 
-	virtual bool Handle(const MouseDragEvent& event)
+	void Zoom(float delta)
 	{
-		double pitch = 0.005 * (event._in_x < 0 ? -1.0 : 1.0);
-		RotateYawAndPitch(_rotation, pitch, 0.0);
-		UpdateCamera();
-		return false;
+		_eye +=  Vec3f(delta, 0.0f, 0.0f);
 	}
+
+
 
 	void RotateYawAndPitch(Quatf &rotation, double yaw, double pitch, const Vec3f& localUp = Vec3f(1.0f))
 	{
@@ -120,7 +135,7 @@ protected:
 		Quatf rotatePitch;
 		Quatf newRotation;
 
-		rotateYaw.makeRotate(-yaw, rotation * Vec3f(0.0f, 1.0f, 0.0f));
+		rotateYaw.makeRotate(-yaw, Vec3f(0.0f, 1.0f, 0.0f));
 
 		
 

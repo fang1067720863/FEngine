@@ -11,7 +11,7 @@
 #include"Geometry.h"
 #include"Node.h"
 #include"UtfConverter.h"
-
+#include"Constant.h"
 struct Primitive
 {
 	uint32_t firstIndex = 0;
@@ -98,6 +98,9 @@ public:
 	};
 	void PreDraw()
 	{
+
+		Ptr<ConstantBufferObject> buffer = ConstantBufferPool::Instance().GetResource("world");
+		buffer->Upload<CBEveryObject>(CBEveryObject{ scale(20.0f,20.f,20.0f )});
 		// set Material Params
 		for (auto uniformSlot : mMaterialSlot.uniformSlots)
 		{
@@ -149,6 +152,8 @@ public:
 	
 	void InitPbrMaterial()
 	{
+		
+
 		Ptr<ConstantBufferObject> materialCBO = ConstantBufferPool::Instance().CreateDeviceResource("pbrMaterial", sizeof(PbrMaterialMetalRoughness), device);
 		
 		int32_t materialSlot = mGeomtry->materialSlot;

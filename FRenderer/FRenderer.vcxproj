@@ -162,6 +162,7 @@
     <ClCompile Include="Private\test.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Public\Constant.h" />
     <ClInclude Include="Public\d3dApp.h" />
     <ClInclude Include="Public\FDx11.h" />
     <ClInclude Include="Public\FDx11App.h" />

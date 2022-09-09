@@ -5,7 +5,6 @@
 cbuffer m_CBFrame : register(b0)
 {
 	matrix g_View;  // 该教程往后将使用默认的列主矩阵，但需要在C++代码端预先将矩阵进行转置。
-	matrix g_World;
 	float4 g_EyePosW;
 }
 cbuffer m_CBOnResize : register(b1)
@@ -16,6 +15,12 @@ cbuffer CBChangesRarely : register(b2)
 {
 	DirectionalLight g_DirLight;
 }
+cbuffer CBEveryObject : register(b3)
+{
+	matrix g_World;
+}
+
+
 
 
 struct VertexPosNormalTex
