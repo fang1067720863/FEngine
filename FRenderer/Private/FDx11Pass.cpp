@@ -1,4 +1,5 @@
 #include"../Public/FDx11Pass.h"
+#include"../Public/FDx11RenderState.h"
 
 FDx11Pass::FDx11Pass(const FDx11Device& _device,const D3D11_VIEWPORT& vp) :mDevice(_device)
 {
@@ -26,18 +27,18 @@ bool FDx11Pass::InitPass(const std::string& vs, const std::string& ps)
 	{
 		return false;
 	}
-	if (!InitRenderState())
+	/*if (!InitRenderState())
 	{
 		return false;
-	}
+	}*/
 	if (!InitGpuProgram(vs,ps))
 	{
 		return false;
 	}
-	if (!InitVertexInputLayout())
+	/*if (!InitVertexInputLayout())
 	{
 		return false;
-	}
+	}*/
 	
 	
 }
@@ -117,8 +118,14 @@ bool FDx11Pass::InitRenderTexture(ID3D11Device* device)
 }
 
 
-bool FDx11Pass::InitRenderState()
+bool FDx11Pass::UseRenderState()
 {
+	auto dsState = DepthStencilStateResoucePool::Instance().GetResource(DepthStencilStateType::LESS_EQUAL);
+	auto bsState = BlendStateResoucePool::Instance().GetResource(BlendStateType::ADDITIVE);
+	auto rsState = RasterStateResoucePool::Instance().GetResource(RasterizeStateType::RS_NO_CULL);
+	mDevice.GetDeviceContext()->RSSetState(rsState.Get());
+	mDevice.GetDeviceContext()->OMSetDepthStencilState(dsState.Get(), 0);
+	mDevice.GetDeviceContext()->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF);
 	return true;
 }
 
@@ -129,9 +136,9 @@ bool FDx11Pass::InitGpuProgram(const std::string& vs, const std::string& ps)
 
 }
 
-bool FDx11Pass::InitVertexInputLayout()
-{
-	//magic
-	mVInputLayout = new FDx11VertexInputLayout(VertexElementType::POSITION, mGpuProgram.get() ,mDevice);
-	return true;
-}
+//bool FDx11Pass::InitVertexInputLayout()
+//{
+//	//magic
+//	mVInputLayout = new FDx11VertexInputLayout(VertexElementType::POSITION, mGpuProgram.get() ,mDevice);
+//	return true;
+//}

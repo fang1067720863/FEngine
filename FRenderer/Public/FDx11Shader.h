@@ -51,8 +51,6 @@ public:
 	bool Init()
 	{
 		std::string shaderPath = GLOBAL_PATH + "Shader//";
-	/*	vsFileName = "DefaultVertex";
-		psFileName = "PbrPS";*/
 		const std::string hlslExt = ".hlsl";
 		const std::string csoExt = ".cso";
 
@@ -61,11 +59,11 @@ public:
 		HR(device.GetDevice()->CreateVertexShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, mVertexShader.GetAddressOf()));
 		// 创建顶点布局
 		HR(device.GetDevice()->CreateInputLayout(PNT_InputElement, ARRAYSIZE(PNT_InputElement), blob->GetBufferPointer(), blob->GetBufferSize(), inputLayout.GetAddressOf()));
-		//HR(device.GetDevice()->CreateInputLayout(PNT_InputElement, ARRAYSIZE(PNT_InputElement), blob->GetBufferPointer(), blob->GetBufferSize(), inputLayout.GetAddressOf()));
 		HR(CreateShaderFromFile(ConvertUtf(shaderPath + psFileName + csoExt).c_str(), ConvertUtf(shaderPath + psFileName + hlslExt).c_str(), "PS", "ps_5_0", blob.ReleaseAndGetAddressOf()));
 		HR(device.GetDevice()->CreatePixelShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, mPixelShader.GetAddressOf()));
 		return true;
 	}
+
 
 	bool UseProgram()
 	{

@@ -1,7 +1,6 @@
 #pragma once
 
 #include"FDx11RenderTarget.h"
-
 #include"FDx11Mesh.h"
 #include"FDx11Pass.h"
 #include"FTimer.h"
@@ -12,8 +11,6 @@
 #include"UtfConverter.h"
 #include"Group.h"
 #include"Constant.h"
-
-
 
 
 class GLTFModel;
@@ -27,9 +24,10 @@ public:
 	bool InitSinglePass();
 	void ExecuteMainPass(FDx11Pass* pass);
 
-	void ClearFrameBuffer(FDx11Pass* GBufferPass);
-	void InitCommmonConstantBuffer();
-	void InitSamplerResourcePool();
+	void ClearFrameBuffer(FDx11Pass* pass);
+	void _InitForwardPassShaderInput();
+	void _InitSkyPassShaderInput();
+	
 	// ÏñËØ×ÅÉ«Æ÷
 	FDx11App(HINSTANCE hInstance, const std::wstring& windowName, int initWidth, int initHeight);
 	
@@ -38,22 +36,20 @@ public:
 
 	}
 
-	
-
-
 	bool Init() override
 	{
 		if (!D3DApp::Init())
 			return false;
-		InitSamplerResourcePool();
+		
 
 		FindGlobalPath();
-		if (!InitSinglePass())
-			return false;
 		if (!InitGameObject())
 			return false;
+		if (!InitSinglePass())
+			return false;
 		
-		InitCommmonConstantBuffer();
+		
+		
 		
 		return true;
 	}
@@ -72,9 +68,7 @@ private:
 	Ptr<FDx11Mesh> boxMesh;
 	Ptr<FGroup> sceneGroup;
 	Ptr<FCamera> mainCamera;
+	Ptr<FNode> skybox;
 
 	std::shared_ptr<GLTFModel> gltfModel;
-
-	//std::shared_ptr<GLTFModel> gltfModel;
-
 };

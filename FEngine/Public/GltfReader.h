@@ -4,7 +4,6 @@
 #include <Windows.h>
 #include"Group.h"
 #include"Geometry.h"
-#include"Mesh.h"
 
 
 struct GLTFModel
@@ -53,6 +52,8 @@ protected:
 	bool loadMaterials(const tinygltf::Model& glTFInput, GLTFModel& model);
 	bool loadTextures(const tinygltf::Model& glTFInput, GLTFModel& model);
 	bool loadNode(const tinygltf::Node& inputNode, const tinygltf::Model& input, GLTFModel& model);
+
+	File modelFile;
 };
 #endif
 

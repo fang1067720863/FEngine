@@ -89,7 +89,8 @@ float3 BRDF(float VdotH,
     float3 f0,
     float3 diffuseColor,
     float3 lightColor,
-    float ao)
+    float ao,
+    float3 emissive)
 {
 
 
@@ -104,6 +105,7 @@ float3 BRDF(float VdotH,
     float3 color = NdotL * lightColor * (diffuseContrib + specContrib);
 
     color *= ao;
+    color += emissive;
 
     //#ifdef EMISSIVE_MAP
     //    vec3 emissive = SRGBtoLINEAR(texture(emissiveMap, texCoord0)).rgb * pbr.emissiveFactor.rgb;

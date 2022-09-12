@@ -1,9 +1,11 @@
 #pragma once
 
 #include<string>
-#include"Buffer.h"
-#include"FDx11.h"
 #include<D3DX11tex.h>
+
+#include"BufferDescription.h"
+#include"FDx11.h"
+#include"Reference.h"
 #include"UtfConverter.h"
 
 

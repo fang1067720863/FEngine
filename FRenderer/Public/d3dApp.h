@@ -9,6 +9,7 @@
 #include"Event.h"
 #include"EventQueue.h"
 #include"Timer.h"
+#include"FDx11ResourceFactory.h"
 
 class D3DApp
 {
@@ -69,9 +70,6 @@ protected:
     std::wstring m_MainWndCaption;                        // 主窗口标题
     int m_ClientWidth;                                    // 视口宽度
     int m_ClientHeight;                                   // 视口高度
-  /*  typedef std::list<Ptr<Event>> BufferdEvents;
-    BufferdEvents bufferdEvents;
-    Ptr<KeyboardMap> _keyBoardMap;*/
 
     BufferedEventQueue eventQueue;
 

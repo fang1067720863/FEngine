@@ -6,10 +6,7 @@
 #include<string>
 #include<functional>
 
-#define PROPERTY(T,var) public: \
-inline void Set##var(const T& _var){m##var=_var;}\
-T Get##var() const{return m##var;}\
-private: T m##var;
+
 
 class FNode:public FObject
 {
@@ -24,10 +21,11 @@ public:
 	{
 
 	}
-	inline const Mat4 GetWorldTransform() const { return mWorldTransform; }
+	
 
 	inline void SetRotate(float angle_radians, float x, float y, float z) {
-		mWorldTransform.rotate(angle_radians, x, y, z);
+		mRotation.makeRotate(angle_radians, x, y, z);
+		dirty = true;
 	}
 
 	void Update(float dt)
@@ -35,11 +33,14 @@ public:
 		if (dirty)
 		{
 			mLocalTransform = translate(mPosition) * rotate(mRotation) * scale(mScale);
+			dirty = false;
+			
 		}
 		if (updateCB)
 		{
 			updateCB(dt);
 		}
+		
 	}
 
 	virtual void Draw()
@@ -57,7 +58,7 @@ private:
 	PROPERTY(Vec3f, Scale)
 	PROPERTY(Quatf, Rotation)
 
-	Mat4  mWorldTransform;
+	//Mat4  mWorldTransform;
 	bool  dirty{ true };
 	NodeUpdateCallback updateCB;
 };

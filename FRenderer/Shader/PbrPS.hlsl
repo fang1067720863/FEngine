@@ -23,6 +23,7 @@ float4 PS(VertexPosHWNormalTex pIn) : SV_Target
 
     float roughnessFactor = 1.0;
     float metallicFactor = 1.0;
+    float3 emissiveFactor = float3(1.0f, 1.0f, 1.0f);
 
         /* float4 baseColorFactor = g_Material
      float3 emissiveFactor;
@@ -40,10 +41,11 @@ float4 PS(VertexPosHWNormalTex pIn) : SV_Target
     float4 baseColor = gBaseColorMap.Sample(basicSampler, pIn.Tex);
     float4 mrSample = gMetalRoughnessMap.Sample(basicSampler, pIn.Tex);
     float ao = gAoMap.Sample(basicSampler, pIn.Tex).r;
+    float3 emissive = gEmissiveMap.Sample(basicSampler, pIn.Tex).rgb;
     
     roughness = mrSample.g * roughnessFactor;
     metallic = mrSample.b * metallicFactor;
-
+    emissive *= emissiveFactor;
 
 
     float3 f0 = float3(0.04, 0.04, 0.04);
@@ -62,7 +64,7 @@ float4 PS(VertexPosHWNormalTex pIn) : SV_Target
     float NdotL = max(dot(n, l), 0.0f);
     float NdotV = max(dot(n, v), 0.0f);
 
-    Lo += BRDF(VdotH, NdotH, NdotL, NdotV, roughness, metallic, f0, diffuseColor, lightColor, ao);
+    Lo += BRDF(VdotH, NdotH, NdotL, NdotV, roughness, metallic, f0, diffuseColor, lightColor, ao, emissive);
 
    /* for (int i = 0; i < lightNum; ++i)
     {

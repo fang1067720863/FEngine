@@ -50,6 +50,7 @@ public:
 	{
 		return mVInputLayout.get();
 	}
+	bool UseRenderState();
 	ComPtr<ID3D11RenderTargetView> mMainRTV;
 	ComPtr<ID3D11Texture2D> mMainRTTextures;
 	ComPtr<ID3D11DepthStencilView> mDepthStencilView;
@@ -61,11 +62,11 @@ protected:
 
 	bool InitRenderTexture(ID3D11Device* device);
 
-	bool InitRenderState();
+	
 
 	bool InitGpuProgram(const std::string& vs, const std::string& ps);
 
-	bool InitVertexInputLayout();
+	//bool InitVertexInputLayout();
 
 	// ‰÷»æƒø±Í ”Õº
 	ID3D11RenderTargetView* mRenderTargetView[MAX_MULTIPLE_RENDER_TARGETS];		
@@ -86,5 +87,5 @@ protected:
 	const FDx11Device& mDevice;
 
 	std::string mProgram;
-	//RenderStateSet* mRenderStates;
+	
 };

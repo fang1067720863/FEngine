@@ -126,7 +126,8 @@ public:
     //}
     void makeRotate(value_type angle, value_type x, value_type y, value_type z)
     {
-        const value_type epsilon = 0.0000001;
+        const value_type epsilon = (value_type)0.0000001;
+        const value_type onehalf = (value_type)0.5;
 
         value_type length = sqrt(x * x + y * y + z * z);
         if (length < epsilon)
@@ -136,9 +137,9 @@ public:
             return;
         }
 
-        value_type inversenorm = 1.0 / length;
-        value_type coshalfangle = cos(0.5 * angle);
-        value_type sinhalfangle = sin(0.5 * angle);
+        value_type inversenorm = (value_type)1.0 / length;
+        value_type coshalfangle = cos(onehalf * angle);
+        value_type sinhalfangle = sin(onehalf * angle);
 
         value[0] = x * sinhalfangle * inversenorm;
         value[1] = y * sinhalfangle * inversenorm;

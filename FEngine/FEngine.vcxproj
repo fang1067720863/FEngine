@@ -145,26 +145,30 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Public\BufferDescription.h" />
+    <ClInclude Include="Public\Camera.h" />
     <ClInclude Include="Public\CameraManipulator.h" />
+    <ClInclude Include="Public\CommonType.h" />
     <ClInclude Include="Public\Event.h" />
     <ClInclude Include="Public\EventHandler.h" />
     <ClInclude Include="Public\EventQueue.h" />
     <ClInclude Include="Public\Factory.h" />
     <ClInclude Include="Public\GltfReader.h" />
     <ClInclude Include="Public\GraphicViewWin32.h" />
+    <ClInclude Include="Public\Group.h" />
     <ClInclude Include="Public\Handle.h" />
     <ClInclude Include="Public\Image.h" />
     <ClInclude Include="Public\Light.h" />
     <ClInclude Include="Public\Material.h" />
     <ClInclude Include="Public\FMath.h" />
     <ClInclude Include="Public\Matrix.h" />
+    <ClInclude Include="Public\Node.h" />
     <ClInclude Include="Public\Quat.h" />
     <ClInclude Include="Public\Reference.h" />
     <ClInclude Include="Public\Core.h" />
-    <ClInclude Include="Public\Shader.h" />
     <ClInclude Include="Public\ShaderInput.h" />
     <ClInclude Include="Public\ShaderParameter.h" />
     <ClInclude Include="Public\ShaderResource.h" />
+    <ClInclude Include="Public\Shape.h" />
     <ClInclude Include="Public\Texture.h" />
     <ClInclude Include="Public\Timer.h" />
     <ClInclude Include="Public\UtfConverter.h" />
@@ -181,6 +185,7 @@
     <ClCompile Include="Private\Group.cpp" />
     <ClCompile Include="Private\Node.cpp" />
     <ClCompile Include="Private\Scene.cpp" />
+    <ClCompile Include="Private\Shape.cpp" />
     <ClCompile Include="Private\test.cpp" />
     <ClCompile Include="Private\Timer.cpp" />
     <ClCompile Include="Private\UtfConverter.cpp" />

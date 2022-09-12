@@ -8,12 +8,14 @@
 #define TINYGLTF_NO_INCLUDE_STB_IMAGE_WRITE
 
 #include<tiny_gltf.h>
+#include"UtfConverter.h"
 GltfReader::GltfReader()
 {
 }
-bool GltfReader::loadAssets(const std::string& path, GLTFModel& model)
+bool GltfReader::loadAssets(const std::string& _modelFile, GLTFModel& model)
 {
-	loadglTFFile(path, model);
+	modelFile = File(_modelFile);
+	loadglTFFile(_modelFile, model);
 	return true;
 }
 bool GltfReader::loadglTFFile(const std::string& filename, GLTFModel& model)
@@ -197,9 +199,9 @@ bool GltfReader::loadNode(const tinygltf::Node& inputNode, const tinygltf::Model
 				arrayNor->push_back(Vec3f(normalsBuffer[v * 3], normalsBuffer[v * 3 + 1], normalsBuffer[v * 3 + 2]));
 				arrayTex0->push_back(Vec2f(texCoordsBuffer[v * 2], texCoordsBuffer[v * 2 + 1]));
 			}
-			geom->SetVertexPositionArray(arrayPos.get());
-			geom->SetVertexNormalArray(arrayNor.get());
-			geom->SetVertexTexcoordArray(arrayTex0.get());
+			geom->SetPositionArray(arrayPos.get());
+			geom->SetNormalArray(arrayNor.get());
+			geom->SetTexcoordArray(arrayTex0.get());
 		}
 		// Indices
 		{
@@ -243,7 +245,8 @@ bool GltfReader::loadNode(const tinygltf::Node& inputNode, const tinygltf::Model
 	}
 	
 	geom->Compile();
-
+	geom->SetMaterialType(MaterialType::Pbr);
+	geom->SetModelFile(modelFile);
 	model.node = node;
 
 	return true;

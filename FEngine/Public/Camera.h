@@ -43,9 +43,9 @@ public:
     {
         SetFrustum(frustum.mFovY, frustum.mAspect, frustum.mNearZ, frustum.mFarZ);
       
-        DirectX::XMMATRIX  a = DirectX::XMMatrixPerspectiveFovLH(frustum.mFovY, frustum.mAspect, frustum.mNearZ, frustum.mFarZ);
+      /*  DirectX::XMMATRIX  a = DirectX::XMMatrixPerspectiveFovLH(frustum.mFovY, frustum.mAspect, frustum.mNearZ, frustum.mFarZ);
         DirectX::XMFLOAT4X4 res;
-        XMStoreFloat4x4(&res, a);
+        XMStoreFloat4x4(&res, a);*/
         
     }
     void SetFrustum(float fovy_radians, float aspectRatio, float zNear, float zFar)

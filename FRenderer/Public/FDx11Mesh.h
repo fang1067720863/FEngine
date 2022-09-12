@@ -3,6 +3,7 @@
 
 #include"FDx11BufferObject.h"
 #include"FDx11InpuyLayout.h"
+#include"FDx11RenderState.h".h"
 #include"FDx11ResourceFactory.h"
 
 //#include"Material.h"
@@ -65,8 +66,24 @@ public:
 		{
 			mIBO = new IndexBufferObject(geom->GetCompiledIndexDataSize(), geom->GetCompiledIndexData(), device, geom->GetIndexELementNum());
 		}
-		//InitNormalMaterial();
-		InitPbrMaterial();
+		switch (geom->GetMaterialType())
+		{
+		case MaterialType::None:
+			break;
+		case MaterialType::Pbr:
+			InitPbrMaterial();
+			break;
+		case MaterialType::Phong:
+			InitNormalMaterial();
+			break;
+		case MaterialType::SkyBox:
+			InitSkyBoxMaterial();
+			break;
+		default:
+			break;
+		}
+		
+		
 		
 	}
 	struct MaterialSlot
@@ -96,11 +113,16 @@ public:
 		vector<SamplerSlot> samplerSlots;
 
 	};
+	
+
 	void PreDraw()
 	{
-
+		// set model matrix
+		
 		Ptr<ConstantBufferObject> buffer = ConstantBufferPool::Instance().GetResource("world");
-		buffer->Upload<CBEveryObject>(CBEveryObject{ scale(20.0f,20.f,20.0f )});
+		buffer->Upload<CBEveryObject>(CBEveryObject{ this->GetLocalTransform() });
+		
+		
 		// set Material Params
 		for (auto uniformSlot : mMaterialSlot.uniformSlots)
 		{
@@ -125,7 +147,7 @@ public:
 		}
 		for (auto samplerSlot : mMaterialSlot.samplerSlots)
 		{
-			auto sampler = SamplerResoucePool::Instance().GetResource(SamplerType::SSLinearWrap);
+			auto sampler = SamplerResoucePool::Instance().GetResource(SamplerStateType::LINIEAR_WRAP);
 			ID3D11SamplerState* samplerArray[1];
 			samplerArray[0] = sampler.Get();
 			device.GetDeviceContext()->PSSetSamplers(0, samplerSlot.num, samplerArray);
@@ -144,7 +166,7 @@ public:
 		auto path = GLOBAL_PATH + "Model//TexturesCom_Brick_BlocksBare_1K_albedo.tif";
 		
 		int32_t resourceSlot = ShaderResoucePool::Instance().CreateDeviceResource(path, device);
-		int32_t mapSlot = 0;  // fixed in pbr shader
+		int32_t mapSlot = 0;  // fixed in default ps shader
 		mMaterialSlot.textureSlots.push_back(MaterialSlot::TextureSlot{ mapSlot, 1, resourceSlot });
 
 		mMaterialSlot.samplerSlots.push_back(MaterialSlot::SamplerSlot{ 0, 1, 1 });
@@ -153,11 +175,11 @@ public:
 	void InitPbrMaterial()
 	{
 		
-
 		Ptr<ConstantBufferObject> materialCBO = ConstantBufferPool::Instance().CreateDeviceResource("pbrMaterial", sizeof(PbrMaterialMetalRoughness), device);
 		
 		int32_t materialSlot = mGeomtry->materialSlot;
 		int32_t materialMapSlot = mGeomtry->materialMapSlot;
+		string path = mGeomtry->GetModelFile().GetFilePath();
 
 		MaterialMapPtr mapPtr = MaterialMapBuilder::Instance().GetResource(materialMapSlot);
 		
@@ -166,26 +188,35 @@ public:
 		const uint32_t PbrMaterialParamSlot = 3; // fixed in pbr shader
 		mMaterialSlot.uniformSlots.push_back(MaterialSlot::UniformSlot{ PbrMaterialParamSlot, false, true, 1, materialCBO->GetBufferSlot() });
 
-		int32_t resourceSlot =ShaderResoucePool::Instance().CreateDeviceResource(mapPtr->baseColorMap.uri, device);
+		int32_t resourceSlot =ShaderResoucePool::Instance().CreateDeviceResource(path + mapPtr->baseColorMap.uri, device);
 		int32_t mapSlot = 0;  // fixed in pbr shader
 		mMaterialSlot.textureSlots.push_back(MaterialSlot::TextureSlot{ mapSlot, 1, resourceSlot });
 
-		resourceSlot = ShaderResoucePool::Instance().CreateDeviceResource(mapPtr->metalRoughnessMap.uri, device);
+		resourceSlot = ShaderResoucePool::Instance().CreateDeviceResource(path + mapPtr->metalRoughnessMap.uri, device);
 		mapSlot = 1;  // fixed in pbr shader
 		mMaterialSlot.textureSlots.push_back(MaterialSlot::TextureSlot{ mapSlot, 1, resourceSlot });
 
-		resourceSlot = ShaderResoucePool::Instance().CreateDeviceResource(mapPtr->normalMap.uri, device);
+		resourceSlot = ShaderResoucePool::Instance().CreateDeviceResource(path + mapPtr->normalMap.uri, device);
 		mapSlot = 2;  // fixed in pbr shader
 		mMaterialSlot.textureSlots.push_back(MaterialSlot::TextureSlot{ mapSlot, 1, resourceSlot });
 
-		resourceSlot = ShaderResoucePool::Instance().CreateDeviceResource(mapPtr->aoMap.uri, device);
+		resourceSlot = ShaderResoucePool::Instance().CreateDeviceResource(path + mapPtr->aoMap.uri, device);
 		mapSlot = 3;  // fixed in pbr shader
 		mMaterialSlot.textureSlots.push_back(MaterialSlot::TextureSlot{ mapSlot, 1, resourceSlot });
 
-		resourceSlot = ShaderResoucePool::Instance().CreateDeviceResource(mapPtr->emissiveMap.uri, device);
+		resourceSlot = ShaderResoucePool::Instance().CreateDeviceResource(path + mapPtr->emissiveMap.uri, device);
 		mapSlot = 4;  // fixed in pbr shader
 		mMaterialSlot.textureSlots.push_back(MaterialSlot::TextureSlot{ mapSlot, 1, resourceSlot });
 
+		mMaterialSlot.samplerSlots.push_back(MaterialSlot::SamplerSlot{ 0, 1, 1 });
+	}
+
+	void InitSkyBoxMaterial()
+	{
+		string path = mGeomtry->GetModelFile().GetFilePath();
+		int32_t resourceSlot = ShaderResoucePool::Instance().CreateDeviceResource(path + "\\skybox.dds", device);
+		int32_t mapSlot = 0;  // fixed in default sky shader
+		mMaterialSlot.textureSlots.push_back(MaterialSlot::TextureSlot{ mapSlot, 1, resourceSlot });
 		mMaterialSlot.samplerSlots.push_back(MaterialSlot::SamplerSlot{ 0, 1, 1 });
 	}
 
@@ -218,6 +249,6 @@ protected:
 	Ptr<DisJointVertexBufferObject> mDisjointVBO;
 	IBOPtr mIBO;
 	MaterialSlot mMaterialSlot;
-	FGeometry* mGeomtry;   // weak ptr
+	Ptr<FGeometry> mGeomtry;   // weak ptr
 };
 

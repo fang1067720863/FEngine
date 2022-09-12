@@ -3,6 +3,7 @@
 #include"FDx11.h"
 #include <windowsx.h>
 #include <sstream>
+#include"FDx11RenderState.h"
 
 #pragma warning(disable: 6031)
 #include"Event.h"
@@ -120,6 +121,11 @@ bool D3DApp::Init()
 
     if (!InitDirect3D())
         return false;
+    SamplerResoucePool::Instance().Init(m_pDevice);
+    RasterStateResoucePool::Instance().Init(m_pDevice);
+    BlendStateResoucePool::Instance().Init(m_pDevice);
+    DepthStencilStateResoucePool::Instance().Init(m_pDevice);
+    
 
     return true;
 }
@@ -562,5 +568,4 @@ void D3DApp::CalculateFrameStats()
     //    timeElapsed += 1.0f;
     //}
 }
-
 

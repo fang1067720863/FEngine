@@ -1,5 +1,6 @@
 #include"FDx11App.h"
 #include<D3DX11tex.h>
+#include"Shape.h"
 #include"GltfReader.h"
 
 void FDx11App::ExecuteMainPass(FDx11Pass* pass)
@@ -22,6 +23,7 @@ void FDx11App::ExecuteMainPass(FDx11Pass* pass)
 	m_pDevice.GetDeviceContext()->IASetInputLayout(pass->GetGpuProgram()->inputLayout.Get());
 	// shader & shader resource
 	pass->GetGpuProgram()->UseProgram();
+	pass->UseRenderState();
 	
 
 }
@@ -29,7 +31,7 @@ void FDx11App::ExecuteMainPass(FDx11Pass* pass)
 
 
 
-void FDx11App::ClearFrameBuffer(FDx11Pass* GBufferPass)
+void FDx11App::ClearFrameBuffer(FDx11Pass* pass)
 {
 
 
@@ -37,7 +39,7 @@ void FDx11App::ClearFrameBuffer(FDx11Pass* GBufferPass)
 	UINT8 stencil = 0;
 	static float black[4] = { 0.0f, 0.0f, 1.0f, 1.0f };	// RGBA = (0,0,0,255)
 
-	unsigned int numberOfViews = GBufferPass->GetNumViews();
+	unsigned int numberOfViews = pass->GetNumViews();
 	/*for (unsigned int i = 0; i < numberOfViews; ++i)
 	{
 		device.GetDeviceContext()->ClearRenderTargetView(GBufferPass->GetRenderTargetView(i), reinterpret_cast<const float*>(&black));
@@ -50,7 +52,7 @@ void FDx11App::ClearFrameBuffer(FDx11Pass* GBufferPass)
 
 
 	m_pDevice.GetDeviceContext()->ClearDepthStencilView(
-		GBufferPass->GetDepthStencilView(),
+		pass->GetDepthStencilView(),
 		ClearFlags, depth, static_cast<UINT8>(stencil));
 	m_pDevice.GetDeviceContext()->ClearDepthStencilView(
 		m_pDepthStencilView.Get(),
@@ -66,43 +68,27 @@ bool FDx11App::InitSinglePass()
 {
 	forwardPass = new FDx11Pass(1, m_ScreenViewport,m_pDevice);
 	forwardPass->InitPass("DefaultVertex", "PbrPS");
+	_InitForwardPassShaderInput();
+
+	skyPass = new FDx11Pass(1, m_ScreenViewport, m_pDevice);
+	skyPass->InitPass("skybox_vs", "skybox_ps");
+	_InitSkyPassShaderInput();
 	return true;
 }
-void FDx11App::InitSamplerResourcePool()
+void FDx11App::_InitSkyPassShaderInput()
 {
-	ComPtr<ID3D11SamplerState> samplerLinearWrap;
 
-	D3D11_SAMPLER_DESC sampDesc;
-	ZeroMemory(&sampDesc, sizeof(sampDesc));
+	Ptr<ConstantBufferObject> skyMVP = ConstantBufferPool::Instance().CreateDeviceResource("skyMVP", sizeof(Mat4), m_pDevice);
 
-	// 线性过滤模式
-	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	sampDesc.MinLOD = 0;
-	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	HR(m_pDevice.GetDevice()->CreateSamplerState(&sampDesc, samplerLinearWrap.GetAddressOf()));
-
-	SamplerResoucePool::Instance().CreateResouce(SamplerType::SSLinearWrap, samplerLinearWrap);
-
-	ComPtr<ID3D11SamplerState> samplerAnistropicWrap;
-
-	// 各向异性过滤模式
-	sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
-	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	sampDesc.MaxAnisotropy = 4;
-	sampDesc.MinLOD = 0;
-	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	HR(m_pDevice.GetDevice()->CreateSamplerState(&sampDesc, samplerAnistropicWrap.GetAddressOf()));
-	SamplerResoucePool::Instance().CreateResouce(SamplerType::SSAnistropicWrap, samplerAnistropicWrap);
+	skyMVP->Upload<Mat4>(
+		Mat4{
+			mainCamera->GetViewMatrix() * mainCamera->GetProjMatrix()
+		}
+	);
+	skyPass->GetGpuProgram()->AddConstantBuffer(skyMVP);
 
 }
-void FDx11App::InitCommmonConstantBuffer()
+void FDx11App::_InitForwardPassShaderInput()
 {
 	
 
@@ -129,41 +115,44 @@ void FDx11App::InitCommmonConstantBuffer()
 	forwardPass->GetGpuProgram()->AddConstantBuffer(lightCBO);
 	forwardPass->GetGpuProgram()->AddConstantBuffer(worldCBO);
 
-
 }
 
 
 bool FDx11App::InitGameObject()
 {
+
+	sceneGroup = new FGroup("SceneData");
+
 	mainCamera = new FCamera(Frustum(), "MainCamera");
-	//mainCamera->lookAt<float>(Vec3f(-4.0f, 0.0f, 0.0f), Vec3f(0.0, 0.0, 0.0), Vec3f(0.0, 1.0, 0.0));
-	
 	flyController = new FlyCameraController(mainCamera);
 	FlyCameraController* controller = dynamic_cast<FlyCameraController*>(flyController.get());
 	if (controller)
 	{
 		controller->SetHomePosition(Vec3f(4.0f, 0.0f, 0.0f), Vec3f(0.0, 0.0, 0.0));
 	}
+
+	FBox box(Vec3f(1.0f));
+	FGeometry* skyboxGeom = ShapeGeometryBuilder::instance().BuildBox(box);
+	skyboxGeom->SetMaterialType(MaterialType::SkyBox);
+	skyboxGeom->SetModelFile(File("D:\\GitProject\\FEngine\\FRenderer\\Model"));
+
+	skybox = new FDx11Mesh(skyboxGeom, m_pDevice);
+
 	
-	sceneGroup = new FGroup("SceneData");
 
-
-	//Ptr<FGeometry> boxGeom = ShapeGeometryBuilder::instance().BuildBox(FBox(Vec3f(1.0,1.0,1.0)));
-	//Ptr<FNode> triangle = new FDx11Mesh(boxGeom.get(), m_pDevice);
-	//triangle->SetName("triangle");
-	//FNode* mesh = triangle.get();
-	//// ()是真正执行才能确定的参数  []是只后要处理的对象 
-	///*triangle->SetUpdateCallback([mesh](float dt) {
-	//	static float theta = 0.0f;
-	//	theta += 0.01f * dt;
-	//	mesh->SetRotate(theta, 0.0f, 1.0f, 0.0f);
-	//});*/
-	//sceneGroup->AddChild(triangle);
 	GltfReader reader;
 	gltfModel = make_shared<GLTFModel>();
 	reader.loadAssets("D:\\GitProject\\FEngine\\Assets\\PbrBox\\BoomBox.gltf", *gltfModel.get());
 	Ptr<FNode> gltfMesh = new FDx11Mesh(dynamic_cast<FGeometry*>((gltfModel->node).get()), m_pDevice);
+	gltfMesh->SetScale(Vec3f(20.0f));
 	sceneGroup->AddChild(gltfMesh);
+	gltfMesh->SetUpdateCallback(
+		[gltfMesh](float dt) {
+				static float theta = 0.0f;
+				theta += 0.005f * dt;
+				gltfMesh->SetRotate(theta, 0.0f, 1.0f, 0.0f);
+		});
+	
 	return true;
 }
 
@@ -174,11 +163,13 @@ void FDx11App::DrawScene()
 	m_pDevice.deviceContext->ClearDepthStencilView(m_pDepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	ExecuteMainPass(forwardPass.get());
 	sceneGroup->Draw();
-	//ExecuteMainPass(skyPass.get());
-	//sceneGroup->Draw();
+	ExecuteMainPass(skyPass.get());
+	skybox->Draw();
 
 	HR(m_pSwapChain->Present(0, 0));
 }
+
+
 
 void FDx11App::UpdateScene(float dt)
 {
@@ -196,9 +187,17 @@ void FDx11App::UpdateScene(float dt)
 	frameCBO->Upload<CBChangesEveryFrame>(
 		CBChangesEveryFrame{
 		mainCamera->GetViewMatrix(),
-		//scale(20.0f,20.0f,20.0f) * rotate(3.14f, Vec3<float>(0.0f,1.0f,0.0f)),
 		Vec4f(mainCamera->GetEyePos(),1.0f)
 		}
 	);
-
+	Ptr<ConstantBufferObject> skyMVP = ConstantBufferPool::Instance().GetResource("skyMVP"); 
+	Mat4 V = mainCamera->GetViewMatrix();
+	Mat4 VP{
+		rotate(V.GetRotate()) * mainCamera->GetProjMatrix()
+	};
+	VP.transpose();
+	//V.value[3] = Vec4f(0.0f, 0.0f, 0.0f, 1.0f);
+	skyMVP->Upload<Mat4>(
+		VP
+	);
 }

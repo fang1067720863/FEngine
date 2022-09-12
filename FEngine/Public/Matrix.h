@@ -230,7 +230,7 @@ public:
             q[2] = tq[3];
         }
 
-        s = sqrt(0.25 / tq[j]);
+        s = sqrt((value_type)0.25 / tq[j]);
         q[3] *= s;
         q[0] *= s;
         q[1] *= s;

@@ -8,6 +8,14 @@ struct PhoneMaterial
 {
 
 };
+
+enum class MaterialType
+{
+	None,
+	Pbr,
+	Phong,
+	SkyBox
+};
 struct PbrMaterialMetalRoughness
 {
 	Vec4f baseColorFactor{ 1.0f, 1.0f, 1.0f, 1.0f };

@@ -16,6 +16,11 @@
 //    BLEND_WEIGHTS,
 //    BLEND_INDICES,
 //};
+enum class PrimitiveType : uint8_t {
+    Triange,
+    Quad
+};
+
 enum class GpuContantType : uint8_t
 {
     GCT_FLOAT1,

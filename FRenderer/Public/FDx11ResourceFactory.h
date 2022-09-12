@@ -7,11 +7,7 @@
 #include"Factory.h"
 
 
-enum class SamplerType : uint16_t
-{
-	SSLinearWrap,			            // 线性过滤
-	SSAnistropicWrap		                // 各项异性过滤
-};
+
 
 typedef int32_t TextureSlot;
 
@@ -37,7 +33,7 @@ public:
 	{
 		Resource textureView;
 		
-		HR(D3DX11CreateShaderResourceViewFromFile(_device.GetDevice(), ConvertUtf(filePath + name).c_str(), NULL, NULL, textureView.GetAddressOf(), NULL));
+		HR(D3DX11CreateShaderResourceViewFromFile(_device.GetDevice(), ConvertUtf(name).c_str(), NULL, NULL, textureView.GetAddressOf(), NULL));
 		textureGuid++;
 		resourceMap.insert(std::pair <SLOT, Resource>(textureGuid, textureView));
 		return textureGuid;
@@ -46,11 +42,5 @@ public:
 
 private:
 	TextureSlot textureGuid{ 0 };
-	std::string filePath = "D:\\GitProject\\FEngine\\Assets\\PbrBox\\";
-};
-
-class SamplerResoucePool : public ResourceFactory<ComPtr<ID3D11SamplerState>, SamplerType, SamplerResoucePool>
-{
-
 };
 

@@ -186,6 +186,20 @@ public:
 	inline FObject():FReference() {}
 };
 
+#define PROPERTY(T,var) public: \
+inline void Set##var(const T& _var){m##var=_var;}\
+T Get##var() const{return m##var;}\
+private: T m##var;
 
+#define PROPERTY_DEFAULT(T,var, default) public: \
+inline void Set##var(const T& _var){m##var=_var;}\
+T Get##var() const{return m##var;}\
+private: T m##var{default};
+
+
+#define PROPERTY_REF_PTR(T,var) public: \
+inline void Set##var(T* _var){m##var=_var;}\
+T* Get##var() const{return m##var.get();}\
+private: Ptr<T> m##var;
 
 
