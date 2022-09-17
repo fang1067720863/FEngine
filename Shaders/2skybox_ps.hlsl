@@ -1,4 +1,4 @@
-#include "skybox.hlsli"
+#include "2skybox.hlsli"
 
 TextureCube g_TexCube : register(t0);
 SamplerState g_Sam : register(s0);

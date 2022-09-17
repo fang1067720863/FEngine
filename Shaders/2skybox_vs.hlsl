@@ -1,4 +1,4 @@
-#include "skybox.hlsli"
+#include "2skybox.hlsli"
 
 VertexPosHL VS(VertexPos vIn)
 {
