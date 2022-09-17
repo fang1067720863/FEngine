@@ -3,12 +3,14 @@
 
 #include"FDx11Shader.h"
 #include"Reference.h"
+#include<functional>
 
 #define MAX_MULTIPLE_RENDER_TARGETS 8
 
 
 class FDx11Pass:public FReference
 {
+	using PassCBUpdateCallback = std::function<void(float dt)>;
 public:
 
 	FDx11Pass(const FDx11Device& _device, const D3D11_VIEWPORT& vp);
@@ -55,9 +57,19 @@ public:
 	ComPtr<ID3D11Texture2D> mMainRTTextures;
 	ComPtr<ID3D11DepthStencilView> mDepthStencilView;
 	ComPtr<ID3D11Texture2D> mDepthStencilBuffer;
+
+	void Update(float dt)
+	{
+		if (updateCB)
+		{
+			updateCB(dt);
+		}
+	}
+	void SetUpdateCallback(PassCBUpdateCallback cb) { updateCB = cb; }
+	
 	
 protected:
-
+	PassCBUpdateCallback updateCB;
 	bool InitRenderTargetView(ID3D11Device* device);
 
 	bool InitRenderTexture(ID3D11Device* device);
@@ -87,5 +99,7 @@ protected:
 	const FDx11Device& mDevice;
 
 	std::string mProgram;
+
+	
 	
 };

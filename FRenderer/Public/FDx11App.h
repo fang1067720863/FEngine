@@ -20,6 +20,7 @@ public:
 
 	Ptr<FDx11Pass> forwardPass;
 	Ptr<FDx11Pass> skyPass;
+	Ptr<FDx11Pass> gBufferPass;
 
 	bool InitSinglePass();
 	void ExecuteMainPass(FDx11Pass* pass);
@@ -47,9 +48,6 @@ public:
 			return false;
 		if (!InitSinglePass())
 			return false;
-		
-		
-		
 		
 		return true;
 	}

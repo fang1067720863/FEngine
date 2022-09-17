@@ -117,8 +117,8 @@ bool FindGlobalPath()
         GLOBAL_PATH = "";
     }
     else {
-        GLOBAL_PATH = "D://GitProject//FEngine//FRenderer//";
+        GLOBAL_PATH = "D://GitProject//FEngine//";
     }
-    GLOBAL_PATH = "D://GitProject//FEngine//FRenderer//";
+    GLOBAL_PATH = "D://GitProject//FEngine//";
     return true;
 }

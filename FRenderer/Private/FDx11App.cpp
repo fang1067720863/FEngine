@@ -29,8 +29,6 @@ void FDx11App::ExecuteMainPass(FDx11Pass* pass)
 }
 
 
-
-
 void FDx11App::ClearFrameBuffer(FDx11Pass* pass)
 {
 
@@ -66,32 +64,47 @@ FDx11App::FDx11App(HINSTANCE hInstance, const std::wstring& windowName, int init
 
 bool FDx11App::InitSinglePass()
 {
-	forwardPass = new FDx11Pass(1, m_ScreenViewport,m_pDevice);
-	forwardPass->InitPass("DefaultVertex", "PbrPS");
+	forwardPass = new FDx11Pass(1, m_ScreenViewport, m_pDevice);
+	forwardPass->InitPass("1DefaultVertex", "1PbrPS");
 	_InitForwardPassShaderInput();
 
 	skyPass = new FDx11Pass(1, m_ScreenViewport, m_pDevice);
-	skyPass->InitPass("skybox_vs", "skybox_ps");
+	skyPass->InitPass("2skybox_vs", "2skybox_ps");
 	_InitSkyPassShaderInput();
+
+	
+
+	
 	return true;
 }
 void FDx11App::_InitSkyPassShaderInput()
 {
 
 	Ptr<ConstantBufferObject> skyMVP = ConstantBufferPool::Instance().CreateDeviceResource("skyMVP", sizeof(Mat4), m_pDevice);
-
 	skyMVP->Upload<Mat4>(
 		Mat4{
 			mainCamera->GetViewMatrix() * mainCamera->GetProjMatrix()
 		}
 	);
 	skyPass->GetGpuProgram()->AddConstantBuffer(skyMVP);
+	Ptr<FCamera> camera = mainCamera;
+	skyPass->SetUpdateCallback([camera](float dt) {
+		Ptr<ConstantBufferObject> skyMVP = ConstantBufferPool::Instance().GetResource("skyMVP");
+		Mat4 V = camera->GetViewMatrix();
+		Mat4 VP{
+			rotate(V.GetRotate()) * camera->GetProjMatrix()
+		};
+		VP.transpose();
+		skyMVP->Upload<Mat4>(VP);
+	});
+
+
+
 
 }
 void FDx11App::_InitForwardPassShaderInput()
 {
 	
-
 	Ptr<ConstantBufferObject> frameCBO = ConstantBufferPool::Instance().CreateDeviceResource("frame", sizeof(CBChangesEveryFrame), m_pDevice);
 
 	frameCBO->Upload<CBChangesEveryFrame>(
@@ -114,6 +127,18 @@ void FDx11App::_InitForwardPassShaderInput()
 	forwardPass->GetGpuProgram()->AddConstantBuffer(resizeCBO);
 	forwardPass->GetGpuProgram()->AddConstantBuffer(lightCBO);
 	forwardPass->GetGpuProgram()->AddConstantBuffer(worldCBO);
+
+	Ptr<FCamera> camera = mainCamera;
+	forwardPass->SetUpdateCallback([camera](float dt) {
+		Ptr<ConstantBufferObject> frameCBO = ConstantBufferPool::Instance().GetResource("frame");
+		frameCBO->Upload<CBChangesEveryFrame>(
+			CBChangesEveryFrame{
+			camera->GetViewMatrix(),
+			Vec4f(camera->GetEyePos(),1.0f)
+			}
+		);
+		});
+	
 
 }
 
@@ -181,23 +206,10 @@ void FDx11App::UpdateScene(float dt)
 		evt->Handled(*flyController);
 	}
 	sceneGroup->Update(dt);
+	forwardPass->Update(dt);
+	skyPass->Update(dt);
 
 
-	Ptr<ConstantBufferObject> frameCBO = ConstantBufferPool::Instance().GetResource("frame");
-	frameCBO->Upload<CBChangesEveryFrame>(
-		CBChangesEveryFrame{
-		mainCamera->GetViewMatrix(),
-		Vec4f(mainCamera->GetEyePos(),1.0f)
-		}
-	);
-	Ptr<ConstantBufferObject> skyMVP = ConstantBufferPool::Instance().GetResource("skyMVP"); 
-	Mat4 V = mainCamera->GetViewMatrix();
-	Mat4 VP{
-		rotate(V.GetRotate()) * mainCamera->GetProjMatrix()
-	};
-	VP.transpose();
-	//V.value[3] = Vec4f(0.0f, 0.0f, 0.0f, 1.0f);
-	skyMVP->Upload<Mat4>(
-		VP
-	);
+
+
 }

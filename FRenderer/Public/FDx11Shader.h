@@ -50,7 +50,7 @@ public:
 
 	bool Init()
 	{
-		std::string shaderPath = GLOBAL_PATH + "Shader//";
+		std::string shaderPath = GLOBAL_PATH + "Shaders//";
 		const std::string hlslExt = ".hlsl";
 		const std::string csoExt = ".cso";
 

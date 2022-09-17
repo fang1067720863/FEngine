@@ -25,3 +25,35 @@ struct Light
 	Vec4f specular;
 	Vec4f direction;
 };
+
+struct SpotLight
+{
+	Vec4f Color;
+	Vec4f Direction;
+	Vec3f Position;
+	float Range;
+	float SpotlightAngle;
+};
+
+struct DirectionalLight
+{
+	Vec4f AmbientColor;
+	Vec4f DiffuseColor;
+	Vec3f Direction;
+	float Intensity;
+};
+
+class BumLight
+{
+public:
+	DirectionalLight GetInternalData() {
+		return data._light;
+	}
+
+	union LightData
+	{
+		DirectionalLight _light;
+	}data;
+	
+
+};

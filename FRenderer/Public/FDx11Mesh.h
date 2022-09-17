@@ -163,7 +163,7 @@ public:
 		const uint32_t MaterialParamSlot = 3; // fixed in default shader
 		mMaterialSlot.uniformSlots.push_back(MaterialSlot::UniformSlot{ MaterialParamSlot, true, true, 1, materialCBO->GetBufferSlot() });
 		
-		auto path = GLOBAL_PATH + "Model//TexturesCom_Brick_BlocksBare_1K_albedo.tif";
+		auto path = GLOBAL_PATH + "FRenderer//Model//TexturesCom_Brick_BlocksBare_1K_albedo.tif";
 		
 		int32_t resourceSlot = ShaderResoucePool::Instance().CreateDeviceResource(path, device);
 		int32_t mapSlot = 0;  // fixed in default ps shader

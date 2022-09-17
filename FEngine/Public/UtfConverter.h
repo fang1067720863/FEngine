@@ -10,7 +10,7 @@ extern void ConvertUtf(const std::wstring& src, std::string& utf8);
 
 
 extern bool FileExists(const wchar_t* path);
-static std::string GLOBAL_PATH = "D://GitProject//FEngine//FRenderer//";
+static std::string GLOBAL_PATH = "D://GitProject//FEngine//";
 extern bool FindGlobalPath();
 
 static const char* const PATH_SEPARATORS = "/\\";

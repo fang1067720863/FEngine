@@ -135,10 +135,3 @@ bool FDx11Pass::InitGpuProgram(const std::string& vs, const std::string& ps)
 	return true;
 
 }
-
-//bool FDx11Pass::InitVertexInputLayout()
-//{
-//	//magic
-//	mVInputLayout = new FDx11VertexInputLayout(VertexElementType::POSITION, mGpuProgram.get() ,mDevice);
-//	return true;
-//}
