@@ -196,6 +196,10 @@ inline void Set##var(const T& _var){m##var=_var;}\
 T Get##var() const{return m##var;}\
 private: T m##var{default};
 
+#define PROPERTY_GETTER(T,var) public: \
+T Get##var() const{return m##var;}\
+private: T m##var;
+
 
 #define PROPERTY_REF_PTR(T,var) public: \
 inline void Set##var(T* _var){m##var=_var;}\

@@ -1,5 +1,6 @@
 #include"../Public/FDx11Pass.h"
 #include"../Public/FDx11RenderState.h"
+#include"../Public/FDx11ResourceFactory.h"
 
 FDx11Pass::FDx11Pass(const FDx11Device& _device,const D3D11_VIEWPORT& vp) :mDevice(_device)
 {
@@ -23,45 +24,45 @@ bool FDx11Pass::InitPass(const std::string& vs, const std::string& ps)
 	{
 		return false;
 	}
-	if (!InitRenderTargetView(device))
-	{
-		return false;
-	}
-	/*if (!InitRenderState())
-	{
-		return false;
-	}*/
+	
+
 	if (!InitGpuProgram(vs,ps))
 	{
 		return false;
 	}
-	/*if (!InitVertexInputLayout())
-	{
-		return false;
-	}*/
-	
+
 	
 }
 
-bool FDx11Pass::InitRenderTargetView(ID3D11Device *device)
+
+bool FDx11Pass::ClearRenderTargetView()
 {
-	if (mNumViews == 0)
+	float depth = 1.0;
+	UINT8 stencil = 0;
+	static float black[4] = { 0.0f, 0.0f, 1.0f, 1.0f };	// RGBA = (0,0,0,255)
+
+	UINT ClearFlags = 0;
+	ClearFlags |= D3D11_CLEAR_DEPTH;
+	ClearFlags |= D3D11_CLEAR_STENCIL;
+	for (unsigned int i = 0; i < GetNumViews(); ++i)
 	{
-		return true;
+		mDevice.GetDeviceContext()->ClearRenderTargetView(mRenderTargetView[i], reinterpret_cast<const float*>(&black));
 	}
-	for (UINT i = 0; i < mNumViews; i++)
-	{
-		//ComPtr<ID3D11Texture2D> backBuffer;
-		HR(device->CreateRenderTargetView(mRenderTargetTextures[i], nullptr, &mRenderTargetView[i]));
-		//HR(device->CreateRenderTargetView(mRTTextures[i].Get(), nullptr, mRTV[i].GetAddressOf()));
-	}
-	HR(device->CreateDepthStencilView(mDepthStencilBuffer.Get(), nullptr, mDepthStencilView.GetAddressOf()));
+
+	mDevice.GetDeviceContext()->ClearDepthStencilView(
+		mDepthStencilView.Get(),
+		ClearFlags, depth, static_cast<UINT8>(stencil));
+	
 	return true;
 }
 
+bool FDx11Pass::InitShaderResourceView(ID3D11Device* device)
+{
+	return true;
+}
 bool FDx11Pass::InitRenderTexture(ID3D11Device* device)
 {
-	if (mNumViews == 0)
+	if (mNumViews == 1)
 	{
 		return true;
 	}
@@ -90,7 +91,6 @@ bool FDx11Pass::InitRenderTexture(ID3D11Device* device)
 	for (unsigned int i = 0; i < mNumViews; i++)
 	{
 		HR(device->CreateTexture2D(&texArrayDesc, nullptr, &mRenderTargetTextures[i]));
-		//HR(device->CreateTexture2D(&texArrayDesc, nullptr, mRTTextures[i].GetAddressOf());
 	}
 
 	D3D11_TEXTURE2D_DESC depthStencilDesc;
@@ -102,9 +102,6 @@ bool FDx11Pass::InitRenderTexture(ID3D11Device* device)
 	depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	depthStencilDesc.SampleDesc.Count = 1;
 	depthStencilDesc.SampleDesc.Quality = 0;
-	//if (m_Enable4xMsaa) 
-	//	depthStencilDesc.SampleDesc.Count = 4;
-	//	depthStencilDesc.SampleDesc.Quality = m_4xMsaaQuality - 1;
 
 	depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
 	depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
@@ -114,6 +111,45 @@ bool FDx11Pass::InitRenderTexture(ID3D11Device* device)
 	// 创建深度缓冲区以及深度模板视图
 	HR(device->CreateTexture2D(&depthStencilDesc, nullptr, mDepthStencilBuffer.GetAddressOf()));
 
+	for (UINT i = 0; i < mNumViews; i++)
+	{
+		HR(device->CreateRenderTargetView(mRenderTargetTextures[i], nullptr, &mRenderTargetView[i]));
+	}
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
+	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
+	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthStencilViewDesc.Texture2D.MipSlice = 0;
+	HR(device->CreateDepthStencilView(mDepthStencilBuffer.Get(), &depthStencilViewDesc, mDepthStencilView.GetAddressOf()));
+
+
+	// init shader resource view
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDepthDesc;
+	srvDepthDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	srvDepthDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDepthDesc.Texture2D.MostDetailedMip = 0;
+	srvDepthDesc.Texture2D.MipLevels = 1;
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvTextureDesc;
+	srvTextureDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	srvTextureDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvTextureDesc.Texture2D.MostDetailedMip = 0;
+	srvTextureDesc.Texture2D.MipLevels = 1;
+	for (UINT i = 0; i < mNumViews; i++)
+	{
+
+		ComPtr<ID3D11ShaderResourceView> shaderResourceView;
+		HR(device->CreateShaderResourceView(mRenderTargetTextures[i], &srvTextureDesc, &shaderResourceView));
+		int32_t slot = ShaderResoucePool::Instance().CreateShaderResouce(shaderResourceView);
+		std::string name = "gBuffer" + std::to_string(slot);
+		mRTShaderResourceSlots[name] = slot;
+	}
+
+	ComPtr<ID3D11ShaderResourceView> srvDepth;
+	HR(device->CreateShaderResourceView(mDepthStencilBuffer.Get(), &srvDepthDesc, &srvDepth));
+	int32_t slot = ShaderResoucePool::Instance().CreateShaderResouce(srvDepth);
+	std::string name = "gBuffer" + std::string("Depth");
+	mRTShaderResourceSlots[name] = slot;
 	return true;
 }
 

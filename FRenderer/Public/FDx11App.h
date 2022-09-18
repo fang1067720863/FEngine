@@ -21,6 +21,7 @@ public:
 	Ptr<FDx11Pass> forwardPass;
 	Ptr<FDx11Pass> skyPass;
 	Ptr<FDx11Pass> gBufferPass;
+	Ptr<FDx11Pass> deferredPass;
 
 	bool InitSinglePass();
 	void ExecuteMainPass(FDx11Pass* pass);
@@ -28,6 +29,8 @@ public:
 	void ClearFrameBuffer(FDx11Pass* pass);
 	void _InitForwardPassShaderInput();
 	void _InitSkyPassShaderInput();
+	void _InitDeferredPassShaderInput();
+	void _InitGBufferPassShaderInput();
 	
 	// ÏñËØ×ÅÉ«Æ÷
 	FDx11App(HINSTANCE hInstance, const std::wstring& windowName, int initWidth, int initHeight);

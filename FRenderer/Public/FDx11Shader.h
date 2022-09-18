@@ -5,6 +5,10 @@
 #include"FDx11BufferObject.h"
 #include"FDx11Util.h"
 #include"UtfConverter.h"
+#include"Constant.h"
+#include"FDx11ResourceFactory.h"
+#include"FDx11RenderState.h"
+
 
 
 class ShaderVariable
@@ -70,8 +74,7 @@ public:
 		device.GetDeviceContext()->VSSetShader(GetVertexShader(), nullptr, 0);
 		device.GetDeviceContext()->PSSetShader(GetPixelShader(), nullptr, 0);
 
-		// 一个slot 只设置一块resource element ,不设置成Array magicNumber = 1
-		// shader resource constant buffer
+
 		unsigned int num = GetConstantBufferNum();
 		for (unsigned int i = 0; i < num; i++)
 		{
@@ -84,23 +87,19 @@ public:
 			device.GetDeviceContext()->PSSetConstantBuffers(slot, 1, bufferArray);
 		}
 
-		// shader resource texture
-		num = GetTextureNum();
-		for (unsigned int i = 0; i < num; i++)
+		for (auto textureSlot : mMaterialSlot.textureSlots)
 		{
-
-			UINT slot = i;
-			UINT num = 1;
-			device.GetDeviceContext()->PSSetShaderResources(slot, num, GetGpuTextureView(i));
+			auto texture = ShaderResoucePool::Instance().GetResource(textureSlot.resourceSlot);
+			ID3D11ShaderResourceView* srArray[1];
+			srArray[0] = texture.Get();
+			device.GetDeviceContext()->PSSetShaderResources(textureSlot.slotId, textureSlot.num, srArray);
 		}
-
-		// shader resource sampler
-		num = GetSamplerNum();
-		for (unsigned int i = 0; i < num; i++)
+		for (auto samplerSlot : mMaterialSlot.samplerSlots)
 		{
-			UINT slot = i;
-			UINT num = 1;
-			device.GetDeviceContext()->PSSetSamplers(slot, num, GetSamplerView(i));
+			auto sampler = SamplerResoucePool::Instance().GetResource(SamplerStateType::LINIEAR_WRAP);
+			ID3D11SamplerState* samplerArray[1];
+			samplerArray[0] = sampler.Get();
+			device.GetDeviceContext()->PSSetSamplers(0, samplerSlot.num, samplerArray);
 		}
 		return true;
 	}
@@ -111,16 +110,24 @@ public:
 		return true;
 	}
 
-	bool AddTextureResource(GpuTextureView texturePtr)
+	int AddShaderResource(const std::string& texturePath, int32_t shaderSlot)
 	{
-		mTextureArrayView.push_back(texturePtr); 
-		return true;
-		//emplace_back std::move(smartPtr) ? 
+		int32_t resourceSlot = ShaderResoucePool::Instance().CreateDeviceResource(texturePath, device);
+		mMaterialSlot.textureSlots.push_back(ShaderInputSlot::TextureSlot{ shaderSlot, 1, resourceSlot });
+		return resourceSlot;
 	}
-	bool AddSamplerResource(GpuSamplerView samplerPtr)
+
+	int AddShaderResource(int32_t resourceSlot, int32_t shaderSlot)
 	{
-		mSamplerArrayView.push_back(samplerPtr);
-		return true;
+		//int32_t resourceSlot = ShaderResoucePool::Instance().CreateDeviceResource(texturePath, device);
+		mMaterialSlot.textureSlots.push_back(ShaderInputSlot::TextureSlot{ shaderSlot, 1, resourceSlot });
+		return resourceSlot;
+	}
+
+	void AddSamplerResource(SamplerStateType type = SamplerStateType::LINIEAR_WRAP, int32_t shaderSlot = 0)
+	{
+		//int32_t resourceSlot = SamplerResoucePool::Instance().GetResource(type);
+		mMaterialSlot.samplerSlots.push_back(ShaderInputSlot::SamplerSlot{ shaderSlot, 1, 1 });
 	}
 	
 	ID3DBlob* GetD3DBlob() { return blob.Get(); }
@@ -152,25 +159,6 @@ public:
 		return mCboList.size();
 	}
 
-	UINT GetTextureNum() const
-	{
-		return mTextureArrayView.size();
-	}
-
-	ID3D11ShaderResourceView** GetGpuTextureView(unsigned int i)
-	{
-		return mTextureArrayView[i].GetAddressOf();
-    }
-
-	UINT GetSamplerNum() const
-	{
-		return mSamplerArrayView.size();
-	}
-
-	ID3D11SamplerState** GetSamplerView(unsigned int i)
-	{
-		return mSamplerArrayView[i].GetAddressOf();
-	}
 
 protected:
 
@@ -187,11 +175,12 @@ protected:
 	CboArray mCboList;
 	UINT mNumSlots;
 	//
-	UINT mTextureNum;
-	GpuTextureViewArray mTextureArrayView;
+	//UINT mTextureNum;
+	//GpuTextureViewArray mTextureArrayView;
 
-	UINT mSamplerNum;
-	GpuSamplerViewArray mSamplerArrayView;
+	//UINT mSamplerNum;
+	//GpuSamplerViewArray mSamplerArrayView;
+	ShaderInputSlot mMaterialSlot;
 
 	ComPtr<ID3DBlob> blob;
 

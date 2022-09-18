@@ -26,38 +26,49 @@ class FCamera: public FNode
         Perspective,
         Orthographic
     };
+    PROPERTY_GETTER(Mat4, ViewMatrix)
+    PROPERTY_GETTER(Mat4, ProjMatrix)
+    PROPERTY_GETTER(Mat4, ViewMatrixInverse)
+    PROPERTY_GETTER(Mat4, ProjMatrixInverse)
+    PROPERTY_GETTER(Vec3f, EyePos)
+    PROPERTY_GETTER(float, ZNear)
+    PROPERTY_GETTER(float, ZFar)
 public:
     FCamera(const Frustum& frustum, const std::string& name):FNode(name)
     {
         SetFrustum(frustum);
     }
-    Mat4 mViewMatrix;
-    Mat4 mProjMatrix;
-    Vec3f mEye;
-    Vec3f mForward;
-    Vec3f mUp;
+  
 
+    using CameraViewUpdateCallback = std::function<void(float dt)>;
+    using CameraViewUpdateCallbacks = std::vector<CameraViewUpdateCallback>;
 
+    void AddViewUpdateCallback(CameraViewUpdateCallback cb)
+    {
+        mViewCallbacks.push_back(std::move(cb));
+    }
+
+    CameraViewUpdateCallbacks mViewCallbacks;
 
     void SetFrustum(const Frustum& frustum)
     {
-        SetFrustum(frustum.mFovY, frustum.mAspect, frustum.mNearZ, frustum.mFarZ);
-      
-      /*  DirectX::XMMATRIX  a = DirectX::XMMatrixPerspectiveFovLH(frustum.mFovY, frustum.mAspect, frustum.mNearZ, frustum.mFarZ);
-        DirectX::XMFLOAT4X4 res;
-        XMStoreFloat4x4(&res, a);*/
-        
+        SetFrustum(frustum.mFovY, frustum.mAspect, frustum.mNearZ, frustum.mFarZ);  
     }
     void SetFrustum(float fovy_radians, float aspectRatio, float zNear, float zFar)
     {
+        mZFar = zFar;
+        mZNear = zNear;
         mProjMatrix = perspective<float>(fovy_radians, aspectRatio, zNear, zFar);
+        mProjMatrixInverse = inverse_4x4(mProjMatrix);
     } 
 
-    const Mat4& GetViewMatrix()const { return mViewMatrix; }
-    const Mat4& GetProjMatrix()const { return mProjMatrix; }
-    const Vec3f& GetEyePos()const { return mEye; }
-
     void SetViewMatrix(const Mat4& mat) { mViewMatrix = mat; mViewMatrix.transpose(); }
+    void SetViewMatrix(const Mat4& view, const Mat4& viewInverse) { 
+        mViewMatrix = view; 
+        mViewMatrix.transpose();
+        mViewMatrixInverse = viewInverse;
+        mViewMatrixInverse.transpose();
+    }
 
     template<class T>
     constexpr Matrix4<T> perspective(T fovy_radians, T aspectRatio, T zNear, T zFar)
@@ -72,7 +83,7 @@ public:
             0, f, 0, 0,
             0, 0, zFar * r, 1,
             0, 0, -(zFar * zNear) * r, 0);*/
-        // transpose
+        // dx_perspective_matrix_transpose
         return Matrix4<T>(f / aspectRatio, 0, 0, 0,
             0, f, 0, 0,
             0, 0, zFar * r, -(zFar * zNear) * r,

@@ -8,25 +8,36 @@
 #define MAX_MULTIPLE_RENDER_TARGETS 8
 
 
-class FDx11Pass:public FReference
+class FDx11Pass :public FReference
 {
 	using PassCBUpdateCallback = std::function<void(float dt)>;
 public:
 
 	FDx11Pass(const FDx11Device& _device, const D3D11_VIEWPORT& vp);
-	FDx11Pass(unsigned int numViews,  const D3D11_VIEWPORT& vp,const FDx11Device& _device);
+	FDx11Pass(unsigned int numViews, const D3D11_VIEWPORT& vp, const FDx11Device& _device);
 	bool InitPass(const std::string& vs, const std::string& ps);
+	bool ClearRenderTargetView();
 	// render target view
 	unsigned int GetNumViews() { return mNumViews; }
-	ID3D11RenderTargetView** GetRenderTargetViewAddress() {
+
+	int32_t GetRTShaderResourceSlot(const std::string& name)
+	{
+		return mRTShaderResourceSlots.at(name);
+	}
+
+	
+	/*ID3D11RenderTargetView** GetRenderTargetViewAddress() {
 		return mRenderTargetView; }
 	ID3D11RenderTargetView* GetRenderTargetView(unsigned int i) {
 		return mRenderTargetView[i];
 	}
-	ID3D11Texture2D* GetDepthStencilBuffer() {
-		return mDepthStencilBuffer.Get();
+	id3d11texture2d* getdepthstencilbuffer() {
+		return mdepthstencilbuffer.get();
 	}
 
+
+
+	*/
 	ID3D11DepthStencilView* GetDepthStencilView() {
 		return mDepthStencilView.Get();
 	}
@@ -34,10 +45,10 @@ public:
 	{
 		mDepthStencilView.Reset();
 		mDepthStencilBuffer.Reset();
-		mMainRTV.Reset();
+		//mMainRTV.Reset();
 
 	}
-	const D3D11_VIEWPORT* GetViewport() const{
+	const D3D11_VIEWPORT* GetViewport() const {
 		return &mViewport;
 	}
 	const D3D11_RECT* GetScissorRects() const
@@ -53,10 +64,9 @@ public:
 		return mVInputLayout.get();
 	}
 	bool UseRenderState();
-	ComPtr<ID3D11RenderTargetView> mMainRTV;
-	ComPtr<ID3D11Texture2D> mMainRTTextures;
-	ComPtr<ID3D11DepthStencilView> mDepthStencilView;
-	ComPtr<ID3D11Texture2D> mDepthStencilBuffer;
+	//ComPtr<ID3D11RenderTargetView> mMainRTV;
+	//ComPtr<ID3D11Texture2D> mMainRTTextures;
+	
 
 	void Update(float dt)
 	{
@@ -66,30 +76,35 @@ public:
 		}
 	}
 	void SetUpdateCallback(PassCBUpdateCallback cb) { updateCB = cb; }
-	
-	
+
+
 protected:
 	PassCBUpdateCallback updateCB;
-	bool InitRenderTargetView(ID3D11Device* device);
+	
+
+	bool InitShaderResourceView(ID3D11Device* device);
 
 	bool InitRenderTexture(ID3D11Device* device);
 
-	
+
 
 	bool InitGpuProgram(const std::string& vs, const std::string& ps);
 
 	//bool InitVertexInputLayout();
 
 	// 渲染目标视图
-	ID3D11RenderTargetView* mRenderTargetView[MAX_MULTIPLE_RENDER_TARGETS];		
+	ID3D11RenderTargetView* mRenderTargetView[MAX_MULTIPLE_RENDER_TARGETS];
 	ID3D11Texture2D* mRenderTargetTextures[MAX_MULTIPLE_RENDER_TARGETS];
+	ComPtr<ID3D11DepthStencilView> mDepthStencilView;
+	ComPtr<ID3D11Texture2D> mDepthStencilBuffer;
+	std::unordered_map<std::string, int32_t> mRTShaderResourceSlots;
 
-	
+
 	// 深度模板视图
-	
+
 
 	D3D11_VIEWPORT mViewport;
-	D3D11_RECT mRect;	
+	D3D11_RECT mRect;
 
 	unsigned int mNumViews = 0;
 
@@ -100,6 +115,6 @@ protected:
 
 	std::string mProgram;
 
-	
-	
+
+
 };

@@ -1,5 +1,6 @@
 
-#include"2_Pbr.hlsli"
+#include"Pbr.hlsli"
+#include"3Deferred.hlsli"
 // draw triangle
 
 
@@ -12,15 +13,15 @@ Texture2D gOrmMap : register(t2);   // occlusionRoughnessMetallic
 Texture2D gDepthBuffer				: register(t3);
 SamplerState basicSampler : register(s0);
 
-cbuffer CBEveryObject : register(b3)
-{
-	matrix g_World;
-    matrix g_ViewInverse;
-    matrix g_ProjInverse;
-    float g_Near;
-    float g_Far;
-    float g_EyePos;
-}
+// cbuffer CBEveryObject : register(b3)
+// {
+// 	matrix g_World;
+//     matrix g_ViewInverse;
+//     matrix g_ProjInverse;
+//     float g_Near;
+//     float g_Far;
+//     float g_EyePos;
+// }
 
 
 struct VertexToPixel
