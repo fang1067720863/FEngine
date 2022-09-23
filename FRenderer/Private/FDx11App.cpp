@@ -5,19 +5,15 @@
 
 void FDx11App::ExecuteMainPass(FDx11Pass* pass)
 {
-	// inputLayout
-	m_pDevice.GetDeviceContext()->IASetInputLayout(pass->GetGpuProgram()->inputLayout.Get());
-	// shader & shader resource
-	pass->GetGpuProgram()->UseProgram();
-	pass->UseRenderState();
-	
 
+	
+	pass->Begin();
 }
 
 
 void FDx11App::ClearFrameBuffer(FDx11Pass* pass)
 {
-	pass->ClearRenderTargetView();
+	//pass->ClearRenderTargetView();
 }
 
 FDx11App::FDx11App(HINSTANCE hInstance, const std::wstring& windowName, int initWidth, int initHeight)
@@ -35,16 +31,21 @@ bool FDx11App::InitSinglePass()
 	skyPass->InitPass("2skybox_vs", "2skybox_ps");
 	_InitSkyPassShaderInput();
 
-	//gBufferPass = new FDx11Pass(3, m_ScreenViewport, m_pDevice);
-	//gBufferPass->InitPass("3DeferredVS", "3DeferredPS");
-	//_InitGBufferPassShaderInput();
+	gBufferPass = new FDx11Pass(3, m_ScreenViewport, m_pDevice);
+	gBufferPass->InitPass("3GBufferVS", "3GBufferPS");
+	_InitGBufferPassShaderInput();
 
-	//deferredPass = new FDx11Pass(1, m_ScreenViewport, m_pDevice);
-	//skyPass->InitPass("3DeferredVS", "3DeferredPS");
-	//_InitSkyPassShaderInput();
+	deferredPass = new FDx11Pass(1, m_ScreenViewport, m_pDevice);
+	deferredPass->InitPass("3DeferredVS", "3DeferredPS");
+	_InitDeferredPassShaderInput();
 
 	
 	return true;
+}
+void FDx11App::_InitAllPassShaderInput()
+
+{
+
 }
 void FDx11App::_InitGBufferPassShaderInput()
 {
@@ -59,22 +60,32 @@ void FDx11App::_InitGBufferPassShaderInput()
 void FDx11App::_InitDeferredPassShaderInput()
 {
 	Ptr<ConstantBufferObject> defer0 = ConstantBufferPool::Instance().CreateDeviceResource("defer0", sizeof(CBDeferred0), m_pDevice);
-	defer0->Upload<CBDeferred0>(
-		CBDeferred0{
-			mainCamera->GetViewMatrix(), mainCamera->GetViewMatrixInverse(), Vec4f(mainCamera->GetEyePos(),1.0)
-		}
-	);
 	Ptr<ConstantBufferObject> defer1 = ConstantBufferPool::Instance().CreateDeviceResource("defer1", sizeof(CBDeferred1), m_pDevice);
-	defer1->Upload<CBDeferred1>(
-		CBDeferred1{
-			mainCamera->GetProjMatrix(), mainCamera->GetProjMatrixInverse(),mainCamera->GetZNear(),mainCamera->GetZFar(), Vec2f(0.0f,0.0f)
-		}
-	);
+	
+	mainCamera->AddViewUpdateCallback([defer0, camera = this->mainCamera](float dt)
+	{
+		defer0->Upload<CBDeferred0>(
+			CBDeferred0{
+				camera->GetViewMatrix(), camera->GetViewMatrixInverse(), Vec4f(camera->GetEyePos(),1.0)
+			});
+	});
+	mainCamera->AddProjUpdateCallback([defer1, camera = this->mainCamera](float dt)
+	{
+		defer1->Upload<CBDeferred1>(
+			CBDeferred1{
+				camera->GetProjMatrix(), camera->GetProjMatrixInverse(),camera->GetZNear(),camera->GetZFar(), Vec2f(0.0f,0.0f)
+			}
+		);
+	});
 	Ptr<ConstantBufferObject> defer2 = ConstantBufferPool::Instance().CreateDeviceResource("defer2", sizeof(Light), m_pDevice);
 	defer2->Upload<Light>(Light{ Vec4f(1.0,1.0,1.0,1.0),Vec4f(1.0,1.0,1.0,1.0),Vec4f(0.7,0.7,0.7,1.0),Vec4f(0.5,0.5,0.0,1.0) });
+	Ptr<ConstantBufferObject> worldCBO = ConstantBufferPool::Instance().GetResource("world");
+
+
 	deferredPass->GetGpuProgram()->AddConstantBuffer(defer0);
 	deferredPass->GetGpuProgram()->AddConstantBuffer(defer1);
 	deferredPass->GetGpuProgram()->AddConstantBuffer(defer2);
+	deferredPass->GetGpuProgram()->AddConstantBuffer(worldCBO);
 
 
 	deferredPass->GetGpuProgram()->AddSamplerResource(SamplerStateType::LINIEAR_WRAP,0);
@@ -94,15 +105,10 @@ void FDx11App::_InitSkyPassShaderInput()
 {
 
 	Ptr<ConstantBufferObject> skyMVP = ConstantBufferPool::Instance().CreateDeviceResource("skyMVP", sizeof(Mat4), m_pDevice);
-	skyMVP->Upload<Mat4>(
-		Mat4{
-			mainCamera->GetViewMatrix() * mainCamera->GetProjMatrix()
-		}
-	);
 	skyPass->GetGpuProgram()->AddConstantBuffer(skyMVP);
-	Ptr<FCamera> camera = mainCamera;
-	skyPass->SetUpdateCallback([camera](float dt) {
-		Ptr<ConstantBufferObject> skyMVP = ConstantBufferPool::Instance().GetResource("skyMVP");
+
+	mainCamera->AddViewUpdateCallback([skyMVP, camera = this->mainCamera](float dt)
+	{
 		Mat4 V = camera->GetViewMatrix();
 		Mat4 VP{
 			rotate(V.GetRotate()) * camera->GetProjMatrix()
@@ -111,22 +117,12 @@ void FDx11App::_InitSkyPassShaderInput()
 		skyMVP->Upload<Mat4>(VP);
 	});
 
-
-
-
 }
 void FDx11App::_InitForwardPassShaderInput()
 {
 	
 	Ptr<ConstantBufferObject> frameCBO = ConstantBufferPool::Instance().CreateDeviceResource("frame", sizeof(CBChangesEveryFrame), m_pDevice);
-
-	frameCBO->Upload<CBChangesEveryFrame>(
-		CBChangesEveryFrame{
-		mainCamera->GetViewMatrix(), Vec4f(mainCamera->GetEyePos(), 1.0f)
-		}
-	);
 	Ptr<ConstantBufferObject> resizeCBO = ConstantBufferPool::Instance().CreateDeviceResource("onResize", sizeof(CBChangesOnResize), m_pDevice);
-	resizeCBO->Upload<CBChangesOnResize>(CBChangesOnResize{ mainCamera->GetProjMatrix() });
 
 	// todo 修改rpi主动修改rhi
 	Ptr<ConstantBufferObject> lightCBO = ConstantBufferPool::Instance().CreateDeviceResource("light", sizeof(Light), m_pDevice);
@@ -141,16 +137,24 @@ void FDx11App::_InitForwardPassShaderInput()
 	forwardPass->GetGpuProgram()->AddConstantBuffer(lightCBO);
 	forwardPass->GetGpuProgram()->AddConstantBuffer(worldCBO);
 
-	Ptr<FCamera> camera = mainCamera;
-	forwardPass->SetUpdateCallback([camera](float dt) {
-		Ptr<ConstantBufferObject> frameCBO = ConstantBufferPool::Instance().GetResource("frame");
-		frameCBO->Upload<CBChangesEveryFrame>(
-			CBChangesEveryFrame{
-			camera->GetViewMatrix(),
-			Vec4f(camera->GetEyePos(),1.0f)
-			}
-		);
+
+
+	mainCamera->AddViewUpdateCallback([frameCBO, camera = this->mainCamera](float dt)
+		{
+			frameCBO->Upload<CBChangesEveryFrame>(
+				CBChangesEveryFrame{
+				camera->GetViewMatrix(),
+				Vec4f(camera->GetEyePos(),1.0f)
+				});
 		});
+
+	mainCamera->AddProjUpdateCallback([resizeCBO, camera = this->mainCamera](float dt)
+	{
+	
+		resizeCBO->Upload<CBChangesOnResize>(CBChangesOnResize{
+			camera->GetProjMatrix() }
+			);
+	});
 	
 
 }
@@ -173,8 +177,9 @@ bool FDx11App::InitGameObject()
 	FGeometry* skyboxGeom = ShapeGeometryBuilder::instance().BuildBox(box);
 	skyboxGeom->SetMaterialType(MaterialType::SkyBox);
 	skyboxGeom->SetModelFile(File("D:\\GitProject\\FEngine\\FRenderer\\Model"));
-
 	skybox = new FDx11Mesh(skyboxGeom, m_pDevice);
+
+
 
 	
 
@@ -199,14 +204,20 @@ void FDx11App::DrawScene()
 	static float black[4] = { 0.0f, 0.0f, 0.0f, 1.0f };	// RGBA = (0,0,0,255)
 	m_pDevice.deviceContext->ClearRenderTargetView(m_pRenderTargetView.Get(), black);
 	m_pDevice.deviceContext->ClearDepthStencilView(m_pDepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-	ExecuteMainPass(forwardPass.get());
+	this->ResetMainRenderTarget();
+
+	forwardPass->Begin();
 	sceneGroup->Draw();
-	//ClearFrameBuffer(gBufferPass.get());
-	//ExecuteMainPass(gBufferPass.get());
-	//sceneGroup->Draw();
-	ExecuteMainPass(skyPass.get());
+	forwardPass->End();
+
+	gBufferPass->Begin();
+	sceneGroup->Draw();
+	gBufferPass->End();
+
+	this->ResetMainRenderTarget();
+	skyPass->Begin();
 	skybox->Draw();
-	
+	skyPass->End();
 
 	HR(m_pSwapChain->Present(0, 0));
 }
@@ -223,8 +234,9 @@ void FDx11App::UpdateScene(float dt)
 		evt->Handled(*flyController);
 	}
 	sceneGroup->Update(dt);
-	forwardPass->Update(dt);
+	//forwardPass->Update(dt);
 	skyPass->Update(dt);
+	mainCamera->Update(dt);
 
 
 

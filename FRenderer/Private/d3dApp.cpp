@@ -207,6 +207,21 @@ void D3DApp::OnResize()
 
 }
 
+void D3DApp::ResetMainRenderTarget()
+{
+    m_pDevice.deviceContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), m_pDepthStencilView.Get());
+
+    // 设置视口变换
+    m_ScreenViewport.TopLeftX = 0;
+    m_ScreenViewport.TopLeftY = 0;
+    m_ScreenViewport.Width = static_cast<float>(m_ClientWidth);
+    m_ScreenViewport.Height = static_cast<float>(m_ClientHeight);
+    m_ScreenViewport.MinDepth = 0.0f;
+    m_ScreenViewport.MaxDepth = 1.0f;
+
+    m_pDevice.deviceContext->RSSetViewports(1, &m_ScreenViewport);
+}
+
 LRESULT D3DApp::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 

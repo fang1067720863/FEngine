@@ -11,7 +11,7 @@ struct VertexOut
 	float2 TexC    : TEXCOORD;
 };
 
-cbuffer CBEveryObject : register(b0)
+cbuffer CBEveryObject : register(b3)
 {
 	matrix g_World;
 }

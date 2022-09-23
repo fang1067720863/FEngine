@@ -35,7 +35,7 @@ protected:
     bool InitDirect3D();         // Direct3D初始化
 
     void CalculateFrameStats();  // 计算每秒帧数并在窗口显示
-
+    void ResetMainRenderTarget();
 protected:
 
     HINSTANCE m_hAppInst;        // 应用实例句柄

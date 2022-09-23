@@ -10,7 +10,9 @@
 
 class FNode:public FObject
 {
+protected:
 	using NodeUpdateCallback = std::function<void(float dt)>;
+	using NodeUpdateCallbackList = std::vector<NodeUpdateCallback>;
 public:
 	
 	FNode() :mName("")
@@ -28,7 +30,7 @@ public:
 		dirty = true;
 	}
 
-	void Update(float dt)
+	virtual void Update(float dt)
 	{
 		if (dirty)
 		{

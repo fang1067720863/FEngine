@@ -35,7 +35,7 @@ float4 PS(VertexPosHWNormalTex pIn) : SV_Target
      float aoStrength;*/
 
 
-    float3 v = normalize(g_EyePosW - pIn.PosW);
+    float3 v = normalize(g_EyePosW.xyz - pIn.PosW);
     float3 n = normalize(pIn.NormalW);
 
     float4 baseColor = gBaseColorMap.Sample(basicSampler, pIn.Tex);

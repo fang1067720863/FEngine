@@ -16,7 +16,7 @@ public:
 	FDx11Pass(const FDx11Device& _device, const D3D11_VIEWPORT& vp);
 	FDx11Pass(unsigned int numViews, const D3D11_VIEWPORT& vp, const FDx11Device& _device);
 	bool InitPass(const std::string& vs, const std::string& ps);
-	bool ClearRenderTargetView();
+	
 	// render target view
 	unsigned int GetNumViews() { return mNumViews; }
 
@@ -25,19 +25,7 @@ public:
 		return mRTShaderResourceSlots.at(name);
 	}
 
-	
-	/*ID3D11RenderTargetView** GetRenderTargetViewAddress() {
-		return mRenderTargetView; }
-	ID3D11RenderTargetView* GetRenderTargetView(unsigned int i) {
-		return mRenderTargetView[i];
-	}
-	id3d11texture2d* getdepthstencilbuffer() {
-		return mdepthstencilbuffer.get();
-	}
 
-
-
-	*/
 	ID3D11DepthStencilView* GetDepthStencilView() {
 		return mDepthStencilView.Get();
 	}
@@ -45,7 +33,6 @@ public:
 	{
 		mDepthStencilView.Reset();
 		mDepthStencilBuffer.Reset();
-		//mMainRTV.Reset();
 
 	}
 	const D3D11_VIEWPORT* GetViewport() const {
@@ -55,17 +42,17 @@ public:
 	{
 		return &mRect;
 	}
-	FDx11GpuProgram* GetGpuProgram() const
+
+	FDx11GpuProgram* GetGpuProgram()const
 	{
 		return mGpuProgram.get();
 	}
-	FDx11VertexInputLayout* GetInputLayout() const
-	{
-		return mVInputLayout.get();
-	}
-	bool UseRenderState();
-	//ComPtr<ID3D11RenderTargetView> mMainRTV;
-	//ComPtr<ID3D11Texture2D> mMainRTTextures;
+	bool Begin();
+	bool End();
+	bool _UseRenderState();
+	bool _SetRenderTarget();
+	bool _ClearRenderTargetView();
+	
 	
 
 	void Update(float dt)
@@ -89,8 +76,7 @@ protected:
 
 
 	bool InitGpuProgram(const std::string& vs, const std::string& ps);
-
-	//bool InitVertexInputLayout();
+	
 
 	// 渲染目标视图
 	ID3D11RenderTargetView* mRenderTargetView[MAX_MULTIPLE_RENDER_TARGETS];
@@ -98,22 +84,13 @@ protected:
 	ComPtr<ID3D11DepthStencilView> mDepthStencilView;
 	ComPtr<ID3D11Texture2D> mDepthStencilBuffer;
 	std::unordered_map<std::string, int32_t> mRTShaderResourceSlots;
-
-
-	// 深度模板视图
-
-
 	D3D11_VIEWPORT mViewport;
 	D3D11_RECT mRect;
-
 	unsigned int mNumViews = 0;
-
 	FPtr<FDx11GpuProgram> mGpuProgram;
-	FPtr<FDx11VertexInputLayout> mVInputLayout;
+
 
 	const FDx11Device& mDevice;
-
-	std::string mProgram;
 
 
 

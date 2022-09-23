@@ -2,22 +2,6 @@
 
 
 
-
-cbuffer CBChangesRarely : register(b2)
-{
-	DirectionalLight g_DirLight;
-}
-
-
-cbuffer m_CBOnResize : register(b3)
-{
-    matrix g_Proj; 
-    matrix g_ProjInverse;
-    float g_Near;
-    float g_Far;
-    
-}
-
 cbuffer m_CBFrame : register(b0)
 {
 	matrix g_View;  
@@ -25,6 +9,18 @@ cbuffer m_CBFrame : register(b0)
 	float4 g_EyePos;
 }
 
+cbuffer m_CBOnResize : register(b1)
+{
+    matrix g_Proj; 
+    matrix g_ProjInverse;
+    float g_Near;
+    float g_Far;
+}
+
+cbuffer CBChangesRarely : register(b2)
+{
+	DirectionalLight g_DirLight;
+}
 
 
 

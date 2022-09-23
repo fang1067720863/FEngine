@@ -31,6 +31,8 @@ public:
 	void _InitSkyPassShaderInput();
 	void _InitDeferredPassShaderInput();
 	void _InitGBufferPassShaderInput();
+
+	void  _InitAllPassShaderInput();
 	
 	// ÏñËØ×ÅÉ«Æ÷
 	FDx11App(HINSTANCE hInstance, const std::wstring& windowName, int initWidth, int initHeight);

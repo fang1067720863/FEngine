@@ -10,12 +10,6 @@ FDx11Pass::FDx11Pass(const FDx11Device& _device,const D3D11_VIEWPORT& vp) :mDevi
 FDx11Pass::FDx11Pass(unsigned int numViews, const D3D11_VIEWPORT& vp, const FDx11Device& _device) :mNumViews(numViews), mDevice(_device)
 {
 	mViewport = vp;
-	/*for (uint32_t i = 0; i < mNumViews; i++)
-	{
-		mRTTextures.push_back(ComPtr<ID3D11Texture2D>());
-		mRTV.push_back(ComPtr<ID3D11RenderTargetView>());
-	}*/
-	//InitPass(mDevice.GetDevice());
 }
 bool FDx11Pass::InitPass(const std::string& vs, const std::string& ps)
 {
@@ -35,7 +29,7 @@ bool FDx11Pass::InitPass(const std::string& vs, const std::string& ps)
 }
 
 
-bool FDx11Pass::ClearRenderTargetView()
+bool FDx11Pass::_ClearRenderTargetView()
 {
 	float depth = 1.0;
 	UINT8 stencil = 0;
@@ -66,8 +60,7 @@ bool FDx11Pass::InitRenderTexture(ID3D11Device* device)
 	{
 		return true;
 	}
-	
-	
+
 	// 后面改成TextureArray
 	D3D11_TEXTURE2D_DESC texArrayDesc;
 	texArrayDesc.Width = 800;
@@ -82,39 +75,53 @@ bool FDx11Pass::InitRenderTexture(ID3D11Device* device)
 	texArrayDesc.CPUAccessFlags = 0;
 	texArrayDesc.MiscFlags = 0; // 指定需要生成mipmap
 
-	D3D11_SUBRESOURCE_DATA sd;
-	uint32_t* pData = nullptr;
-	sd.pSysMem = pData;
-	sd.SysMemPitch = 128 * sizeof(uint32_t);
-	sd.SysMemSlicePitch = 128 * 128 * sizeof(uint32_t);
 
 	for (unsigned int i = 0; i < mNumViews; i++)
 	{
 		HR(device->CreateTexture2D(&texArrayDesc, nullptr, &mRenderTargetTextures[i]));
 	}
 
+	for (UINT i = 0; i < mNumViews; i++)
+	{
+		HR(device->CreateRenderTargetView(mRenderTargetTextures[i], nullptr, &mRenderTargetView[i]));
+		D3D11SetDebugObjectName(mRenderTargetView[i], "mRenderTargetView"+ std::to_string(i));
+	/*	D3D11SetDebugObjectName(mRenderTargetView[1], "mRenderTargetView1");
+		D3D11SetDebugObjectName(mRenderTargetView[2], "mRenderTargetView2");*/
+	}
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
+	shaderResourceViewDesc.Format = texArrayDesc.Format;
+	shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
+	shaderResourceViewDesc.Texture2D.MipLevels = 1;
+	for (UINT i = 0; i < mNumViews; i++)
+	{
+
+		ComPtr<ID3D11ShaderResourceView> shaderResourceView;
+		HR(device->CreateShaderResourceView(mRenderTargetTextures[i], &shaderResourceViewDesc, &shaderResourceView));
+		int32_t slot = ShaderResoucePool::Instance().CreateShaderResouce(shaderResourceView);
+		std::string name = "gBuffer" + std::to_string(slot);
+		mRTShaderResourceSlots[name] = slot;
+	}
+
+
 	D3D11_TEXTURE2D_DESC depthStencilDesc;
 
-	depthStencilDesc.Width = mViewport.Width;
-	depthStencilDesc.Height = mViewport.Height;
+	depthStencilDesc.Width = 800;
+	depthStencilDesc.Height = 600;
 	depthStencilDesc.MipLevels = 1;
 	depthStencilDesc.ArraySize = 1;
-	depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
 	depthStencilDesc.SampleDesc.Count = 1;
 	depthStencilDesc.SampleDesc.Quality = 0;
 
 	depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
-	depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 	depthStencilDesc.CPUAccessFlags = 0;
 	depthStencilDesc.MiscFlags = 0;
-
 	// 创建深度缓冲区以及深度模板视图
 	HR(device->CreateTexture2D(&depthStencilDesc, nullptr, mDepthStencilBuffer.GetAddressOf()));
 
-	for (UINT i = 0; i < mNumViews; i++)
-	{
-		HR(device->CreateRenderTargetView(mRenderTargetTextures[i], nullptr, &mRenderTargetView[i]));
-	}
 	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
 	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
 	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -122,39 +129,23 @@ bool FDx11Pass::InitRenderTexture(ID3D11Device* device)
 	depthStencilViewDesc.Texture2D.MipSlice = 0;
 	HR(device->CreateDepthStencilView(mDepthStencilBuffer.Get(), &depthStencilViewDesc, mDepthStencilView.GetAddressOf()));
 
-
-	// init shader resource view
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDepthDesc;
 	srvDepthDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
 	srvDepthDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	srvDepthDesc.Texture2D.MostDetailedMip = 0;
-	srvDepthDesc.Texture2D.MipLevels = 1;
-
-	D3D11_SHADER_RESOURCE_VIEW_DESC srvTextureDesc;
-	srvTextureDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
-	srvTextureDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	srvTextureDesc.Texture2D.MostDetailedMip = 0;
-	srvTextureDesc.Texture2D.MipLevels = 1;
-	for (UINT i = 0; i < mNumViews; i++)
-	{
-
-		ComPtr<ID3D11ShaderResourceView> shaderResourceView;
-		HR(device->CreateShaderResourceView(mRenderTargetTextures[i], &srvTextureDesc, &shaderResourceView));
-		int32_t slot = ShaderResoucePool::Instance().CreateShaderResouce(shaderResourceView);
-		std::string name = "gBuffer" + std::to_string(slot);
-		mRTShaderResourceSlots[name] = slot;
-	}
-
+	srvDepthDesc.Texture2D.MipLevels = depthStencilDesc.MipLevels;
+	
 	ComPtr<ID3D11ShaderResourceView> srvDepth;
 	HR(device->CreateShaderResourceView(mDepthStencilBuffer.Get(), &srvDepthDesc, &srvDepth));
 	int32_t slot = ShaderResoucePool::Instance().CreateShaderResouce(srvDepth);
 	std::string name = "gBuffer" + std::string("Depth");
 	mRTShaderResourceSlots[name] = slot;
+
 	return true;
 }
 
 
-bool FDx11Pass::UseRenderState()
+bool FDx11Pass::_UseRenderState()
 {
 	auto dsState = DepthStencilStateResoucePool::Instance().GetResource(DepthStencilStateType::LESS_EQUAL);
 	auto bsState = BlendStateResoucePool::Instance().GetResource(BlendStateType::ADDITIVE);
@@ -165,6 +156,47 @@ bool FDx11Pass::UseRenderState()
 	return true;
 }
 
+bool FDx11Pass::_SetRenderTarget()
+{
+	
+
+	mDevice.deviceContext->OMSetRenderTargets(mNumViews, mRenderTargetView, mDepthStencilView.Get());
+
+	// 设置视口变换
+	D3D11_VIEWPORT m_ScreenViewport;
+	m_ScreenViewport.TopLeftX = 0;
+	m_ScreenViewport.TopLeftY = 0;
+	m_ScreenViewport.Width = static_cast<float>(800);
+	m_ScreenViewport.Height = static_cast<float>(600);
+	m_ScreenViewport.MinDepth = 0.0f;
+	m_ScreenViewport.MaxDepth = 1.0f;
+
+	mDevice.deviceContext->RSSetViewports(1, &m_ScreenViewport);
+	return true;
+
+}
+
+bool FDx11Pass::End()
+{
+	mDevice.deviceContext->OMSetRenderTargets(0, nullptr, nullptr);
+	return true;
+}
+
+bool FDx11Pass::Begin()
+{
+	if (GetNumViews() > 2)
+	{
+		_ClearRenderTargetView();
+		_SetRenderTarget();
+	}
+	
+
+	_UseRenderState();
+	mDevice.GetDeviceContext()->IASetInputLayout(mGpuProgram->inputLayout.Get());
+	mGpuProgram->UseProgram();
+	
+	return true;
+}
 bool FDx11Pass::InitGpuProgram(const std::string& vs, const std::string& ps)
 {
 	mGpuProgram = new FDx11GpuProgram(mDevice,vs,ps);

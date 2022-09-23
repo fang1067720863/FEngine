@@ -39,16 +39,18 @@ public:
         SetFrustum(frustum);
     }
   
-
-    using CameraViewUpdateCallback = std::function<void(float dt)>;
-    using CameraViewUpdateCallbacks = std::vector<CameraViewUpdateCallback>;
-
-    void AddViewUpdateCallback(CameraViewUpdateCallback cb)
+    void AddViewUpdateCallback(NodeUpdateCallback cb)
     {
         mViewCallbacks.push_back(std::move(cb));
     }
 
-    CameraViewUpdateCallbacks mViewCallbacks;
+    void AddProjUpdateCallback(NodeUpdateCallback cb)
+    {
+        mViewCallbacks.push_back(std::move(cb));
+    }
+
+    NodeUpdateCallbackList mViewCallbacks;
+    NodeUpdateCallbackList mProjCallbacks;
 
     void SetFrustum(const Frustum& frustum)
     {
@@ -69,6 +71,20 @@ public:
         mViewMatrixInverse = viewInverse;
         mViewMatrixInverse.transpose();
     }
+
+    void Update(float dt) override
+    {
+        for (auto cb : mViewCallbacks)
+        {
+            cb(dt);
+        }
+        for (auto cb : mProjCallbacks)
+        {
+            cb(dt);
+        }
+    }
+   // int32_t dirtyMask;
+
 
     template<class T>
     constexpr Matrix4<T> perspective(T fovy_radians, T aspectRatio, T zNear, T zFar)
@@ -99,6 +115,7 @@ public:
             0.0, 0.0, 1.0 / (zFar - zNear), 0.0,
             -(right + left) / (right - left), -(bottom + top) / (bottom - top), zFar / (zFar - zNear), 1.0);
     }
+
 
 
 };
