@@ -32,16 +32,15 @@ public:
 
 	void build(const FBox& box);
 	void buildTriangle();
+	void buildQuad();
 	
 
 	void End();
 
-	FGeometry* BuildBox(const FBox& box);
+	Ptr<FGeometry> BuildBox(const FBox& box);
+	Ptr<FGeometry> BuildRenderQuad();
 	FGeometry* BuildTriangle();
-	void Clear()
-	{
-
-	}
+	
 private:
 	ShapeGeometryBuilder() {
 		_vertices = new Vec3fArray();
@@ -49,6 +48,14 @@ private:
 		mTexcoordArray = new Vec2fArray();
 		_colors = new Vec4fArray();
 		mIndexArray = new IndexArray();
+	}
+
+	void Clear()
+	{
+		_vertices->clear();
+		mNormalArray->clear();
+		mTexcoordArray->clear();
+		mIndexArray->clear();
 	}
 protected:
 	inline void Vertex3f(const Vec3f& v) { _vertices->push_back(v); }

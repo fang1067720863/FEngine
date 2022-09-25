@@ -71,6 +71,7 @@ public:
 		switch (geom->GetMaterialType())
 		{
 		case MaterialType::None:
+			InitTestMaterial();
 			break;
 		case MaterialType::Pbr:
 			InitPbrMaterial();
@@ -194,6 +195,22 @@ public:
 		int32_t mapSlot = 0;  // fixed in default sky shader
 		mMaterialSlot.textureSlots.push_back(ShaderInputSlot::TextureSlot{ mapSlot, 1, resourceSlot });
 		mMaterialSlot.samplerSlots.push_back(ShaderInputSlot::SamplerSlot{ 0, 1, 1 });
+	}
+
+	void InitTestMaterial()
+	{
+		//string path = mGeomtry->GetModelFile().GetFilePath();
+		//int32_t resourceSlot = ShaderResoucePool::Instance().CreateDeviceResource(path + "\\TexturesCom_Brick_BlocksBare_1K_roughness.tif", device);
+		//int32_t mapSlot = 0;  // fixed in default sky shader
+		//mMaterialSlot.textureSlots.push_back(ShaderInputSlot::TextureSlot{ mapSlot, 1, resourceSlot });
+	/*	mMaterialSlot.samplerSlots.push_back(ShaderInputSlot::SamplerSlot{ 0, 1, 7 });
+		mMaterialSlot.samplerSlots.push_back(ShaderInputSlot::SamplerSlot{ 1, 1, 8 });
+		mMaterialSlot.samplerSlots.push_back(ShaderInputSlot::SamplerSlot{ 2, 1, 9 });*/
+		mMaterialSlot.textureSlots.push_back(ShaderInputSlot::TextureSlot{ 0, 1, 7 });
+		mMaterialSlot.textureSlots.push_back(ShaderInputSlot::TextureSlot{ 1, 1, 8 });
+		mMaterialSlot.textureSlots.push_back(ShaderInputSlot::TextureSlot{ 2, 1, 9 });
+		mMaterialSlot.textureSlots.push_back(ShaderInputSlot::TextureSlot{ 3, 1, 10 });
+
 	}
 
 	void Draw() override

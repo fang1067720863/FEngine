@@ -23,19 +23,19 @@ FDx11App::FDx11App(HINSTANCE hInstance, const std::wstring& windowName, int init
 
 bool FDx11App::InitSinglePass()
 {
-	forwardPass = new FDx11Pass(1, m_ScreenViewport, m_pDevice);
+	forwardPass = new FDx11Pass("forwardPass",1, m_ScreenViewport, m_pDevice);
 	forwardPass->InitPass("1DefaultVertex", "1PbrPS");
 	_InitForwardPassShaderInput();
 
-	skyPass = new FDx11Pass(1, m_ScreenViewport, m_pDevice);
+	skyPass = new FDx11Pass("skyPass",1, m_ScreenViewport, m_pDevice);
 	skyPass->InitPass("2skybox_vs", "2skybox_ps");
 	_InitSkyPassShaderInput();
 
-	gBufferPass = new FDx11Pass(3, m_ScreenViewport, m_pDevice);
+	gBufferPass = new FDx11Pass("gBuffer",3, m_ScreenViewport, m_pDevice);
 	gBufferPass->InitPass("3GBufferVS", "3GBufferPS");
 	_InitGBufferPassShaderInput();
 
-	deferredPass = new FDx11Pass(1, m_ScreenViewport, m_pDevice);
+	deferredPass = new FDx11Pass("deferred",1, m_ScreenViewport, m_pDevice);
 	deferredPass->InitPass("3DeferredVS", "3DeferredPS");
 	_InitDeferredPassShaderInput();
 
@@ -79,26 +79,25 @@ void FDx11App::_InitDeferredPassShaderInput()
 	});
 	Ptr<ConstantBufferObject> defer2 = ConstantBufferPool::Instance().CreateDeviceResource("defer2", sizeof(Light), m_pDevice);
 	defer2->Upload<Light>(Light{ Vec4f(1.0,1.0,1.0,1.0),Vec4f(1.0,1.0,1.0,1.0),Vec4f(0.7,0.7,0.7,1.0),Vec4f(0.5,0.5,0.0,1.0) });
-	Ptr<ConstantBufferObject> worldCBO = ConstantBufferPool::Instance().GetResource("world");
+	
 
 
 	deferredPass->GetGpuProgram()->AddConstantBuffer(defer0);
 	deferredPass->GetGpuProgram()->AddConstantBuffer(defer1);
 	deferredPass->GetGpuProgram()->AddConstantBuffer(defer2);
-	deferredPass->GetGpuProgram()->AddConstantBuffer(worldCBO);
 
 
 	deferredPass->GetGpuProgram()->AddSamplerResource(SamplerStateType::LINIEAR_WRAP,0);
 
 	//shader slot fix in deferred shader
-	int32_t albdo = gBufferPass->GetRTShaderResourceSlot("albdo");
-	int32_t normal = gBufferPass->GetRTShaderResourceSlot("normal");
-	int32_t orm = gBufferPass->GetRTShaderResourceSlot("orm");
-	int32_t depth = gBufferPass->GetRTShaderResourceSlot("depth");
-	deferredPass->GetGpuProgram()->AddShaderResource(albdo, 0);
-	deferredPass->GetGpuProgram()->AddShaderResource(normal, 1);
-	deferredPass->GetGpuProgram()->AddShaderResource(orm, 2);
-	deferredPass->GetGpuProgram()->AddShaderResource(depth, 3);
+	//int32_t albdo = gBufferPass->GetRTShaderResourceSlot("gBuffer0");
+	//int32_t normal = gBufferPass->GetRTShaderResourceSlot("gBuffer1");
+	//int32_t orm = gBufferPass->GetRTShaderResourceSlot("gBuffer2");
+	//int32_t depth = gBufferPass->GetRTShaderResourceSlot("gBufferDepth");
+	//deferredPass->GetGpuProgram()->AddShaderResource(albdo, 0);
+	//deferredPass->GetGpuProgram()->AddShaderResource(normal, 1);
+	//deferredPass->GetGpuProgram()->AddShaderResource(orm, 2);
+	//deferredPass->GetGpuProgram()->AddShaderResource(depth, 3);
 
 }
 void FDx11App::_InitSkyPassShaderInput()
@@ -174,14 +173,15 @@ bool FDx11App::InitGameObject()
 	}
 
 	FBox box(Vec3f(1.0f));
-	FGeometry* skyboxGeom = ShapeGeometryBuilder::instance().BuildBox(box);
+	Ptr<FGeometry> skyboxGeom = ShapeGeometryBuilder::instance().BuildBox(box);
 	skyboxGeom->SetMaterialType(MaterialType::SkyBox);
 	skyboxGeom->SetModelFile(File("D:\\GitProject\\FEngine\\FRenderer\\Model"));
-	skybox = new FDx11Mesh(skyboxGeom, m_pDevice);
+	skybox = new FDx11Mesh(skyboxGeom.get(), m_pDevice);
 
 
-
-	
+	Ptr<FGeometry> quad = ShapeGeometryBuilder::instance().BuildRenderQuad();
+	quad->SetModelFile(File("D:\\GitProject\\FEngine\\FRenderer\\Model"));
+	renderQuad = new FDx11Mesh(quad.get(), m_pDevice);
 
 	GltfReader reader;
 	gltfModel = make_shared<GLTFModel>();
@@ -201,23 +201,34 @@ bool FDx11App::InitGameObject()
 
 void FDx11App::DrawScene()
 {
-	static float black[4] = { 0.0f, 0.0f, 0.0f, 1.0f };	// RGBA = (0,0,0,255)
-	m_pDevice.deviceContext->ClearRenderTargetView(m_pRenderTargetView.Get(), black);
-	m_pDevice.deviceContext->ClearDepthStencilView(m_pDepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-	this->ResetMainRenderTarget();
 
-	forwardPass->Begin();
-	sceneGroup->Draw();
-	forwardPass->End();
+
+
+
+
 
 	gBufferPass->Begin();
 	sceneGroup->Draw();
 	gBufferPass->End();
 
+	
+	//forwardPass->Begin();
+	//sceneGroup->Draw();
+	//forwardPass->End();
+
+	static float black[4] = { 0.0f, 0.0f, 0.0f, 1.0f };	// RGBA = (0,0,0,255)
+	m_pDevice.deviceContext->ClearRenderTargetView(m_pRenderTargetView.Get(), black);
+	m_pDevice.deviceContext->ClearDepthStencilView(m_pDepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	this->ResetMainRenderTarget();
-	skyPass->Begin();
-	skybox->Draw();
-	skyPass->End();
+	deferredPass->Begin();
+	renderQuad->Draw();
+	deferredPass->End();
+
+
+	//this->ResetMainRenderTarget();
+	//skyPass->Begin();
+	//skybox->Draw();
+	//skyPass->End();
 
 	HR(m_pSwapChain->Present(0, 0));
 }

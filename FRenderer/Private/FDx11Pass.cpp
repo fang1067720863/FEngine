@@ -7,9 +7,10 @@ FDx11Pass::FDx11Pass(const FDx11Device& _device,const D3D11_VIEWPORT& vp) :mDevi
 	mViewport = vp;
 }
 
-FDx11Pass::FDx11Pass(unsigned int numViews, const D3D11_VIEWPORT& vp, const FDx11Device& _device) :mNumViews(numViews), mDevice(_device)
+FDx11Pass::FDx11Pass(const std::string& _name, unsigned int numViews, const D3D11_VIEWPORT& vp, const FDx11Device& _device) :mNumViews(numViews), mDevice(_device)
 {
 	mViewport = vp;
+	mName = _name;
 }
 bool FDx11Pass::InitPass(const std::string& vs, const std::string& ps)
 {
@@ -75,6 +76,11 @@ bool FDx11Pass::InitRenderTexture(ID3D11Device* device)
 	texArrayDesc.CPUAccessFlags = 0;
 	texArrayDesc.MiscFlags = 0; // 指定需要生成mipmap
 
+	D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
+		// Setup the description of the render target view.
+	renderTargetViewDesc.Format = texArrayDesc.Format;
+	renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	renderTargetViewDesc.Texture2D.MipSlice = 0;
 
 	for (unsigned int i = 0; i < mNumViews; i++)
 	{
@@ -85,8 +91,6 @@ bool FDx11Pass::InitRenderTexture(ID3D11Device* device)
 	{
 		HR(device->CreateRenderTargetView(mRenderTargetTextures[i], nullptr, &mRenderTargetView[i]));
 		D3D11SetDebugObjectName(mRenderTargetView[i], "mRenderTargetView"+ std::to_string(i));
-	/*	D3D11SetDebugObjectName(mRenderTargetView[1], "mRenderTargetView1");
-		D3D11SetDebugObjectName(mRenderTargetView[2], "mRenderTargetView2");*/
 	}
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
@@ -98,10 +102,9 @@ bool FDx11Pass::InitRenderTexture(ID3D11Device* device)
 	{
 
 		ComPtr<ID3D11ShaderResourceView> shaderResourceView;
-		HR(device->CreateShaderResourceView(mRenderTargetTextures[i], &shaderResourceViewDesc, &shaderResourceView));
+		HR(device->CreateShaderResourceView(mRenderTargetTextures[i], &shaderResourceViewDesc, shaderResourceView.GetAddressOf()));
 		int32_t slot = ShaderResoucePool::Instance().CreateShaderResouce(shaderResourceView);
-		std::string name = "gBuffer" + std::to_string(slot);
-		mRTShaderResourceSlots[name] = slot;
+		std::cout << slot << endl;
 	}
 
 
@@ -138,8 +141,8 @@ bool FDx11Pass::InitRenderTexture(ID3D11Device* device)
 	ComPtr<ID3D11ShaderResourceView> srvDepth;
 	HR(device->CreateShaderResourceView(mDepthStencilBuffer.Get(), &srvDepthDesc, &srvDepth));
 	int32_t slot = ShaderResoucePool::Instance().CreateShaderResouce(srvDepth);
-	std::string name = "gBuffer" + std::string("Depth");
-	mRTShaderResourceSlots[name] = slot;
+	std::cout << slot << endl;
+	//mRTShaderResourceSlots[name] = slot;
 
 	return true;
 }
@@ -147,9 +150,21 @@ bool FDx11Pass::InitRenderTexture(ID3D11Device* device)
 
 bool FDx11Pass::_UseRenderState()
 {
-	auto dsState = DepthStencilStateResoucePool::Instance().GetResource(DepthStencilStateType::LESS_EQUAL);
+	ComPtr<ID3D11DepthStencilState> dsState;
+	dsState = DepthStencilStateResoucePool::Instance().GetResource(DepthStencilStateType::LESS_EQUAL);
 	auto bsState = BlendStateResoucePool::Instance().GetResource(BlendStateType::ADDITIVE);
 	auto rsState = RasterStateResoucePool::Instance().GetResource(RasterizeStateType::RS_NO_CULL);
+
+	if ("deferred" == mName)
+	{
+		 dsState = DepthStencilStateResoucePool::Instance().GetResource(DepthStencilStateType::NO_DEPTH_TEST_WITH_STENCIL);
+	}
+	else {
+		 dsState = DepthStencilStateResoucePool::Instance().GetResource(DepthStencilStateType::LESS_EQUAL);
+	}
+	
+	
+
 	mDevice.GetDeviceContext()->RSSetState(rsState.Get());
 	mDevice.GetDeviceContext()->OMSetDepthStencilState(dsState.Get(), 0);
 	mDevice.GetDeviceContext()->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF);

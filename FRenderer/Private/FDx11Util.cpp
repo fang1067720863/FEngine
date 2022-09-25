@@ -6,6 +6,7 @@
 #include<d3d11.h>
 #include<string>
 #include<string_view>
+#include<iostream>
 
 
 
@@ -44,7 +45,7 @@ HRESULT CreateShaderFromFile(
 		if (errorBlob != nullptr)
 		{
 			const char* errstr = reinterpret_cast<const char*>(errorBlob->GetBufferPointer());
-			int a = 1;
+			std::cout << errstr << std::endl;
 		}
 		//SAFE_RELEASE(errorBlob);
 		return hr;

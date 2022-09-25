@@ -72,121 +72,66 @@ void ShapeGeometryBuilder::build(const FBox& box)
 	{
 		mIndexArray->emplace_back(indices[i]);
 	}
-
-
-
-	// 24 points in box
-	// create body
-	//Normal3f(0.0f, -1.0f, 0.0f);
-	//TexCoord2f(0.0f, 1.0f);
-	//Vertex3f(-dx, -dy, dz);
-
-	//Normal3f(0.0f, -1.0f, 0.0f);
-	//TexCoord2f(0.0f, 0.0f);
-	//Vertex3f(-dx, -dy, -dz);
-
-	//Normal3f(0.0f, -1.0f, 0.0f);
-	//TexCoord2f(1.0f, 0.0f);
-	//Vertex3f(dx, -dy, -dz);
-
-	//Normal3f(0.0f, -1.0f, 0.0f);
-	//TexCoord2f(1.0f, 1.0f);
-	//Vertex3f(dx, -dy, dz);
-
-	//// +ve y plane
-	//Normal3f(0.0f, 1.0f, 0.0f);
-	//TexCoord2f(0.0f, 1.0f);
-	//Vertex3f(dx, dy, dz);
-
-	//Normal3f(0.0f, 1.0f, 0.0f);
-	//TexCoord2f(0.0f, 0.0f);
-	//Vertex3f(dx, dy, -dz);
-
-	//Normal3f(0.0f, 1.0f, 0.0f);
-	//TexCoord2f(1.0f, 0.0f);
-	//Vertex3f(-dx, dy, -dz);
-
-	//Normal3f(0.0f, 1.0f, 0.0f);
-	//TexCoord2f(1.0f, 1.0f);
-	//Vertex3f(-dx, dy, dz);
-
-	//// +ve x plane
-	//Normal3f(1.0f, 0.0f, 0.0f);
-	//TexCoord2f(0.0f, 1.0f);
-	//Vertex3f(dx, -dy, dz);
-
-	//Normal3f(1.0f, 0.0f, 0.0f);
-	//TexCoord2f(0.0f, 0.0f);
-	//Vertex3f(dx, -dy, -dz);
-
-	//Normal3f(1.0f, 0.0f, 0.0f);
-	//TexCoord2f(1.0f, 0.0f);
-	//Vertex3f(dx, dy, -dz);
-
-	//Normal3f(1.0f, 0.0f, 0.0f);
-	//TexCoord2f(1.0f, 1.0f);
-	//Vertex3f(dx, dy, dz);
-
-	//// -ve x plane
-	//Normal3f(-1.0f, 0.0f, 0.0f);
-	//TexCoord2f(0.0f, 1.0f);
-	//Vertex3f(-dx, dy, dz);
-
-	//Normal3f(-1.0f, 0.0f, 0.0f);
-	//TexCoord2f(0.0f, 0.0f);
-	//Vertex3f(-dx, dy, -dz);
-
-	//Normal3f(-1.0f, 0.0f, 0.0f);
-	//TexCoord2f(1.0f, 0.0f);
-	//Vertex3f(-dx, -dy, -dz);
-
-	//Normal3f(-1.0f, 0.0f, 0.0f);
-	//TexCoord2f(1.0f, 1.0f);
-	//Vertex3f(-dx, -dy, dz);
-
-	////createTop
-	//// +ve z plane
-	//Normal3f(0.0f, 0.0f, 1.0f);
-	//TexCoord2f(0.0f, 1.0f);
-	//Vertex3f(-dx, dy, dz);
-
-	//Normal3f(0.0f, 0.0f, 1.0f);
-	//TexCoord2f(0.0f, 0.0f);
-	//Vertex3f(-dx, -dy, dz);
-
-	//Normal3f(0.0f, 0.0f, 1.0f);
-	//TexCoord2f(1.0f, 0.0f);
-	//Vertex3f(dx, -dy, dz);
-
-	//Normal3f(0.0f, 0.0f, 1.0f);
-	//TexCoord2f(1.0f, 1.0f);
-	//Vertex3f(dx, dy, dz);
-
-
-	////createBottom
-	//Normal3f(0.0f, 0.0f, -1.0f);
-	//TexCoord2f(0.0f, 1.0f);
-	//Vertex3f(dx, dy, -dz);
-
-	//Normal3f(0.0f, 0.0f, -1.0f);
-	//TexCoord2f(0.0f, 0.0f);
-	//Vertex3f(dx, -dy, -dz);
-
-	//Normal3f(0.0f, 0.0f, -1.0f);
-	//TexCoord2f(1.0f, 0.0f);
-	//Vertex3f(-dx, -dy, -dz);
-
-	//Normal3f(0.0f, 0.0f, -1.0f);
-	//TexCoord2f(1.0f, 1.0f);
-	//Vertex3f(-dx, dy, -dz);
-
-   // End();
 }
 void ShapeGeometryBuilder::buildTriangle()
 {
 	Vertex3f(0.5f, 0.5f, 0.5f);
 	Vertex3f(0.8f, 0.5f, 0.5f);
 	Vertex3f(0.5f, -0.5f, 0.5f);
+}
+
+void ShapeGeometryBuilder::buildQuad()
+{
+	//Vertex3f(-1.0f, 1.0f, 0.0f);
+	//TexCoord2f(0.0f, 1.0f);
+
+	//Vertex3f(-1.0f, -1.0f, 0.0f);
+	//TexCoord2f(0.0f, 0.0f);
+
+	//Vertex3f(1.0f, 1.0f, 0.0f);
+	//TexCoord2f(1.0f, 0.0f);
+
+	//Vertex3f(1.0f, -1.0f, 0.0f);
+	//TexCoord2f(1.0f, 0.0f);
+
+	//Normal3f(0.0f, 0.0f, -1.0f);
+	//Normal3f(0.0f, 0.0f, -1.0f);
+	//Normal3f(0.0f, 0.0f, -1.0f);
+	//Normal3f(0.0f, 0.0f, -1.0f);
+
+	//unsigned int indices[] = {
+	//	// 正面
+	//	0, 1, 2,
+	//	2, 3, 0,
+	//};
+	//for (int i = 0; i < 6; i++)
+	//{
+	//	mIndexArray->emplace_back(indices[i]);
+	//}
+
+	Vertex3f(-1.0f, 1.0f, 0.5f);  // left-top
+	Vertex3f(1.0f, 1.0f, 0.5f);   // right-top
+	Vertex3f(1.0f, -1.0f, 0.5f);  // right-bottom
+	Vertex3f(-1.0f, -1.0f, 0.5f); // top-bottom
+	Normal3f(0.0f, 0.0f, -1.0f);
+	Normal3f(0.0f, 0.0f, -1.0f);
+	Normal3f(0.0f, 0.0f, -1.0f);
+	Normal3f(0.0f, 0.0f, -1.0f);
+	TexCoord2f(0.0f, 0.0f);
+	TexCoord2f(1.0f, 0.0f);
+	TexCoord2f(1.0f, 1.0f);
+	TexCoord2f(0.0f, 1.0f);
+	// anti clock
+	unsigned int indices[] = {
+		// 正面
+		0, 1, 2,
+		0, 2, 3
+	};
+	for (int i = 0; i < 6; i++)
+	{
+		mIndexArray->emplace_back(indices[i]);
+	}
+
 }
 
 void ShapeGeometryBuilder::End()
@@ -208,22 +153,34 @@ void ShapeGeometryBuilder::End()
 		mIndexArray->emplace_back(p0);
 	}
 }
-FGeometry* ShapeGeometryBuilder::BuildBox(const FBox& box)
+Ptr<FGeometry> ShapeGeometryBuilder::BuildBox(const FBox& box)
 {
 	build(box);
-	FGeometry* geom = new FGeometry();
+	Ptr<FGeometry> geom = new FGeometry();
 	geom->SetPositionArray(_vertices.get());
 	geom->SetNormalArray(mNormalArray.get());
 	geom->SetTexcoordArray(mTexcoordArray.get());
 	geom->SetIndexArray(mIndexArray.get());
 	geom->Compile();
+	Clear();
 	return geom;
 }
 FGeometry* ShapeGeometryBuilder::BuildTriangle()
 {
 	buildTriangle();
 	FGeometry* geom = new FGeometry();
-	/* geom->SetVertexPositionArray(_vertices.get());
-	 geom->CompilePos();*/
+	return geom;
+}
+
+Ptr<FGeometry> ShapeGeometryBuilder::BuildRenderQuad()
+{
+	buildQuad();
+	Ptr<FGeometry> geom = new FGeometry();
+	geom->SetPositionArray(_vertices.get());
+	geom->SetNormalArray(mNormalArray.get());
+	geom->SetTexcoordArray(mTexcoordArray.get());
+	geom->SetIndexArray(mIndexArray.get());
+	geom->Compile();
+	Clear();
 	return geom;
 }

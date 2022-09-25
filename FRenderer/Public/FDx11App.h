@@ -72,6 +72,7 @@ private:
 	Ptr<FGroup> sceneGroup;
 	Ptr<FCamera> mainCamera;
 	Ptr<FNode> skybox;
+	Ptr<FNode> renderQuad;
 
 	std::shared_ptr<GLTFModel> gltfModel;
 };

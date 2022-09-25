@@ -14,7 +14,7 @@ class FDx11Pass :public FReference
 public:
 
 	FDx11Pass(const FDx11Device& _device, const D3D11_VIEWPORT& vp);
-	FDx11Pass(unsigned int numViews, const D3D11_VIEWPORT& vp, const FDx11Device& _device);
+	FDx11Pass(const std::string& _name, unsigned int numViews, const D3D11_VIEWPORT& vp, const FDx11Device& _device);
 	bool InitPass(const std::string& vs, const std::string& ps);
 	
 	// render target view
@@ -88,10 +88,16 @@ protected:
 	D3D11_RECT mRect;
 	unsigned int mNumViews = 0;
 	FPtr<FDx11GpuProgram> mGpuProgram;
-
+	std::string mName;
 
 	const FDx11Device& mDevice;
 
 
+	ID3D11ShaderResourceView* gBufferSRV[MAX_MULTIPLE_RENDER_TARGETS];
+
+	ID3D11ShaderResourceView* GetGBufferSRV(int i)
+	{
+		return gBufferSRV[i];
+	}
 
 };
