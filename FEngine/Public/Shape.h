@@ -2,11 +2,31 @@
 
 #include"VecArray.h"
 
-class FShape :public FReference
-{
 
+
+class FBox;
+class FQuad;
+class FTriangle;
+class FSphere;
+class IShape;
+class IDrawer : public FReference
+{
+public:
+	IDrawer() = default;
+	virtual bool Draw(const IShape& event) { return false; }
+	virtual bool Draw(const FBox& event)  { return false; }
+	virtual bool Draw(const FQuad& event) { return false; }
+	virtual bool Draw(const FTriangle& event)  { return false; }
+	virtual bool Draw(const FSphere& event) { return false; }
 };
-class FBox :public FShape
+
+class IShape :public FReference
+{
+public:
+	virtual void Drawn(IDrawer& drawer) const = 0;
+};
+
+class FBox :public IShape
 {
 public:
 	FBox(const Vec3f& halfVec) : mHalfLength(halfVec[0] / 2)
@@ -16,11 +36,41 @@ public:
 	float mHalfWidth;
 	float mHalfLength;
 	float mHalfHeight;
+
+	virtual void Drawn(IDrawer& drawer) const
+	{
+		drawer.Draw(*this);
+	}
+};
+class FTriangle : public IShape
+{
+public:
+	virtual void Drawn(IDrawer& drawer) const
+	{
+		drawer.Draw(*this);
+	}
+};
+class FSphere : public IShape
+{
+public:
+	virtual void Drawn(IDrawer& drawer) const
+	{
+		drawer.Draw(*this);
+	}
+};
+class FQuad : public IShape
+{
+public:
+	virtual void Drawn(IDrawer& drawer) const
+	{
+		drawer.Draw(*this);
+	}
 };
 
 
+
 class FGeometry;
-class ShapeGeometryBuilder
+class ShapeGeometryBuilder:protected IDrawer
 {
 public:
 	static ShapeGeometryBuilder& instance()
@@ -28,18 +78,19 @@ public:
 		static ShapeGeometryBuilder instance;
 		return instance;
 	}
-	FGeometry* Build(const FShape& shape);
 
-	void build(const FBox& box);
-	void buildTriangle();
-	void buildQuad();
-	
+	Ptr<FGeometry> BuildGeomtry(const IShape& shape);
+
+
+protected:
 
 	void End();
+	virtual bool Draw(const FBox& box);
+	virtual bool Draw(const FTriangle& triangle);
+	virtual bool Draw(const FSphere& sphere);
+	virtual bool Draw(const FQuad& quad);
+	
 
-	Ptr<FGeometry> BuildBox(const FBox& box);
-	Ptr<FGeometry> BuildRenderQuad();
-	FGeometry* BuildTriangle();
 	
 private:
 	ShapeGeometryBuilder() {

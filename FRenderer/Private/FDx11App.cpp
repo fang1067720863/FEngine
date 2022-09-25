@@ -173,13 +173,13 @@ bool FDx11App::InitGameObject()
 	}
 
 	FBox box(Vec3f(1.0f));
-	Ptr<FGeometry> skyboxGeom = ShapeGeometryBuilder::instance().BuildBox(box);
+	Ptr<FGeometry> skyboxGeom = ShapeGeometryBuilder::instance().BuildGeomtry(box);
 	skyboxGeom->SetMaterialType(MaterialType::SkyBox);
 	skyboxGeom->SetModelFile(File("D:\\GitProject\\FEngine\\FRenderer\\Model"));
 	skybox = new FDx11Mesh(skyboxGeom.get(), m_pDevice);
 
 
-	Ptr<FGeometry> quad = ShapeGeometryBuilder::instance().BuildRenderQuad();
+	Ptr<FGeometry> quad = ShapeGeometryBuilder::instance().BuildGeomtry(FQuad());
 	quad->SetModelFile(File("D:\\GitProject\\FEngine\\FRenderer\\Model"));
 	renderQuad = new FDx11Mesh(quad.get(), m_pDevice);
 
