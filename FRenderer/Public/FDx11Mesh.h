@@ -206,10 +206,10 @@ public:
 	/*	mMaterialSlot.samplerSlots.push_back(ShaderInputSlot::SamplerSlot{ 0, 1, 7 });
 		mMaterialSlot.samplerSlots.push_back(ShaderInputSlot::SamplerSlot{ 1, 1, 8 });
 		mMaterialSlot.samplerSlots.push_back(ShaderInputSlot::SamplerSlot{ 2, 1, 9 });*/
-		mMaterialSlot.textureSlots.push_back(ShaderInputSlot::TextureSlot{ 0, 1, 7 });
+		/*mMaterialSlot.textureSlots.push_back(ShaderInputSlot::TextureSlot{ 0, 1, 7 });
 		mMaterialSlot.textureSlots.push_back(ShaderInputSlot::TextureSlot{ 1, 1, 8 });
 		mMaterialSlot.textureSlots.push_back(ShaderInputSlot::TextureSlot{ 2, 1, 9 });
-		mMaterialSlot.textureSlots.push_back(ShaderInputSlot::TextureSlot{ 3, 1, 10 });
+		mMaterialSlot.textureSlots.push_back(ShaderInputSlot::TextureSlot{ 3, 1, 10 });*/
 
 	}
 

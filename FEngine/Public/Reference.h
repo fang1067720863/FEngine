@@ -112,9 +112,20 @@ public:
 	}
 	FPtr& operator=(FPtr&& other)
 	{
+		//p = other.p;
+		////std::cout << "Ptr move assgin" << std::endl;
+		//other.p = nullptr;
+		//return *this;
+
+		if (p == other.p) return *this;
+
+		if (p)	p->remove_ref();
+
 		p = other.p;
-		//std::cout << "Ptr move assgin" << std::endl;
+
 		other.p = nullptr;
+
+		return *this;
 	}
 	~FPtr()
 	{

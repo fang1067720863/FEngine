@@ -77,5 +77,5 @@ float4 PS(VertexPosHWNormalTex pIn): SV_Target
     // return float4(color, 1.0f);
     
     
-    return float4(depthProj1,1.0);
+    return float4(depthProj,1.0);
 }

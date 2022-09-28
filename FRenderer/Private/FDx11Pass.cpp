@@ -2,19 +2,29 @@
 #include"../Public/FDx11RenderState.h"
 #include"../Public/FDx11ResourceFactory.h"
 
-FDx11Pass::FDx11Pass(const FDx11Device& _device,const D3D11_VIEWPORT& vp) :mDevice(_device)
+FDx11Pass::FDx11Pass(Ptr<PassBuilder::PassContext> _context, const PassBuilder::PassOption& _option)
+{
+	
+	globalContext = _context;
+	option = _option;
+	mDevice = _context->device;
+	mNumViews = _option.numViews;
+}
+
+
+FDx11Pass::FDx11Pass(const FDx11Device& _device,const D3D11_VIEWPORT& vp) :mDevice(const_cast<FDx11Device*>(&_device))
 {
 	mViewport = vp;
 }
 
-FDx11Pass::FDx11Pass(const std::string& _name, unsigned int numViews, const D3D11_VIEWPORT& vp, const FDx11Device& _device) :mNumViews(numViews), mDevice(_device)
+FDx11Pass::FDx11Pass(const std::string& _name, unsigned int numViews, const D3D11_VIEWPORT& vp, const FDx11Device& _device) :mNumViews(numViews), mDevice(const_cast<FDx11Device*>(&_device))
 {
 	mViewport = vp;
 	mName = _name;
 }
 bool FDx11Pass::InitPass(const std::string& vs, const std::string& ps)
 {
-	ID3D11Device* device = mDevice.GetDevice();
+	ID3D11Device* device = mDevice->GetDevice();
 	if (!InitRenderTexture(device))
 	{
 		return false;
@@ -41,10 +51,10 @@ bool FDx11Pass::_ClearRenderTargetView()
 	ClearFlags |= D3D11_CLEAR_STENCIL;
 	for (unsigned int i = 0; i < GetNumViews(); ++i)
 	{
-		mDevice.GetDeviceContext()->ClearRenderTargetView(mRenderTargetView[i], reinterpret_cast<const float*>(&black));
+		mDevice->GetDeviceContext()->ClearRenderTargetView(mRenderTargetView[i], reinterpret_cast<const float*>(&black));
 	}
 
-	mDevice.GetDeviceContext()->ClearDepthStencilView(
+	mDevice->GetDeviceContext()->ClearDepthStencilView(
 		mDepthStencilView.Get(),
 		ClearFlags, depth, static_cast<UINT8>(stencil));
 	
@@ -101,9 +111,11 @@ bool FDx11Pass::InitRenderTexture(ID3D11Device* device)
 	for (UINT i = 0; i < mNumViews; i++)
 	{
 
-		ComPtr<ID3D11ShaderResourceView> shaderResourceView;
+		ComPtr<ID3D11ShaderResourceView> shaderResourceView{ nullptr };
 		HR(device->CreateShaderResourceView(mRenderTargetTextures[i], &shaderResourceViewDesc, shaderResourceView.GetAddressOf()));
 		int32_t slot = ShaderResoucePool::Instance().CreateShaderResouce(shaderResourceView);
+		globalContext->AddSrvMap("gBuffer" + std::to_string(i), slot);
+		
 		std::cout << slot << endl;
 	}
 
@@ -140,9 +152,11 @@ bool FDx11Pass::InitRenderTexture(ID3D11Device* device)
 	
 	ComPtr<ID3D11ShaderResourceView> srvDepth;
 	HR(device->CreateShaderResourceView(mDepthStencilBuffer.Get(), &srvDepthDesc, &srvDepth));
+	
 	int32_t slot = ShaderResoucePool::Instance().CreateShaderResouce(srvDepth);
+	globalContext->AddSrvMap("gBufferDepth", slot);
 	std::cout << slot << endl;
-	//mRTShaderResourceSlots[name] = slot;
+
 
 	return true;
 }
@@ -165,9 +179,9 @@ bool FDx11Pass::_UseRenderState()
 	
 	
 
-	mDevice.GetDeviceContext()->RSSetState(rsState.Get());
-	mDevice.GetDeviceContext()->OMSetDepthStencilState(dsState.Get(), 0);
-	mDevice.GetDeviceContext()->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF);
+	mDevice->GetDeviceContext()->RSSetState(rsState.Get());
+	mDevice->GetDeviceContext()->OMSetDepthStencilState(dsState.Get(), 0);
+	mDevice->GetDeviceContext()->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF);
 	return true;
 }
 
@@ -175,7 +189,7 @@ bool FDx11Pass::_SetRenderTarget()
 {
 	
 
-	mDevice.deviceContext->OMSetRenderTargets(mNumViews, mRenderTargetView, mDepthStencilView.Get());
+	mDevice->deviceContext->OMSetRenderTargets(mNumViews, mRenderTargetView, mDepthStencilView.Get());
 
 	// 设置视口变换
 	D3D11_VIEWPORT m_ScreenViewport;
@@ -186,14 +200,14 @@ bool FDx11Pass::_SetRenderTarget()
 	m_ScreenViewport.MinDepth = 0.0f;
 	m_ScreenViewport.MaxDepth = 1.0f;
 
-	mDevice.deviceContext->RSSetViewports(1, &m_ScreenViewport);
+	mDevice->deviceContext->RSSetViewports(1, &m_ScreenViewport);
 	return true;
 
 }
 
 bool FDx11Pass::End()
 {
-	mDevice.deviceContext->OMSetRenderTargets(0, nullptr, nullptr);
+	mDevice->deviceContext->OMSetRenderTargets(0, nullptr, nullptr);
 	return true;
 }
 
@@ -207,14 +221,19 @@ bool FDx11Pass::Begin()
 	
 
 	_UseRenderState();
-	mDevice.GetDeviceContext()->IASetInputLayout(mGpuProgram->inputLayout.Get());
+	mDevice->GetDeviceContext()->IASetInputLayout(mGpuProgram->inputLayout.Get());
 	mGpuProgram->UseProgram();
 	
 	return true;
 }
 bool FDx11Pass::InitGpuProgram(const std::string& vs, const std::string& ps)
 {
-	mGpuProgram = new FDx11GpuProgram(mDevice,vs,ps);
+	mGpuProgram = new FDx11GpuProgram(*mDevice,vs,ps);
 	return true;
 
+}
+
+Ptr<FDx11Pass> PassBuilder::CreatePass(const PassBuilder::PassOption& option)
+{
+	return Ptr<FDx11Pass>(new FDx11Pass(context, option));
 }

@@ -7,11 +7,87 @@
 
 #define MAX_MULTIPLE_RENDER_TARGETS 8
 
+class FDx11Pass;
+class PassBuilder
+{
+public:
+	struct PassOption {
+		std::string name{ "" };
+		bool mainTarget{ false };
+		unsigned int numViews{ 1 };
+		bool enableDepth{ false };
+		
+	};
+
+	static PassBuilder& Instance()
+	{
+		static PassBuilder instance;
+		return instance;
+	}
+
+	PassBuilder(): context(new PassContext())
+	{
+	
+	}
+	void SetDevice(FDx11Device* device)
+	{
+		context->device = device;
+	}
+
+	class PassContext:public FReference
+	{
+	public:
+
+		PassContext()
+		{
+
+		}
+		using SrvPtr = int32_t;  //resourceSlot
+		ComPtr<ID3D11RenderTargetView> mainRenderTargetView;   // 渲染目标视图
+		ComPtr<ID3D11DepthStencilView> mainDepthStencilView;   // 深度模板视图
+		D3D11_VIEWPORT                 mainScreenViewport;     // 视口
+		std::unordered_map<std::string, SrvPtr> srvMap{};
+		FDx11Device* device;
+
+		bool AddSrvMap(const std::string& name, SrvPtr srv)
+		{
+			if (srvMap.find(name) != srvMap.end())
+			{
+				return false;
+			}
+			else {
+				srvMap[name] = srv;
+			}
+		}
+		SrvPtr GetSrvMap(const std::string& name)
+		{
+			if (srvMap.find(name) != srvMap.end())
+			{
+				return srvMap[name];
+			}
+			else {
+				return -1;
+			}
+		}
+	};
+	Ptr<FDx11Pass> CreatePass(const PassBuilder::PassOption& option);  // 右值是否好些？
+
+
+	Ptr<PassContext> context;
+
+};
+
+
 
 class FDx11Pass :public FReference
 {
 	using PassCBUpdateCallback = std::function<void(float dt)>;
 public:
+	FDx11Pass(Ptr<PassBuilder::PassContext> _context, const PassBuilder::PassOption& _option);
+	
+
+	Ptr<PassBuilder::PassContext> globalContext;
+	PassBuilder::PassOption option;
 
 	FDx11Pass(const FDx11Device& _device, const D3D11_VIEWPORT& vp);
 	FDx11Pass(const std::string& _name, unsigned int numViews, const D3D11_VIEWPORT& vp, const FDx11Device& _device);
@@ -90,7 +166,7 @@ protected:
 	FPtr<FDx11GpuProgram> mGpuProgram;
 	std::string mName;
 
-	const FDx11Device& mDevice;
+	FDx11Device* mDevice;
 
 
 	ID3D11ShaderResourceView* gBufferSRV[MAX_MULTIPLE_RENDER_TARGETS];

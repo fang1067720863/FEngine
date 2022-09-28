@@ -19,6 +19,8 @@ void FDx11App::ClearFrameBuffer(FDx11Pass* pass)
 FDx11App::FDx11App(HINSTANCE hInstance, const std::wstring& windowName, int initWidth, int initHeight)
 	: D3DApp(hInstance, windowName, initWidth, initHeight)
 {
+	PassBuilder::Instance().SetDevice(&m_pDevice);
+	PassBuilder::Instance().context->mainScreenViewport = m_ScreenViewport;
 }
 
 bool FDx11App::InitSinglePass()
@@ -31,11 +33,11 @@ bool FDx11App::InitSinglePass()
 	skyPass->InitPass("2skybox_vs", "2skybox_ps");
 	_InitSkyPassShaderInput();
 
-	gBufferPass = new FDx11Pass("gBuffer",3, m_ScreenViewport, m_pDevice);
+	gBufferPass = PassBuilder::Instance().CreatePass(PassBuilder::PassOption{"gBuffer",false, 3,false});
 	gBufferPass->InitPass("3GBufferVS", "3GBufferPS");
 	_InitGBufferPassShaderInput();
 
-	deferredPass = new FDx11Pass("deferred",1, m_ScreenViewport, m_pDevice);
+	deferredPass = PassBuilder::Instance().CreatePass(PassBuilder::PassOption{ "deferred",false, 1,false });
 	deferredPass->InitPass("3DeferredVS", "3DeferredPS");
 	_InitDeferredPassShaderInput();
 
@@ -89,15 +91,12 @@ void FDx11App::_InitDeferredPassShaderInput()
 
 	deferredPass->GetGpuProgram()->AddSamplerResource(SamplerStateType::LINIEAR_WRAP,0);
 
-	//shader slot fix in deferred shader
-	//int32_t albdo = gBufferPass->GetRTShaderResourceSlot("gBuffer0");
-	//int32_t normal = gBufferPass->GetRTShaderResourceSlot("gBuffer1");
-	//int32_t orm = gBufferPass->GetRTShaderResourceSlot("gBuffer2");
-	//int32_t depth = gBufferPass->GetRTShaderResourceSlot("gBufferDepth");
-	//deferredPass->GetGpuProgram()->AddShaderResource(albdo, 0);
-	//deferredPass->GetGpuProgram()->AddShaderResource(normal, 1);
-	//deferredPass->GetGpuProgram()->AddShaderResource(orm, 2);
-	//deferredPass->GetGpuProgram()->AddShaderResource(depth, 3);
+	deferredPass->GetGpuProgram()->AddShaderResource(deferredPass->globalContext->GetSrvMap("gBuffer0"), 0);
+	deferredPass->GetGpuProgram()->AddShaderResource(deferredPass->globalContext->GetSrvMap("gBuffer1"), 1);
+	deferredPass->GetGpuProgram()->AddShaderResource(deferredPass->globalContext->GetSrvMap("gBuffer2"), 2);
+	deferredPass->GetGpuProgram()->AddShaderResource(deferredPass->globalContext->GetSrvMap("gBufferDepth"), 3);
+
+
 
 }
 void FDx11App::_InitSkyPassShaderInput()
@@ -201,12 +200,6 @@ bool FDx11App::InitGameObject()
 
 void FDx11App::DrawScene()
 {
-
-
-
-
-
-
 	gBufferPass->Begin();
 	sceneGroup->Draw();
 	gBufferPass->End();
@@ -226,9 +219,9 @@ void FDx11App::DrawScene()
 
 
 	//this->ResetMainRenderTarget();
-	//skyPass->Begin();
-	//skybox->Draw();
-	//skyPass->End();
+	skyPass->Begin();
+	skybox->Draw();
+	skyPass->End();
 
 	HR(m_pSwapChain->Present(0, 0));
 }
