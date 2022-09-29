@@ -3,45 +3,50 @@
 #include"Shape.h"
 #include"GltfReader.h"
 
-void FDx11App::ExecuteMainPass(FDx11Pass* pass)
-{
-
-	
-	pass->Begin();
-}
 
 
-void FDx11App::ClearFrameBuffer(FDx11Pass* pass)
-{
-	//pass->ClearRenderTargetView();
-}
 
 FDx11App::FDx11App(HINSTANCE hInstance, const std::wstring& windowName, int initWidth, int initHeight)
 	: D3DApp(hInstance, windowName, initWidth, initHeight)
 {
 	PassBuilder::Instance().SetDevice(&m_pDevice);
 	PassBuilder::Instance().context->mainScreenViewport = m_ScreenViewport;
+
 }
 
 bool FDx11App::InitSinglePass()
 {
-	forwardPass = new FDx11Pass("forwardPass",1, m_ScreenViewport, m_pDevice);
+	PassBuilder::PassOption option;
+	option.name = "forwardPass";
+	forwardPass = PassBuilder::Instance().CreatePass(option);
 	forwardPass->InitPass("1DefaultVertex", "1PbrPS");
 	_InitForwardPassShaderInput();
 
-	skyPass = new FDx11Pass("skyPass",1, m_ScreenViewport, m_pDevice);
+	
+	option.name = "skyPass";
+	option.mainTarget = true;
+	option.numViews = 1;
+	skyPass = PassBuilder::Instance().CreatePass(option);
 	skyPass->InitPass("2skybox_vs", "2skybox_ps");
 	_InitSkyPassShaderInput();
 
-	gBufferPass = PassBuilder::Instance().CreatePass(PassBuilder::PassOption{"gBuffer",false, 3,false});
+
+	option.name = "gBuffer";
+	option.mainTarget = false;
+	option.numViews = 3;
+	option.stateset.dst = DepthStencilStateType::LESS_EQUAL;
+	gBufferPass = PassBuilder::Instance().CreatePass(option);
 	gBufferPass->InitPass("3GBufferVS", "3GBufferPS");
 	_InitGBufferPassShaderInput();
 
-	deferredPass = PassBuilder::Instance().CreatePass(PassBuilder::PassOption{ "deferred",false, 1,false });
+	option.name = "deferred";
+	option.mainTarget = true;
+	option.numViews = 1;
+	option.stateset.dst = DepthStencilStateType::NO_DEPTH_TEST_WITH_STENCIL;
+	deferredPass = PassBuilder::Instance().CreatePass(option);
 	deferredPass->InitPass("3DeferredVS", "3DeferredPS");
 	_InitDeferredPassShaderInput();
 
-	
 	return true;
 }
 void FDx11App::_InitAllPassShaderInput()
@@ -91,10 +96,10 @@ void FDx11App::_InitDeferredPassShaderInput()
 
 	deferredPass->GetGpuProgram()->AddSamplerResource(SamplerStateType::LINIEAR_WRAP,0);
 
-	deferredPass->GetGpuProgram()->AddShaderResource(deferredPass->globalContext->GetSrvMap("gBuffer0"), 0);
-	deferredPass->GetGpuProgram()->AddShaderResource(deferredPass->globalContext->GetSrvMap("gBuffer1"), 1);
-	deferredPass->GetGpuProgram()->AddShaderResource(deferredPass->globalContext->GetSrvMap("gBuffer2"), 2);
-	deferredPass->GetGpuProgram()->AddShaderResource(deferredPass->globalContext->GetSrvMap("gBufferDepth"), 3);
+	deferredPass->GetGpuProgram()->AddShaderResource(deferredPass->GlobalContext()->GetSrvMap("gBuffer0"), 0);
+	deferredPass->GetGpuProgram()->AddShaderResource(deferredPass->GlobalContext()->GetSrvMap("gBuffer1"), 1);
+	deferredPass->GetGpuProgram()->AddShaderResource(deferredPass->GlobalContext()->GetSrvMap("gBuffer2"), 2);
+	deferredPass->GetGpuProgram()->AddShaderResource(deferredPass->GlobalContext()->GetSrvMap("gBufferDepth"), 3);
 
 
 
@@ -209,19 +214,13 @@ void FDx11App::DrawScene()
 	//sceneGroup->Draw();
 	//forwardPass->End();
 
-	static float black[4] = { 0.0f, 0.0f, 0.0f, 1.0f };	// RGBA = (0,0,0,255)
-	m_pDevice.deviceContext->ClearRenderTargetView(m_pRenderTargetView.Get(), black);
-	m_pDevice.deviceContext->ClearDepthStencilView(m_pDepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-	this->ResetMainRenderTarget();
 	deferredPass->Begin();
 	renderQuad->Draw();
 	deferredPass->End();
 
-
-	//this->ResetMainRenderTarget();
-	skyPass->Begin();
+	/*skyPass->Begin();
 	skybox->Draw();
-	skyPass->End();
+	skyPass->End();*/
 
 	HR(m_pSwapChain->Present(0, 0));
 }
@@ -238,8 +237,6 @@ void FDx11App::UpdateScene(float dt)
 		evt->Handled(*flyController);
 	}
 	sceneGroup->Update(dt);
-	//forwardPass->Update(dt);
-	skyPass->Update(dt);
 	mainCamera->Update(dt);
 
 

@@ -24,9 +24,9 @@ public:
 	Ptr<FDx11Pass> deferredPass;
 
 	bool InitSinglePass();
-	void ExecuteMainPass(FDx11Pass* pass);
+	
 
-	void ClearFrameBuffer(FDx11Pass* pass);
+
 	void _InitForwardPassShaderInput();
 	void _InitSkyPassShaderInput();
 	void _InitDeferredPassShaderInput();

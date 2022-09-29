@@ -2,45 +2,56 @@
 #include"../Public/FDx11RenderState.h"
 #include"../Public/FDx11ResourceFactory.h"
 
+
+
+Ptr<FDx11Pass> PassBuilder::CreatePass(const PassBuilder::PassOption& option)
+{
+	return Ptr<FDx11Pass>(new FDx11Pass(context, option));
+}
+
 FDx11Pass::FDx11Pass(Ptr<PassBuilder::PassContext> _context, const PassBuilder::PassOption& _option)
 {
-	
 	globalContext = _context;
 	option = _option;
 	mDevice = _context->device;
 	mNumViews = _option.numViews;
 }
 
-
-FDx11Pass::FDx11Pass(const FDx11Device& _device,const D3D11_VIEWPORT& vp) :mDevice(const_cast<FDx11Device*>(&_device))
+bool FDx11Pass::End()
 {
-	mViewport = vp;
+	mDevice->deviceContext->OMSetRenderTargets(0, nullptr, nullptr);
+	return true;
 }
 
-FDx11Pass::FDx11Pass(const std::string& _name, unsigned int numViews, const D3D11_VIEWPORT& vp, const FDx11Device& _device) :mNumViews(numViews), mDevice(const_cast<FDx11Device*>(&_device))
+bool FDx11Pass::Begin()
 {
-	mViewport = vp;
-	mName = _name;
+	_SetRenderTarget();
+	_UseRenderState();
+	mDevice->GetDeviceContext()->IASetInputLayout(mGpuProgram->inputLayout.Get());
+	mGpuProgram->UseProgram();
+	return true;
 }
 bool FDx11Pass::InitPass(const std::string& vs, const std::string& ps)
 {
 	ID3D11Device* device = mDevice->GetDevice();
-	if (!InitRenderTexture(device))
+	if (!_InitRenderTexture(device))
 	{
 		return false;
 	}
-	
-
-	if (!InitGpuProgram(vs,ps))
+	if (!_InitGpuProgram(vs,ps))
 	{
 		return false;
 	}
-
-	
 }
 
+bool FDx11Pass::_InitGpuProgram(const std::string& vs, const std::string& ps)
+{
+	mGpuProgram = new FDx11GpuProgram(*mDevice, vs, ps);
+	return true;
 
-bool FDx11Pass::_ClearRenderTargetView()
+}
+
+bool FDx11Pass::_SetRenderTarget()
 {
 	float depth = 1.0;
 	UINT8 stencil = 0;
@@ -49,23 +60,47 @@ bool FDx11Pass::_ClearRenderTargetView()
 	UINT ClearFlags = 0;
 	ClearFlags |= D3D11_CLEAR_DEPTH;
 	ClearFlags |= D3D11_CLEAR_STENCIL;
-	for (unsigned int i = 0; i < GetNumViews(); ++i)
+
+	if (option.mainTarget)
 	{
-		mDevice->GetDeviceContext()->ClearRenderTargetView(mRenderTargetView[i], reinterpret_cast<const float*>(&black));
+		mDevice->deviceContext->ClearRenderTargetView(globalContext->mainRenderTargetView.Get(), black);
+		mDevice->deviceContext->ClearDepthStencilView(globalContext->mainDepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+		mDevice->deviceContext->OMSetRenderTargets(1, globalContext->mainRenderTargetView.GetAddressOf(), globalContext->mainDepthStencilView.Get());
+		mDevice->deviceContext->RSSetViewports(1, &globalContext->mainScreenViewport);
+	
+	}
+	else {
+
+		for (unsigned int i = 0; i < GetNumViews(); ++i)
+		{
+			mDevice->GetDeviceContext()->ClearRenderTargetView(mRenderTargetView[i], reinterpret_cast<const float*>(&black));
+		}
+
+		mDevice->GetDeviceContext()->ClearDepthStencilView(
+			mDepthStencilView.Get(),
+			ClearFlags, depth, static_cast<UINT8>(stencil));
+
+		mDevice->deviceContext->OMSetRenderTargets(mNumViews, mRenderTargetView, mDepthStencilView.Get());
+		// 设置视口变换
+		D3D11_VIEWPORT m_ScreenViewport;
+		m_ScreenViewport.TopLeftX = 0;
+		m_ScreenViewport.TopLeftY = 0;
+		m_ScreenViewport.Width = static_cast<float>(800);
+		m_ScreenViewport.Height = static_cast<float>(600);
+		m_ScreenViewport.MinDepth = 0.0f;
+		m_ScreenViewport.MaxDepth = 1.0f;
+
+		mDevice->deviceContext->RSSetViewports(1, &m_ScreenViewport);
+		
 	}
 
-	mDevice->GetDeviceContext()->ClearDepthStencilView(
-		mDepthStencilView.Get(),
-		ClearFlags, depth, static_cast<UINT8>(stencil));
-	
 	return true;
+
 }
 
-bool FDx11Pass::InitShaderResourceView(ID3D11Device* device)
-{
-	return true;
-}
-bool FDx11Pass::InitRenderTexture(ID3D11Device* device)
+
+bool FDx11Pass::_InitRenderTexture(ID3D11Device* device)
 {
 	if (mNumViews == 1)
 	{
@@ -157,27 +192,15 @@ bool FDx11Pass::InitRenderTexture(ID3D11Device* device)
 	globalContext->AddSrvMap("gBufferDepth", slot);
 	std::cout << slot << endl;
 
-
 	return true;
 }
 
 
 bool FDx11Pass::_UseRenderState()
 {
-	ComPtr<ID3D11DepthStencilState> dsState;
-	dsState = DepthStencilStateResoucePool::Instance().GetResource(DepthStencilStateType::LESS_EQUAL);
-	auto bsState = BlendStateResoucePool::Instance().GetResource(BlendStateType::ADDITIVE);
-	auto rsState = RasterStateResoucePool::Instance().GetResource(RasterizeStateType::RS_NO_CULL);
-
-	if ("deferred" == mName)
-	{
-		 dsState = DepthStencilStateResoucePool::Instance().GetResource(DepthStencilStateType::NO_DEPTH_TEST_WITH_STENCIL);
-	}
-	else {
-		 dsState = DepthStencilStateResoucePool::Instance().GetResource(DepthStencilStateType::LESS_EQUAL);
-	}
-	
-	
+	auto dsState = DepthStencilStateResoucePool::Instance().GetResource(option.stateset.dst);
+	auto bsState = BlendStateResoucePool::Instance().GetResource(option.stateset.bst);
+	auto rsState = RasterStateResoucePool::Instance().GetResource(option.stateset.rst);	
 
 	mDevice->GetDeviceContext()->RSSetState(rsState.Get());
 	mDevice->GetDeviceContext()->OMSetDepthStencilState(dsState.Get(), 0);
@@ -185,55 +208,5 @@ bool FDx11Pass::_UseRenderState()
 	return true;
 }
 
-bool FDx11Pass::_SetRenderTarget()
-{
-	
 
-	mDevice->deviceContext->OMSetRenderTargets(mNumViews, mRenderTargetView, mDepthStencilView.Get());
 
-	// 设置视口变换
-	D3D11_VIEWPORT m_ScreenViewport;
-	m_ScreenViewport.TopLeftX = 0;
-	m_ScreenViewport.TopLeftY = 0;
-	m_ScreenViewport.Width = static_cast<float>(800);
-	m_ScreenViewport.Height = static_cast<float>(600);
-	m_ScreenViewport.MinDepth = 0.0f;
-	m_ScreenViewport.MaxDepth = 1.0f;
-
-	mDevice->deviceContext->RSSetViewports(1, &m_ScreenViewport);
-	return true;
-
-}
-
-bool FDx11Pass::End()
-{
-	mDevice->deviceContext->OMSetRenderTargets(0, nullptr, nullptr);
-	return true;
-}
-
-bool FDx11Pass::Begin()
-{
-	if (GetNumViews() > 2)
-	{
-		_ClearRenderTargetView();
-		_SetRenderTarget();
-	}
-	
-
-	_UseRenderState();
-	mDevice->GetDeviceContext()->IASetInputLayout(mGpuProgram->inputLayout.Get());
-	mGpuProgram->UseProgram();
-	
-	return true;
-}
-bool FDx11Pass::InitGpuProgram(const std::string& vs, const std::string& ps)
-{
-	mGpuProgram = new FDx11GpuProgram(*mDevice,vs,ps);
-	return true;
-
-}
-
-Ptr<FDx11Pass> PassBuilder::CreatePass(const PassBuilder::PassOption& option)
-{
-	return Ptr<FDx11Pass>(new FDx11Pass(context, option));
-}

@@ -4,6 +4,7 @@
 #include <windowsx.h>
 #include <sstream>
 #include"FDx11RenderState.h"
+#include"FDx11Pass.h"
 
 #pragma warning(disable: 6031)
 #include"Event.h"
@@ -149,6 +150,8 @@ void D3DApp::OnResize()
     HR(m_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBuffer.GetAddressOf())));
     HR(m_pDevice.device->CreateRenderTargetView(backBuffer.Get(), nullptr, m_pRenderTargetView.GetAddressOf()));
 
+   
+
     // 设置调试对象名
     D3D11SetDebugObjectName(backBuffer.Get(), "BackBuffer[0]");
 
@@ -190,6 +193,9 @@ void D3DApp::OnResize()
     // 将渲染目标视图和深度/模板缓冲区结合到管线
     m_pDevice.deviceContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), m_pDepthStencilView.Get());
 
+    
+
+
     // 设置视口变换
     m_ScreenViewport.TopLeftX = 0;
     m_ScreenViewport.TopLeftY = 0;
@@ -199,6 +205,10 @@ void D3DApp::OnResize()
     m_ScreenViewport.MaxDepth = 1.0f;
 
     m_pDevice.deviceContext->RSSetViewports(1, &m_ScreenViewport);
+
+    PassBuilder::Instance().context->mainDepthStencilView = m_pDepthStencilView;
+    PassBuilder::Instance().context->mainRenderTargetView = m_pRenderTargetView;
+    PassBuilder::Instance().context->mainScreenViewport = m_ScreenViewport;
 
     // 设置调试对象名
     D3D11SetDebugObjectName(m_pDepthStencilBuffer.Get(), "DepthStencilBuffer");

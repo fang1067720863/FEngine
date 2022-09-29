@@ -11,12 +11,17 @@ class FDx11Pass;
 class PassBuilder
 {
 public:
+	struct RenderStateSet
+	{
+		RasterizeStateType rst{ RasterizeStateType::RS_NO_CULL };
+		BlendStateType bst{ BlendStateType::ADDITIVE };
+		DepthStencilStateType dst{ DepthStencilStateType::LESS_EQUAL };
+	};
 	struct PassOption {
 		std::string name{ "" };
-		bool mainTarget{ false };
+		bool mainTarget{ true };
 		unsigned int numViews{ 1 };
-		bool enableDepth{ false };
-		
+		RenderStateSet stateset;
 	};
 
 	static PassBuilder& Instance()
@@ -38,10 +43,7 @@ public:
 	{
 	public:
 
-		PassContext()
-		{
-
-		}
+		PassContext() = default;
 		using SrvPtr = int32_t;  //resourceSlot
 		ComPtr<ID3D11RenderTargetView> mainRenderTargetView;   // 渲染目标视图
 		ComPtr<ID3D11DepthStencilView> mainDepthStencilView;   // 深度模板视图
@@ -71,8 +73,6 @@ public:
 		}
 	};
 	Ptr<FDx11Pass> CreatePass(const PassBuilder::PassOption& option);  // 右值是否好些？
-
-
 	Ptr<PassContext> context;
 
 };
@@ -81,99 +81,40 @@ public:
 
 class FDx11Pass :public FReference
 {
-	using PassCBUpdateCallback = std::function<void(float dt)>;
+	friend class PassBuilder;
+	
 public:
-	FDx11Pass(Ptr<PassBuilder::PassContext> _context, const PassBuilder::PassOption& _option);
-	
 
-	Ptr<PassBuilder::PassContext> globalContext;
-	PassBuilder::PassOption option;
+	unsigned int               GetNumViews()   { return mNumViews; }
+	PassBuilder::PassContext * GlobalContext() { return globalContext.get(); }
+    FDx11GpuProgram*           GetGpuProgram()const{return mGpuProgram.get();}
 
-	FDx11Pass(const FDx11Device& _device, const D3D11_VIEWPORT& vp);
-	FDx11Pass(const std::string& _name, unsigned int numViews, const D3D11_VIEWPORT& vp, const FDx11Device& _device);
-	bool InitPass(const std::string& vs, const std::string& ps);
-	
-	// render target view
-	unsigned int GetNumViews() { return mNumViews; }
-
-	int32_t GetRTShaderResourceSlot(const std::string& name)
-	{
-		return mRTShaderResourceSlots.at(name);
-	}
-
-
-	ID3D11DepthStencilView* GetDepthStencilView() {
-		return mDepthStencilView.Get();
-	}
-	void ResetAll()
-	{
-		mDepthStencilView.Reset();
-		mDepthStencilBuffer.Reset();
-
-	}
-	const D3D11_VIEWPORT* GetViewport() const {
-		return &mViewport;
-	}
-	const D3D11_RECT* GetScissorRects() const
-	{
-		return &mRect;
-	}
-
-	FDx11GpuProgram* GetGpuProgram()const
-	{
-		return mGpuProgram.get();
-	}
 	bool Begin();
 	bool End();
+	bool InitPass(const std::string& vs, const std::string& ps);
+	
+protected:
+	FDx11Pass(Ptr<PassBuilder::PassContext> _context, const PassBuilder::PassOption& _option);
+
+	bool _InitRenderTexture(ID3D11Device* device);
+	bool _InitGpuProgram(const std::string& vs, const std::string& ps);
+
 	bool _UseRenderState();
 	bool _SetRenderTarget();
-	bool _ClearRenderTargetView();
 	
-	
-
-	void Update(float dt)
-	{
-		if (updateCB)
-		{
-			updateCB(dt);
-		}
-	}
-	void SetUpdateCallback(PassCBUpdateCallback cb) { updateCB = cb; }
-
-
-protected:
-	PassCBUpdateCallback updateCB;
-	
-
-	bool InitShaderResourceView(ID3D11Device* device);
-
-	bool InitRenderTexture(ID3D11Device* device);
-
-
-
-	bool InitGpuProgram(const std::string& vs, const std::string& ps);
-	
-
-	// 渲染目标视图
-	ID3D11RenderTargetView* mRenderTargetView[MAX_MULTIPLE_RENDER_TARGETS];
-	ID3D11Texture2D* mRenderTargetTextures[MAX_MULTIPLE_RENDER_TARGETS];
+	ID3D11RenderTargetView*  mRenderTargetView[MAX_MULTIPLE_RENDER_TARGETS];
+	ID3D11Texture2D*         mRenderTargetTextures[MAX_MULTIPLE_RENDER_TARGETS];
+	FPtr<FDx11GpuProgram>    mGpuProgram;
+	D3D11_VIEWPORT           mViewport;
+	D3D11_RECT               mRect;
 	ComPtr<ID3D11DepthStencilView> mDepthStencilView;
-	ComPtr<ID3D11Texture2D> mDepthStencilBuffer;
-	std::unordered_map<std::string, int32_t> mRTShaderResourceSlots;
-	D3D11_VIEWPORT mViewport;
-	D3D11_RECT mRect;
-	unsigned int mNumViews = 0;
-	FPtr<FDx11GpuProgram> mGpuProgram;
-	std::string mName;
+	ComPtr<ID3D11Texture2D>        mDepthStencilBuffer;
+	
+	std::string                    mName;
+	unsigned int                   mNumViews{ 0 };
+	PassBuilder::PassOption        option;
 
 	FDx11Device* mDevice;
-
-
-	ID3D11ShaderResourceView* gBufferSRV[MAX_MULTIPLE_RENDER_TARGETS];
-
-	ID3D11ShaderResourceView* GetGBufferSRV(int i)
-	{
-		return gBufferSRV[i];
-	}
+	Ptr<PassBuilder::PassContext> globalContext;
 
 };
