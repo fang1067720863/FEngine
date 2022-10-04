@@ -11,8 +11,8 @@ VertexPosHWNormalTex VS(VertexPosNormalTex vIn)
     vOut.PosW = posW.xyz;
     float4 tmp = mul(posW, viewProj);
     vOut.PosH = tmp;
-    vOut.NormalW = mul(vIn.NormalL, (float3x3)g_World);
-    vOut.NormalW = normalize(vOut.NormalW);
+    //vOut.NormalW = mul(vIn.NormalL, (float3x3)g_World);
+    vOut.NormalW = normalize(vIn.NormalL);
     vOut.Tex = vIn.Tex;
     return vOut;
 }

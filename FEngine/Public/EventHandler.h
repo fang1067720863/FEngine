@@ -80,7 +80,8 @@ protected:
 	
 	void UpdateCamera()
 	{
-		_camera->SetViewMatrix(GetInverseMatrix());
+		//_camera->SetViewMatrix(GetInverseMatrix());
+		_camera->SetViewMatrix(GetInverseMatrix(), GetMatrix(), _eye);
 	}
 
 	virtual Mat4 GetInverseMatrix()   // ViewMatrix

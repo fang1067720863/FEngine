@@ -1,4 +1,4 @@
-#include"test.h"
+//#include"test.h"
 
 #define _CRTDBG_MAP_ALLOC
 #include "stdlib.h"

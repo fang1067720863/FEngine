@@ -26,6 +26,7 @@ bool FDx11App::InitSinglePass()
 	option.name = "skyPass";
 	option.mainTarget = true;
 	option.numViews = 1;
+	option.stateset.dst = DepthStencilStateType::DRAW_WITH_STENCIL;
 	skyPass = PassBuilder::Instance().CreatePass(option);
 	skyPass->InitPass("2skybox_vs", "2skybox_ps");
 	_InitSkyPassShaderInput();
@@ -165,7 +166,6 @@ void FDx11App::_InitForwardPassShaderInput()
 
 bool FDx11App::InitGameObject()
 {
-
 	sceneGroup = new FGroup("SceneData");
 
 	mainCamera = new FCamera(Frustum(), "MainCamera");
@@ -205,22 +205,24 @@ bool FDx11App::InitGameObject()
 
 void FDx11App::DrawScene()
 {
-	gBufferPass->Begin();
-	sceneGroup->Draw();
-	gBufferPass->End();
+
 
 	
-	//forwardPass->Begin();
+	forwardPass->Begin();
+	sceneGroup->Draw();
+	forwardPass->End();
+
+	//gBufferPass->Begin();
 	//sceneGroup->Draw();
-	//forwardPass->End();
+	//gBufferPass->End();
 
-	deferredPass->Begin();
-	renderQuad->Draw();
-	deferredPass->End();
+	//deferredPass->Begin();
+	//renderQuad->Draw();
+	//deferredPass->End();
 
-	/*skyPass->Begin();
-	skybox->Draw();
-	skyPass->End();*/
+	//skyPass->Begin();
+	//skybox->Draw();
+	//skyPass->End();
 
 	HR(m_pSwapChain->Present(0, 0));
 }

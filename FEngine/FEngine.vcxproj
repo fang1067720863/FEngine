@@ -152,6 +152,7 @@
     <ClInclude Include="Public\EventHandler.h" />
     <ClInclude Include="Public\EventQueue.h" />
     <ClInclude Include="Public\Factory.h" />
+    <ClInclude Include="Public\Geometry.h" />
     <ClInclude Include="Public\GltfReader.h" />
     <ClInclude Include="Public\GraphicViewWin32.h" />
     <ClInclude Include="Public\Group.h" />
@@ -189,7 +190,6 @@
     <ClCompile Include="Private\test.cpp" />
     <ClCompile Include="Private\Timer.cpp" />
     <ClCompile Include="Private\UtfConverter.cpp" />
-    <ClCompile Include="Private\View.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

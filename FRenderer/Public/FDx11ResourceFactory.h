@@ -2,7 +2,7 @@
 
 #include<map>
 #include<string>
-#include"FDx11ConstantBuffer.h"
+#include"FDx11BufferObject.h"
 #include"UtfConverter.h"
 #include"Factory.h"
 

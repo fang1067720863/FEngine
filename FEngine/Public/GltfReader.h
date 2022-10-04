@@ -1,6 +1,5 @@
 //#pragma once
-#ifndef OSGEARTH_GLTF_READER_H
-#define OSGEARTH_GLTF_READER_H
+
 #include <Windows.h>
 #include"Group.h"
 #include"Geometry.h"
@@ -55,5 +54,5 @@ protected:
 
 	File modelFile;
 };
-#endif
+
 

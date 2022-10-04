@@ -13,34 +13,51 @@ Texture2D gNormalMap : register(t2);
 Texture2D gAoMap : register(t3);
 SamplerState basicSampler : register(s0);
 
+float3 CalculateNormalInWorld(float3 normalFromTexture, float3 normal, float3 tangent)
+{
+   	float3 unpackedNormal = normalFromTexture * 2.0f - 1.0f;
+	float3 N = normal;
+	float3 T = normalize(tangent - N * dot(tangent, N));
+	float3 B = cross(N, T);
+	float3x3 TBN = float3x3(T, B, N);
+	return normalize(mul(unpackedNormal, TBN));
+}
+
+float3 NormalInWorldWithoutTangent(float3 normalFromTexture, float3 normal, float3 eyePos,float2 uv)
+{
+    // Perturb normal, see http://www.thetenthplanet.de/archives/1180
+    float3 unpackedNormal = normalFromTexture * 2.0f - 1.0f;
+
+    float3 q1 = ddx(eyePos);
+    float3 q2 = ddy(eyePos);
+    float2 st1 = ddx(uv);
+    float2 st2 = ddy(uv);
+
+    float3 N = normalize(normal);
+    float3 T = float3(0.0,0.0,1.0);
+    //normalize(q1 * st2.y - q2 * st1.y);
+    float3 B = normalize(cross(N, T));
+
+	float3x3 TBN = float3x3(T, B, N);
+	return normalize(mul(unpackedNormal, TBN));
+
+}
 PixelOutput PS(VertexPosHWNormalTex pIn) : SV_Target
 {
 	float3 albedoFromTexture = gBaseColorMap.Sample(basicSampler, pIn.Tex).rgb;
 	float3 normalFromTexture = gNormalMap.Sample(basicSampler, pIn.Tex).rgb;
 	float3 ormFromTexture = gMetalRoughnessMap.Sample(basicSampler, pIn.Tex).rgb;
-	// //if (matData.TextureSrgb[0] == 1)
-		//albedoFromTexture = pow(albedoFromTexture, 2.2f);
-	//if (matData.TextureSrgb[1] == 1)
-		//normalFromTexture = pow(normalFromTexture, 2.2f);
-	//if (matData.TextureSrgb[2] == 1)
-		//ormFromTexture = pow(ormFromTexture, 2.2f);
+	float ao = gAoMap.Sample(basicSampler, pIn.Tex).r;
 
-	// float4 prevPos = input.prevPos;
-	// prevPos = prevPos / prevPos.w;
-	// prevPos.xy = prevPos.xy / float2(2.0f, -2.0f) + float2(0.5f, 0.5f);//negate Y because world coord and tex coord have different Y axis.
-	// float4 curPos = input.curPos;
-	// curPos = curPos / curPos.w;
-	// curPos.xy = curPos.xy / float2(2.0f, -2.0f) + float2(0.5f, 0.5f);//negate Y because world coord and tex coord have different Y axis.
+	float3 normalWC = NormalInWorldWithoutTangent(normalFromTexture, pIn.NormalW, g_EyePosW.xyz, pIn.Tex);
 
-	//float3 normal = calculateNormalFromMap(normalFromTexture, normalize(pIn.NormalW), input.tangent);
-	
 	PixelOutput output;
 	output.albedo = float4(albedoFromTexture, 1.0f);;
-	output.normal = float4(normalize(pIn.NormalW), 1.0f);
+	output.normal = float4(normalWC, 1.0f);
 
 	float roughness = ormFromTexture.g;
 	float metal = ormFromTexture.b;
-	output.occlusionRoughnessMetallic = float4(0, roughness, metal, 0);
+	output.occlusionRoughnessMetallic = float4(ao, roughness, metal, 0);
 	output.albedo.a = 1.0f;
 	return output;
 }

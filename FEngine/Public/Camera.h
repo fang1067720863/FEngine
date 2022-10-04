@@ -65,11 +65,12 @@ public:
     } 
 
     void SetViewMatrix(const Mat4& mat) { mViewMatrix = mat; mViewMatrix.transpose(); }
-    void SetViewMatrix(const Mat4& view, const Mat4& viewInverse) { 
+    void SetViewMatrix(const Mat4& view, const Mat4& viewInverse, const Vec3f eye) { 
         mViewMatrix = view; 
         mViewMatrix.transpose();
         mViewMatrixInverse = viewInverse;
         mViewMatrixInverse.transpose();
+        mEyePos = eye;
     }
 
     void Update(float dt) override

@@ -155,11 +155,8 @@
     <ClCompile Include="Private\FDx11Renderer.cpp" />
     <ClCompile Include="Private\FDx11Texture.cpp" />
     <ClCompile Include="Private\FDx11Util.cpp" />
-    <ClCompile Include="Private\FGraphicWindowWin32.cpp" />
     <ClCompile Include="Private\FTimer.cpp" />
-    <ClCompile Include="Private\FView.cpp" />
     <ClCompile Include="Private\main.cpp" />
-    <ClCompile Include="Private\test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Public\Constant.h" />
@@ -178,9 +175,7 @@
     <ClInclude Include="Public\FDx11Texture.h" />
     <ClInclude Include="Public\FDx11Util.h" />
     <ClInclude Include="Public\FDx11Mesh.h" />
-    <ClInclude Include="Public\GraphicContext.h" />
     <ClInclude Include="Public\FGraphicWindowWin32.h" />
-    <ClInclude Include="Public\FRenderer.h" />
     <ClInclude Include="Public\FTimer.h" />
     <ClInclude Include="Public\FView.h" />
     <ClInclude Include="Public\FDx11RenderState.h" />

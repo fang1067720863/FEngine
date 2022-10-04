@@ -7,6 +7,15 @@
 #include<functional>
 
 
+enum class RenderMask : uint16_t
+{
+	None                  = 1 << 0,
+    Forward               = 1 << 1,
+	GBuffer               = 1 << 2,
+	DeferQuad             = 1 << 3,
+	Shadow                = 1 << 4,
+	Sky                   = 1 << 5,
+};
 
 class FNode:public FObject
 {
@@ -59,6 +68,7 @@ private:
 	PROPERTY(Vec3f, Position)
 	PROPERTY(Vec3f, Scale)
 	PROPERTY(Quatf, Rotation)
+	PROPERTY(uint16_t, RenderMask)
 
 	//Mat4  mWorldTransform;
 	bool  dirty{ true };

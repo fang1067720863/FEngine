@@ -2,13 +2,14 @@
 
 #include"GltfReader.h"
 #include"Material.h"
+
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define TINYGLTF_NO_STB_IMAGE_WRITE
 #define TINYGLTF_NO_INCLUDE_STB_IMAGE_WRITE
-
 #include<tiny_gltf.h>
 #include"UtfConverter.h"
+
 GltfReader::GltfReader()
 {
 }

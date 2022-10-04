@@ -8,7 +8,7 @@
 
 //#include"Material.h"
 #include"VecArray.h"
-#include"Ptr.h"
+
 #include"Geometry.h"
 #include"Node.h"
 #include"UtfConverter.h"

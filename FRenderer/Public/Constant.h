@@ -84,14 +84,6 @@ struct ShaderInputSlot
 	vector<TextureSlot> textureSlots;
 	vector<SamplerSlot> samplerSlots;
 
-	/*int32_t AddShaderReource(const std::string& texture, )
-	{
-		int32_t resourceSlot = ShaderResoucePool::Instance().CreateDeviceResource(texturePath, device);
-		mMaterialSlot.textureSlots.push_back(MaterialSlot::TextureSlot{ shaderSlot, 1, resourceSlot });
-		return resourceSlot;
-	}*/
-	
-
 };
 
 

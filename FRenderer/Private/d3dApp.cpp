@@ -324,7 +324,7 @@ LRESULT D3DApp::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         m_AppPaused = false;
         m_Resizing = false;
         //m_Timer.Start();
-        OnResize();
+       //OnResize();
         return 0;
 
         // WM_DESTROY is sent when the window is being destroyed.

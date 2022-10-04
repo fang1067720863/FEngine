@@ -2,13 +2,8 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="Private\main.cpp" />
-    <ClCompile Include="Private\test.cpp">
-      <Filter>test</Filter>
-    </ClCompile>
     <ClCompile Include="Private\FTimer.cpp" />
-    <ClCompile Include="Private\FGraphicWindowWin32.cpp" />
     <ClCompile Include="Private\FDx11Renderer.cpp" />
-    <ClCompile Include="Private\FView.cpp" />
     <ClCompile Include="Private\FDx11.cpp" />
     <ClCompile Include="Private\FDx11Pass.cpp" />
     <ClCompile Include="Private\FDx11Texture.cpp" />
@@ -28,9 +23,7 @@
       <Filter>test</Filter>
     </ClInclude>
     <ClInclude Include="Public\FDx11.h" />
-    <ClInclude Include="Public\FRenderer.h" />
     <ClInclude Include="Public\FTimer.h" />
-    <ClInclude Include="Public\GraphicContext.h" />
     <ClInclude Include="Public\FGraphicWindowWin32.h" />
     <ClInclude Include="Public\FDx11Renderer.h" />
     <ClInclude Include="Public\FView.h" />

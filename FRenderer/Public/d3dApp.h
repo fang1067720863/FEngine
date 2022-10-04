@@ -2,7 +2,6 @@
 
 #include <wrl/client.h>
 #include <string>
-#include"GraphicContext.h"
 #include <DirectXMath.h>
 #include"FDx11.h"
 #include<list>

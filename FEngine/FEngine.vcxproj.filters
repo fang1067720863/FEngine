@@ -27,9 +27,6 @@
     <ClCompile Include="Private\Core.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Private\View.cpp">
-      <Filter>Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="Private\test.cpp" />
     <ClCompile Include="Private\UtfConverter.cpp">
       <Filter>FileUtil</Filter>
@@ -156,5 +153,6 @@
     <ClInclude Include="Public\Timer.h">
       <Filter>Infras</Filter>
     </ClInclude>
+    <ClInclude Include="Public\Geometry.h" />
   </ItemGroup>
 </Project>

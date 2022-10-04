@@ -10,7 +10,7 @@ using namespace std;
 
 
 
-	// define the standard trig values
+	
 #ifdef PI
 #undef PI
 #undef PI_2
