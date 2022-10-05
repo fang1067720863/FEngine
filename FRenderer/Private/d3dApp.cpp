@@ -4,7 +4,7 @@
 #include <windowsx.h>
 #include <sstream>
 #include"FDx11RenderState.h"
-#include"FDx11Pass.h"
+#include"FDx11Pipeline.h"
 
 #pragma warning(disable: 6031)
 #include"Event.h"
@@ -57,6 +57,9 @@ D3DApp::D3DApp(HINSTANCE hInstance, const std::wstring& windowName, int initWidt
     // 让一个全局指针获取这个类，这样我们就可以在Windows消息处理的回调函数
     // 让这个类调用内部的回调函数了
     g_pd3dApp = this;
+
+    PassBuilder::Instance().SetDevice(&m_pDevice);
+    PassBuilder::Instance().context->mainScreenViewport = m_ScreenViewport;
 }
 
 D3DApp::~D3DApp()
@@ -126,9 +129,17 @@ bool D3DApp::Init()
     RasterStateResoucePool::Instance().Init(m_pDevice);
     BlendStateResoucePool::Instance().Init(m_pDevice);
     DepthStencilStateResoucePool::Instance().Init(m_pDevice);
-    
+   
+  
 
     return true;
+}
+
+bool D3DApp::PostInit()
+{
+    pipeline = new FDx11Pipeline(m_pDevice);
+    pipeline->Init();
+    return false;
 }
 
 void D3DApp::OnResize()

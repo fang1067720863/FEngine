@@ -28,7 +28,7 @@ public:
 		return cbo;
 	}
 
-	bool CreateResouce(const SLOT& slot, Resource resource) override { return false; }
+	bool AddResouce(const SLOT& slot, Resource resource) override { return false; }
 };
 
 class ShaderResoucePool : public ResourceFactory<ComPtr<ID3D11ShaderResourceView>, TextureSlot, ShaderResoucePool>
@@ -42,7 +42,7 @@ public:
 		resourceMap.insert(std::pair <SLOT, Resource>(textureGuid, textureView));
 		return textureGuid;
 	}
-	bool CreateResouce(const SLOT& slot, Resource resource) override { return false; }
+	bool AddResouce(const SLOT& slot, Resource resource) override { return false; }
 	SLOT CreateShaderResouce(Resource resource)  {
 		textureGuid++;
 		resourceMap.insert(std::pair <SLOT, Resource>(textureGuid, resource));

@@ -1,12 +1,17 @@
 #pragma once
 
 #include <windows.h>
-#include"Node.h"
-#include"Matrix.h"
 #include<memory>
 #include<vector>
+
+
 #include<wrl/client.h>
 #include<DirectXMath.h>
+
+#include"Node.h"
+#include"Matrix.h"
+#include"Factory.h"
+
 
 
 
@@ -84,8 +89,6 @@ public:
             cb(dt);
         }
     }
-   // int32_t dirtyMask;
-
 
     template<class T>
     constexpr Matrix4<T> perspective(T fovy_radians, T aspectRatio, T zNear, T zFar)
@@ -116,8 +119,12 @@ public:
             0.0, 0.0, 1.0 / (zFar - zNear), 0.0,
             -(right + left) / (right - left), -(bottom + top) / (bottom - top), zFar / (zFar - zNear), 1.0);
     }
-
-
-
 };
 
+
+class CameraManager : public ResourceFactory<Ptr<FCamera>, std::string, CameraManager>
+{
+public:
+    static constexpr const char* MainCamera = "MainCamera";
+
+};

@@ -152,6 +152,7 @@
     <ClCompile Include="Private\FDx11BufferObject.cpp" />
     <ClCompile Include="Private\FDx11InputLayout.cpp" />
     <ClCompile Include="Private\FDx11Pass.cpp" />
+    <ClCompile Include="Private\FDx11Pipeline.cpp" />
     <ClCompile Include="Private\FDx11Renderer.cpp" />
     <ClCompile Include="Private\FDx11Texture.cpp" />
     <ClCompile Include="Private\FDx11Util.cpp" />
@@ -168,6 +169,7 @@
     <ClInclude Include="Public\FDx11Driver.h" />
     <ClInclude Include="Public\FDx11InpuyLayout.h" />
     <ClInclude Include="Public\FDx11Pass.h" />
+    <ClInclude Include="Public\FDx11Pipeline.h" />
     <ClInclude Include="Public\FDx11Renderer.h" />
     <ClInclude Include="Public\FDx11RenderTarget.h" />
     <ClInclude Include="Public\FDx11ResourceFactory.h" />

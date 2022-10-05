@@ -113,13 +113,11 @@ public:
 	int AddShaderResource(const std::string& texturePath, int32_t shaderSlot)
 	{
 		int32_t resourceSlot = ShaderResoucePool::Instance().CreateDeviceResource(texturePath, device);
-		mMaterialSlot.textureSlots.push_back(ShaderInputSlot::TextureSlot{ shaderSlot, 1, resourceSlot });
-		return resourceSlot;
+		return AddShaderResource(resourceSlot, shaderSlot);
 	}
 
 	int AddShaderResource(int32_t resourceSlot, int32_t shaderSlot)
 	{
-		//int32_t resourceSlot = ShaderResoucePool::Instance().CreateDeviceResource(texturePath, device);
 		mMaterialSlot.textureSlots.push_back(ShaderInputSlot::TextureSlot{ shaderSlot, 1, resourceSlot });
 		return resourceSlot;
 	}

@@ -26,7 +26,7 @@ public:
 		return Resource{};
 	}
 
-	virtual bool CreateResouce(const SLOT& slot, Resource resource)
+	virtual bool AddResouce(const SLOT& slot, Resource resource)
 	{
 		if (resourceMap.find(slot) != resourceMap.end())
 		{

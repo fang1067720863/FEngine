@@ -12,6 +12,7 @@
     <ClCompile Include="Private\FDx11InputLayout.cpp" />
     <ClCompile Include="Private\FDx11App.cpp" />
     <ClCompile Include="Private\d3dApp.cpp" />
+    <ClCompile Include="Private\FDx11Pipeline.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="test">
@@ -43,6 +44,7 @@
     <ClInclude Include="Public\FDx11Driver.h" />
     <ClInclude Include="Public\FDx11ResourceFactory.h" />
     <ClInclude Include="Public\Constant.h" />
+    <ClInclude Include="Public\FDx11Pipeline.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Pbr.hlsli" />

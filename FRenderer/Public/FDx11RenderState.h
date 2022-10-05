@@ -55,7 +55,7 @@ public:
 		HR(_device.GetDevice()->CreateSamplerState(&sampDesc, samplerLinearWrap.GetAddressOf()));
 
 
-		this->CreateResouce(SamplerStateType::LINIEAR_WRAP, samplerLinearWrap);
+		this->AddResouce(SamplerStateType::LINIEAR_WRAP, samplerLinearWrap);
 
 		ComPtr<ID3D11SamplerState> samplerAnistropicWrap;
 
@@ -69,7 +69,7 @@ public:
 		sampDesc.MinLOD = 0;
 		sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 		HR(_device.GetDevice()->CreateSamplerState(&sampDesc, samplerAnistropicWrap.GetAddressOf()));
-		this->CreateResouce(SamplerStateType::ANISTROPIC_WRAP, samplerAnistropicWrap);
+		this->AddResouce(SamplerStateType::ANISTROPIC_WRAP, samplerAnistropicWrap);
 		return true;
 	}
 };
@@ -128,10 +128,10 @@ public:
 		rtDesc.RenderTargetWriteMask = 0;
 		HR(_device.GetDevice()->CreateBlendState(&blendDesc, BSNoColorWrite.GetAddressOf()));
 
-		this->CreateResouce(BlendStateType::ADDITIVE, BSAdditive);
-		this->CreateResouce(BlendStateType::NO_COLOR_WRITE, BSNoColorWrite);
-		this->CreateResouce(BlendStateType::TRANSPORT, BSTransparent);
-		this->CreateResouce(BlendStateType::ALPHA_TO_COVERAGE, BSAlphaToCoverage);
+		this->AddResouce(BlendStateType::ADDITIVE, BSAdditive);
+		this->AddResouce(BlendStateType::NO_COLOR_WRITE, BSNoColorWrite);
+		this->AddResouce(BlendStateType::TRANSPORT, BSTransparent);
+		this->AddResouce(BlendStateType::ALPHA_TO_COVERAGE, BSAlphaToCoverage);
 		return true;
 
 	}
@@ -171,9 +171,9 @@ public:
 		rasterizerDesc.DepthClipEnable = true;
 		HR(_device.GetDevice()->CreateRasterizerState(&rasterizerDesc, RSCullClockWise.GetAddressOf()));
 
-		this->CreateResouce(RasterizeStateType::RS_WIREFRAME, RSWireframe);
-		this->CreateResouce(RasterizeStateType::RS_NO_CULL, RSNoCull);
-		this->CreateResouce(RasterizeStateType::RS_CULL_CLOCKWISE, RSCullClockWise);
+		this->AddResouce(RasterizeStateType::RS_WIREFRAME, RSWireframe);
+		this->AddResouce(RasterizeStateType::RS_NO_CULL, RSNoCull);
+		this->AddResouce(RasterizeStateType::RS_CULL_CLOCKWISE, RSCullClockWise);
 		return true;
 	}
 		
@@ -336,14 +336,14 @@ public:
 
 		HR(_device.GetDevice()->CreateDepthStencilState(&dsDesc, DSSNoDepthWriteWithStencil.GetAddressOf()));
 		
-		this->CreateResouce(DepthStencilStateType::LESS_EQUAL, DSSLessEqual);
-		this->CreateResouce(DepthStencilStateType::WRITE_STENCIL, DSSWriteStencil);
-		this->CreateResouce(DepthStencilStateType::DRAW_WITH_STENCIL, DSSDrawWithStencil);
-		this->CreateResouce(DepthStencilStateType::NO_DOUBLE_BLEND, DSSNoDoubleBlend);
-		this->CreateResouce(DepthStencilStateType::NO_DEPTH_TEST, DSSNoDepthTest);
-		this->CreateResouce(DepthStencilStateType::NO_DEPTH_WRITE, DSSNoDepthWrite);
-		this->CreateResouce(DepthStencilStateType::NO_DEPTH_TEST_WITH_STENCIL, DSSNoDepthTestWithStencil);
-		this->CreateResouce(DepthStencilStateType::NO_DEPTH_WRITE_WITH_STENCIL, DSSNoDepthWriteWithStencil);
+		this->AddResouce(DepthStencilStateType::LESS_EQUAL, DSSLessEqual);
+		this->AddResouce(DepthStencilStateType::WRITE_STENCIL, DSSWriteStencil);
+		this->AddResouce(DepthStencilStateType::DRAW_WITH_STENCIL, DSSDrawWithStencil);
+		this->AddResouce(DepthStencilStateType::NO_DOUBLE_BLEND, DSSNoDoubleBlend);
+		this->AddResouce(DepthStencilStateType::NO_DEPTH_TEST, DSSNoDepthTest);
+		this->AddResouce(DepthStencilStateType::NO_DEPTH_WRITE, DSSNoDepthWrite);
+		this->AddResouce(DepthStencilStateType::NO_DEPTH_TEST_WITH_STENCIL, DSSNoDepthTestWithStencil);
+		this->AddResouce(DepthStencilStateType::NO_DEPTH_WRITE_WITH_STENCIL, DSSNoDepthWriteWithStencil);
 		return true;
 	}
 };

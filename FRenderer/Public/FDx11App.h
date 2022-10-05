@@ -2,8 +2,9 @@
 
 #include"FDx11RenderTarget.h"
 #include"FDx11Mesh.h"
-#include"FDx11Pass.h"
+//#include"FDx11Pass.h"
 #include"FTimer.h"
+
 
 #include"Camera.h"
 #include"EventHandler.h"
@@ -14,33 +15,13 @@
 
 
 class GLTFModel;
+
 class FDx11App : public D3DApp
 {
 public:
-
-	Ptr<FDx11Pass> forwardPass;
-	Ptr<FDx11Pass> skyPass;
-	Ptr<FDx11Pass> gBufferPass;
-	Ptr<FDx11Pass> deferredPass;
-
-	bool InitSinglePass();
-	
-
-
-	void _InitForwardPassShaderInput();
-	void _InitSkyPassShaderInput();
-	void _InitDeferredPassShaderInput();
-	void _InitGBufferPassShaderInput();
-
-	void  _InitAllPassShaderInput();
-	
-	// ÏñËØ×ÅÉ«Æ÷
 	FDx11App(HINSTANCE hInstance, const std::wstring& windowName, int initWidth, int initHeight);
 	
-	~FDx11App()
-	{
-
-	}
+	~FDx11App(){}
 
 	bool Init() override
 	{
@@ -51,8 +32,8 @@ public:
 		FindGlobalPath();
 		if (!InitGameObject())
 			return false;
-		if (!InitSinglePass())
-			return false;
+
+		D3DApp::PostInit();
 		
 		return true;
 	}
