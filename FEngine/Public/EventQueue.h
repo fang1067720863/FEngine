@@ -364,7 +364,8 @@ public:
     {
         if (_keyBoardMap->getKeySymbol(wParam, lParam, keySymbol, modifiedKeySymbol, keyModifier))
         {
-            Ptr<Event> evt = new KeyPressEvent(keySymbol, keyModifier);
+            std::cout << keySymbol << std::endl;
+            Ptr<Event> evt = new KeyPressEvent(modifiedKeySymbol, keyModifier);
             int32_t repeatCount = (lParam & 0xffff);
             bufferdEvents.emplace_back(evt);
             return true;

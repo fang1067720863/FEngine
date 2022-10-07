@@ -33,19 +33,17 @@ public:
 
 	}
 	
-
 	inline void SetRotate(float angle_radians, float x, float y, float z) {
 		mRotation.makeRotate(angle_radians, x, y, z);
-		dirty = true;
+		mDirtyMask = true;
 	}
 
 	virtual void Update(float dt)
 	{
-		if (dirty)
+		if (mDirtyMask)
 		{
-			mLocalTransform = translate(mPosition) * rotate(mRotation) * scale(mScale);
-			dirty = false;
-			
+			mLocalTransform = translateT(mPosition) * rotate(mRotation)*scale(mScale);
+			mDirtyMask = false;
 		}
 		if (updateCB)
 		{
@@ -65,13 +63,14 @@ private:
 
 	PROPERTY(std::string, Name)
 	PROPERTY(Mat4, LocalTransform)
-	PROPERTY(Vec3f, Position)
-	PROPERTY(Vec3f, Scale)
-	PROPERTY(Quatf, Rotation)
+	PROPERTY_DIRTY(Vec3f, Position)
+	PROPERTY_DIRTY(Vec3f, Scale)
+	PROPERTY_DIRTY(Quatf, Rotation)
 	PROPERTY(uint16_t, RenderMask)
+	PROPERTY_DEFAULT(bool, DirtyMask, true)
 
 	//Mat4  mWorldTransform;
-	bool  dirty{ true };
+
 	NodeUpdateCallback updateCB;
 };
 

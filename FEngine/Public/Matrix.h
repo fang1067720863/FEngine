@@ -414,6 +414,14 @@ constexpr Matrix4<T> translate(T x, T y, T z)
         0, 0, 1, 0,
         x ,y, z, 1);   
 }
+template<typename T>
+constexpr Matrix4<T> translateT(const Vec3<T>& v)
+{
+    return Matrix4<T>(1, 0, 0, v[0],
+        0, 1, 0, v[1],
+        0, 0, 1, v[2],
+        0, 0, 0, 1);
+}
 
 template<typename T>
 constexpr Matrix4<T> translate(const Vec3<T>& v)

@@ -202,6 +202,11 @@ inline void Set##var(const T& _var){m##var=_var;}\
 T Get##var() const{return m##var;}\
 private: T m##var;
 
+#define PROPERTY_DIRTY(T,var) public: \
+inline void Set##var(const T& _var){m##var=_var;mDirtyMask = true;}\
+T Get##var() const{return m##var;}\
+private: T m##var;
+
 #define PROPERTY_DEFAULT(T,var, default) public: \
 inline void Set##var(const T& _var){m##var=_var;}\
 T Get##var() const{return m##var;}\

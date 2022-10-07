@@ -58,7 +58,7 @@ protected:
 		default:
 			break;
 		}
-		UpdateCamera();
+		//UpdateCamera();
 		return false;
 
 	}
@@ -66,7 +66,7 @@ protected:
 	{
 		
 		Zoom((event._motion == ScrollingMotion::SCROLL_UP ? 1.0f : -1.0f) * 0.1f);
-		UpdateCamera();
+		//UpdateCamera();
 		return true;
 	}
 	virtual bool Handle(const MouseDragEvent& event)
@@ -74,13 +74,12 @@ protected:
 		double pitch = 0.005 * (event._in_x < 0 ? -1.0 : 1.0);
 		double yaw = 0.005 * (event._in_y < 0 ? -1.0 : 1.0);
 		RotateYawAndPitch(_rotation, pitch, yaw);
-		UpdateCamera();
+		//UpdateCamera();
 		return false;
 	}
 	
-	void UpdateCamera()
+	void Update() override  
 	{
-		//_camera->SetViewMatrix(GetInverseMatrix());
 		_camera->SetViewMatrix(GetInverseMatrix(), GetMatrix(), _eye);
 	}
 
@@ -127,8 +126,6 @@ protected:
 		_eye +=  Vec3f(delta, 0.0f, 0.0f);
 	}
 
-
-
 	void RotateYawAndPitch(Quatf &rotation, double yaw, double pitch, const Vec3f& localUp = Vec3f(1.0f))
 	{
 		// rotations
@@ -137,8 +134,6 @@ protected:
 		Quatf newRotation;
 
 		rotateYaw.makeRotate(-yaw, Vec3f(0.0f, 1.0f, 0.0f));
-
-		
 
 		Vec3f cameraRight(rotation * Vec3f(1.0f,0.0f,0.0f));
 

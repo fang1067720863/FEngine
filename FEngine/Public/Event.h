@@ -127,6 +127,7 @@ class EventHandler : public FReference
 {
 public:
     EventHandler() = default;
+    virtual void Update() {}
     virtual bool Handle(const Event& event) { return false; }
     virtual bool Handle(const MouseScrollEvent& event) { return false; }
     virtual bool Handle(const KeyPressEvent& event) { return false; }
