@@ -32,6 +32,15 @@ struct CBDeferred1
 	Vec2f padding;
 };
 
+struct CBShadowLightView
+{
+	Mat4 lightView;
+};
+struct CBShadowLightProj
+{
+	Mat4 lightProj;
+};
+
 
 struct Light
 {
@@ -41,14 +50,14 @@ struct Light
 	Vec4f direction;
 };
 
-struct SpotLight
-{
-	Vec4f Color;
-	Vec4f Direction;
-	Vec3f Position;
-	float Range;
-	float SpotlightAngle;
-};
+//struct SpotLight
+//{
+//	Vec4f Color;
+//	Vec4f Direction;
+//	Vec3f Position;
+//	float Range;
+//	float SpotlightAngle;
+//};
 
 struct DirectionalLight
 {

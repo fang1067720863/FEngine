@@ -302,6 +302,36 @@ public:
         return m;
 
     }
+
+    template<typename T>
+    static constexpr Matrix4<T> orthographic(T left, T right, T bottom, T top, T zNear, T zFar)
+    {
+        return Matrix4<T>(2.0 / (right - left), 0.0, 0.0, 0.0,
+            0.0, 2.0 / (bottom - top), 0.0, 0.0,
+            0.0, 0.0, 1.0 / (zFar - zNear), 0.0,
+            -(right + left) / (right - left), -(bottom + top) / (bottom - top), zFar / (zFar - zNear), 1.0);
+    }
+
+    template<class T>
+    static constexpr Matrix4<T> perspective(T fovy_radians, T aspectRatio, T zNear, T zFar)
+    {
+        T f = static_cast<T>(1.0 / std::tan(fovy_radians * 0.5));
+        T r = static_cast<T>(1.0 / (zFar - zNear));
+        /*  vulkan_perspective_matrix = return Matrix4<T>(f / aspectRatio, 0, 0, 0,
+              0, -f, 0, 0,
+              0, 0, zNear * r, -1,
+              0, 0, (zFar * zNear) * r, 0);*/
+              /*  dx_perspective_matrix = return Matrix4<T>(f / aspectRatio, 0, 0, 0,
+                    0, f, 0, 0,
+                    0, 0, zFar * r, 1,
+                    0, 0, -(zFar * zNear) * r, 0);*/
+                    // dx_perspective_matrix_transpose
+        return Matrix4<T>(f / aspectRatio, 0, 0, 0,
+            0, f, 0, 0,
+            0, 0, zFar * r, -(zFar * zNear) * r,
+            0, 0, 1, 1);
+    }
+
     T* data() { return value[0].data(); }
     const T* data() const { return value[0].data(); }
 };

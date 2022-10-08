@@ -3,17 +3,13 @@
 cbuffer m_CBFrame : register(b0)
 {
 	matrix g_View;        // lightView
-	float4 g_EyePosW;     // lightPos
 }
 cbuffer m_CBOnResize : register(b1)
 {
 	matrix g_Proj;       // lightProj
 }
-cbuffer CBChangesRarely : register(b2)
-{
-	DirectionalLight g_DirLight;
-}
-cbuffer CBEveryObject : register(b3)
+
+cbuffer CBEveryObject : register(b2)
 {
 	matrix g_World;
 }
@@ -39,6 +35,7 @@ VertexPosHWNormalTex VS(VertexPosNormalTex vIn)
     matrix viewProj = mul(g_View, g_Proj);
     float4 posW = mul(float4(vIn.PosL, 1.0f), g_World);
     float4 tmp = mul(posW, viewProj);
+    vOut.pos = tmp;
     return vOut;
 }
 

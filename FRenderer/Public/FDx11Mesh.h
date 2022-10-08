@@ -39,7 +39,6 @@ class FDx11Mesh:public FNode
 {
 public:
 	friend class FMeshBuilder;
-	//typedef std::shared_ptr<Material> MaterialPtr;
 	typedef Ptr<VertexBufferObject> VBOPtr;
 	typedef Ptr<IndexBufferObject> IBOPtr;
 	

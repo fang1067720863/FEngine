@@ -114,8 +114,8 @@ inline T inRadians(T angle) { return angle; }
 inline float DegreesToRadians(float angle) { return angle * (float)PI / 180.0f; }
 inline double DegreesToRadians(double angle) { return angle * PI / 180.0; }
 
-inline float RadiansToDegrees(float angle) { return angle * 180.0f / (float)PI; }
-inline double RadiansToDegrees(double angle) { return angle * 180.0 / PI; }
+inline float RadiansToDegrees(float rad) { return rad * 180.0f / (float)PI; }
+inline double RadiansToDegrees(double rad) { return rad * 180.0 / PI; }
 
 //inline float round(float v) { return v >= 0.0f ? floorf(v + 0.5f) : ceilf(v - 0.5f); }
 //inline double round(double v) { return v >= 0.0 ? floor(v + 0.5) : ceil(v - 0.5); }

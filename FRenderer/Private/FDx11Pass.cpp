@@ -102,7 +102,7 @@ bool FDx11Pass::_SetRenderTarget()
 
 bool FDx11Pass::_InitRenderTexture(ID3D11Device* device)
 {
-	if (mNumViews == 1)
+	if (mNumViews == 0)
 	{
 		return true;
 	}

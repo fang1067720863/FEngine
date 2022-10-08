@@ -2,9 +2,7 @@
 
 #include"FDx11RenderTarget.h"
 #include"FDx11Mesh.h"
-//#include"FDx11Pass.h"
 #include"FTimer.h"
-
 
 #include"Camera.h"
 #include"EventHandler.h"
@@ -23,30 +21,17 @@ public:
 	
 	~FDx11App(){}
 
-	bool Init() override
-	{
-		if (!D3DApp::Init())
-			return false;
-		
-
-		FindGlobalPath();
-		if (!InitGameObject())
-			return false;
-
-		D3DApp::PostInit();
-		
-		return true;
-	}
-	void OnResize()
-	{
-		D3DApp::OnResize();
-	}
+	bool Init() override;
+	
+	void OnResize(){D3DApp::OnResize();}
 	void UpdateScene(float dt) override;
 	
 	bool InitGameObject();
 
 	void DrawScene() override;
-	Ptr<EventHandler> flyController;
+	//Ptr<EventHandler> flyController;
+
+	vector<Ptr<EventHandler>> controllers;
 
 private:
 	Ptr<FDx11Mesh> boxMesh;

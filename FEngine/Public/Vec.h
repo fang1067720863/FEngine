@@ -546,6 +546,11 @@ public:
         return Vec4(_v[0] * rhs, _v[1] * rhs, _v[2] * rhs, _v[3] * rhs);
     }
 
+    inline Vec3<T> asVec3() const
+    {
+        return Vec3<T>(_v[0], _v[1] , _v[2]);
+    }
+
     /** Unary multiply by scalar. */
     inline Vec4& operator *= (scalar_type rhs)
     {

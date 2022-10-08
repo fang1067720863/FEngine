@@ -7,5 +7,5 @@ struct VertexPosHWNormalTex
 
 void PS(VertexPosHWNormalTex input)// : SV_TARGET
 {
-
+    
 }

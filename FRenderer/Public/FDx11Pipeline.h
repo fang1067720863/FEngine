@@ -28,9 +28,10 @@ public:
 	void _InitSkyPassShaderInput();
 	void _InitDeferredPassShaderInput();
 	void _InitGBufferPassShaderInput();
-
+	void _InitShadowMapPassShaderInput();
 	Ptr<FDx11Pass> forwardPass;
 	Ptr<FDx11Pass> skyPass;
 	Ptr<FDx11Pass> gBufferPass;
 	Ptr<FDx11Pass> deferredPass;
+	Ptr<FDx11Pass> shadowPass;
 };

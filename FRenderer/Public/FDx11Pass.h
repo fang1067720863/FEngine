@@ -20,7 +20,7 @@ public:
 	struct PassOption {
 		std::string name{ "" };
 		bool mainTarget{ true };
-		unsigned int numViews{ 1 };
+		unsigned int numViews{ 0 };
 		RenderStateSet stateset;
 	};
 
