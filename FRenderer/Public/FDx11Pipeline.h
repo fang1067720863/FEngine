@@ -24,11 +24,9 @@ public:
 	void Init();
 	void _InitAllConstantBuffer();
 
-	void _InitForwardPassShaderInput();
-	void _InitSkyPassShaderInput();
 	void _InitDeferredPassShaderInput();
-	void _InitGBufferPassShaderInput();
-	void _InitShadowMapPassShaderInput();
+	void _InitForwardPassShaderInput();
+
 	Ptr<FDx11Pass> forwardPass;
 	Ptr<FDx11Pass> skyPass;
 	Ptr<FDx11Pass> gBufferPass;

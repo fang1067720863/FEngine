@@ -42,7 +42,34 @@ bool FDx11Pass::InitPass(const std::string& vs, const std::string& ps)
 	{
 		return false;
 	}
+	if (!_AddSRVConstant())
+	{
+		return false;
+	}
 }
+
+void FDx11Pass::AddRTShaderResource(const std::vector<std::string>& targets)
+{
+	for (const auto& slot : mConstantSlots)
+	{
+		//GetGpuProgram()->AddShaderResource(globalContext->GetSrvMap("gBuffer0"), 0);
+	}
+}
+void FDx11Pass::SetConstantBufferSlots(std::vector<std::string>&& slots)
+{
+	mConstantSlots = std::move(slots);
+}
+
+bool FDx11Pass::_AddSRVConstant()
+{
+	for (auto& slot : mConstantSlots)
+	{
+		auto frameCBO = ConstantBufferPool::Instance().GetResource(slot);
+		GetGpuProgram()->AddConstantBuffer(frameCBO);
+	}
+	return true;
+}
+
 
 bool FDx11Pass::_InitGpuProgram(const std::string& vs, const std::string& ps)
 {
@@ -149,9 +176,9 @@ bool FDx11Pass::_InitRenderTexture(ID3D11Device* device)
 		ComPtr<ID3D11ShaderResourceView> shaderResourceView{ nullptr };
 		HR(device->CreateShaderResourceView(mRenderTargetTextures[i], &shaderResourceViewDesc, shaderResourceView.GetAddressOf()));
 		int32_t slot = ShaderResoucePool::Instance().CreateShaderResouce(shaderResourceView);
-		globalContext->AddSrvMap("gBuffer" + std::to_string(i), slot);
+		globalContext->AddSrvMap(option.name + std::to_string(i), slot);
 		
-		std::cout << slot << endl;
+		std::cout << option.name + std::to_string(i) << endl;
 	}
 
 
@@ -189,8 +216,9 @@ bool FDx11Pass::_InitRenderTexture(ID3D11Device* device)
 	HR(device->CreateShaderResourceView(mDepthStencilBuffer.Get(), &srvDepthDesc, &srvDepth));
 	
 	int32_t slot = ShaderResoucePool::Instance().CreateShaderResouce(srvDepth);
-	globalContext->AddSrvMap("gBufferDepth", slot);
-	std::cout << slot << endl;
+	std:string mapName = option.name + "Depth";
+	globalContext->AddSrvMap(mapName, slot);
+	std::cout << mapName << endl;
 
 	return true;
 }

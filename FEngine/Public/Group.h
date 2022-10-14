@@ -15,12 +15,14 @@ public:
 	FNode* GetChild(unsigned int i)const;
 	FNode* GetChild(const std::string& name)const;
 	virtual void DeleteAllChild();
-	virtual void Draw()
+	virtual void Draw(uint16_t mask)
 	{
-		for (auto& child : m_pChildren) child->Draw();
+		if (!(mask & mRenderMask)) return;
+		for (auto& child : m_pChildren) child->Draw(mask);
 	}
 	virtual void Update(float dt)
 	{
+		
 		for (auto& child : m_pChildren) child->Update(dt);
 	}
 protected:

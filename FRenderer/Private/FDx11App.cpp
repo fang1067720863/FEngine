@@ -43,7 +43,7 @@ bool FDx11App::InitGameObject()
 	}*/
 
 	Ptr<DirectLight> defaultLight = LightManager::Instance().CreateDirectLight();
-	defaultLight->direction = Vec4f(0.0, 1.0, -1.0, 0.0);
+	defaultLight->direction = Vec4f(0.0, 1.0, 0.0, 0.0);
 
 	FBox box(Vec3f(1.0f));
 	Ptr<FGeometry> skyboxGeom = ShapeGeometryBuilder::instance().BuildGeomtry(box);
@@ -85,6 +85,7 @@ bool FDx11App::InitGameObject()
 	landMesh->SetScale(Vec3f(10.0f));
 	landMesh->SetPosition(Vec3f(0.0f,-6.0f,0.0f));
 	landMesh->SetRotate(1.57f, 1.0f, 0.0f, 0.0f);
+	landMesh->SetRenderMask(static_cast<uint16_t>(RenderMask::Forward));
 	sceneGroup->AddChild(landMesh);
 
 	GltfReader reader;
@@ -104,7 +105,7 @@ bool FDx11App::InitGameObject()
 				theta += 0.005f * dt;
 				gltfMesh->SetRotate(theta, 0.0f, 1.0f, 0.0f);
 		});
-
+	
 	Ptr<EventHandler>flyController = new TpsCameraController(mainCamera, gltfMesh);
 	controllers.push_back(flyController);
 	

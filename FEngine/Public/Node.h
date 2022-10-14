@@ -15,6 +15,7 @@ enum class RenderMask : uint16_t
 	DeferQuad             = 1 << 3,
 	Shadow                = 1 << 4,
 	Sky                   = 1 << 5,
+	All                   = Forward + GBuffer + DeferQuad+ Shadow+ Sky
 };
 
 class FNode:public FObject
@@ -52,9 +53,9 @@ public:
 		
 	}
 
-	virtual void Draw()
+	virtual void Draw(uint16_t mask)
 	{
-
+		if (!(mask & mRenderMask)) return;
 	}
 
 	void SetUpdateCallback(NodeUpdateCallback cb) { updateCB = cb; }
@@ -66,7 +67,7 @@ private:
 	PROPERTY_DIRTY(Vec3f, Position)
 	PROPERTY_DIRTY(Vec3f, Scale)
 	PROPERTY_DIRTY(Quatf, Rotation)
-	PROPERTY(uint16_t, RenderMask)
+	PROPERTY_DEFAULT(uint16_t, RenderMask, static_cast<uint16_t>(RenderMask::All))
 	PROPERTY_DEFAULT(bool, DirtyMask, true)
 
 	//Mat4  mWorldTransform;

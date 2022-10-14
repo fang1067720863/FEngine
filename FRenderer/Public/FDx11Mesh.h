@@ -212,8 +212,9 @@ public:
 
 	}
 
-	void Draw() override
+	void Draw(uint16_t mask) override
 	{
+		if (!(mask & mRenderMask)) return;
 		PreDraw();
 		device.GetDeviceContext()->IASetPrimitiveTopology(mTopology);
 

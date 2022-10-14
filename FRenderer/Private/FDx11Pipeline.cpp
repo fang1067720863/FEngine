@@ -6,10 +6,10 @@
 void FDx11Pipeline::Execute(FGroup* group)
 {
 	shadowPass->Begin();
-	group->Draw();
+	group->Draw(static_cast<uint16_t>(RenderMask::Shadow));
 	shadowPass->End();
 	forwardPass->Begin();
-	group->Draw();
+	group->Draw(static_cast<uint16_t>(RenderMask::Forward));
 	forwardPass->End();
 }
 
@@ -32,6 +32,8 @@ void FDx11Pipeline::_InitAllConstantBuffer()
 
 	CBOPtr shadow0 = ConstantBufferPool::Instance().CreateDeviceResource("shadow0", sizeof(CBShadowLightView), device);
 	CBOPtr shadow1 = ConstantBufferPool::Instance().CreateDeviceResource("shadow1", sizeof(CBShadowLightProj), device);
+
+	CBOPtr lightTransform = ConstantBufferPool::Instance().CreateDeviceResource("lightTransform", sizeof(Mat4), device);
 
 
 
@@ -70,7 +72,6 @@ void FDx11Pipeline::_InitAllConstantBuffer()
 
 	mainCamera->AddProjUpdateCallback([resizeCBO, camera = mainCamera](float dt)
 	{
-
 		resizeCBO->Upload<CBChangesOnResize>(CBChangesOnResize{
 			camera->GetProjMatrix() }
 		);
@@ -84,107 +85,81 @@ void FDx11Pipeline::_InitAllConstantBuffer()
 
 	Ptr<DirectLight> light = LightManager::Instance().GetDirectLight0();
 	
-	Vec3f lightLoc = light->direction.asVec3() * (-20.0f);
+	Vec3f lightLoc = light->direction.asVec3() * (2.0f);
+	lightLoc = Vec3f(4.0f, 4.0f, 0.0f);
 	Mat4 view(Mat4::lookAt(Vec3(0.0f, 1.0f, 0.0f), lightLoc, Vec3f(0.0f)));
 	view.transpose();
 	shadow0->Upload<CBShadowLightView>(CBShadowLightView{ view });
-	shadow1->Upload<CBShadowLightProj>(CBShadowLightProj{ Mat4::orthographic(0.0f, 10.0f, 0.0f, 10.0f, 20.0f, 60.0f) });
-	//
-	// Mat4::perspective((float)PI / 3 ,static_cast<float>(800 / 600),0.5f,1000.0f)
+
+     Mat4 proj(Mat4::perspective(3.1415f / 3, 4.0f / 3, 0.5f, 500.0f));
+	//Mat4 proj(Mat4::orthographic(0.0f, 10.0f, 0.0f, 10.0f, 2.0f, 60.0f));
+	shadow1->Upload<CBShadowLightProj>(CBShadowLightProj{proj});
+	lightTransform->Upload<Mat4>(proj * view);
+
+
 
 }
 
 void FDx11Pipeline::Init()
 {
 	_InitAllConstantBuffer();
+
 	PassBuilder::PassOption option;
-	option.name = "forwardPass";
-	forwardPass = PassBuilder::Instance().CreatePass(option);
-	forwardPass->InitPass("1DefaultVertex", "1PbrPS");
-	_InitForwardPassShaderInput();
-
-
-	option.name = "skyPass";
-	option.mainTarget = true;
-	//option.numViews = 0;
-	option.stateset.dst = DepthStencilStateType::DRAW_WITH_STENCIL;
-	skyPass = PassBuilder::Instance().CreatePass(option);
-	skyPass->InitPass("2skybox_vs", "2skybox_ps");
-	_InitSkyPassShaderInput();
-
-
-	option.name = "gBuffer";
-	option.mainTarget = false;
-	option.numViews = 3;
-	option.stateset.dst = DepthStencilStateType::LESS_EQUAL;
-	gBufferPass = PassBuilder::Instance().CreatePass(option);
-	gBufferPass->InitPass("3GBufferVS", "3GBufferPS");
-	_InitGBufferPassShaderInput();
-
-	option.name = "deferred";
-	option.mainTarget = true;
-	//option.numViews = 1;
-	option.stateset.dst = DepthStencilStateType::NO_DEPTH_TEST_WITH_STENCIL;
-	deferredPass = PassBuilder::Instance().CreatePass(option);
-	deferredPass->InitPass("3DeferredVS", "3DeferredPS");
-	_InitDeferredPassShaderInput();
-
-
 	option.name = "shadowMap";
 	option.mainTarget = false;
 	option.numViews = 1;
 	option.stateset.dst = DepthStencilStateType::LESS_EQUAL;
 	shadowPass = PassBuilder::Instance().CreatePass(option);
+	std::vector<std::string> shadowParameter{ "shadow0","shadow1", "world" };
+	shadowPass->SetConstantBufferSlots(std::move(shadowParameter));
 	shadowPass->InitPass("4ShadowVS", "4ShadowPS");
-	_InitShadowMapPassShaderInput();
+
+	PassBuilder::PassOption option1;
+	option1.name = "forwardPass";
+	forwardPass = PassBuilder::Instance().CreatePass(option1);
+	std::vector<std::string> forwardParameter{ "frame","onResize","light","world" , "lightTransform"};
+	forwardPass->SetConstantBufferSlots(std::move(forwardParameter));
+	forwardPass->InitPass("1DefaultVertex", "1PbrPS");
+	_InitForwardPassShaderInput();
+
+	PassBuilder::PassOption option2;
+	option2.name = "skyPass";
+	option2.mainTarget = true;
+	option2.stateset.dst = DepthStencilStateType::DRAW_WITH_STENCIL;
+	skyPass = PassBuilder::Instance().CreatePass(option2);
+	std::vector<std::string> skyParameter{"skyMVP"};
+	skyPass->SetConstantBufferSlots(std::move(skyParameter));
+	skyPass->InitPass("2skybox_vs", "2skybox_ps");
+
+	PassBuilder::PassOption option3;
+	option3.name = "gBuffer";
+	option3.mainTarget = false;
+	option3.numViews = 3;
+	option3.stateset.dst = DepthStencilStateType::LESS_EQUAL;
+	gBufferPass = PassBuilder::Instance().CreatePass(option3);
+	std::vector<std::string> gBufferParameter{ "frame","onResize", "world" };
+	gBufferPass->SetConstantBufferSlots(std::move(gBufferParameter));
+	gBufferPass->InitPass("3GBufferVS", "3GBufferPS");
+
+	PassBuilder::PassOption option4;
+	option4.name = "deferred";
+	option4.mainTarget = true;
+	option4.stateset.dst = DepthStencilStateType::NO_DEPTH_TEST_WITH_STENCIL;
+	deferredPass = PassBuilder::Instance().CreatePass(option4);
+	std::vector<std::string> deferredParameter{ "frame","onResize", "Light" };
+	deferredPass->SetConstantBufferSlots(std::move(deferredParameter));
+	deferredPass->InitPass("3DeferredVS", "3DeferredPS");
+	_InitDeferredPassShaderInput();
 
 	return;
 }
-void FDx11Pipeline::_InitShadowMapPassShaderInput()
-{
-	FDx11Pass* pass = shadowPass.get();
-	CBOPtr shadow0 = ConstantBufferPool::Instance().GetResource("shadow0");
-	CBOPtr shadow1 = ConstantBufferPool::Instance().GetResource("shadow1");
-	CBOPtr worldCBO = ConstantBufferPool::Instance().GetResource("world");
 
 
-	pass->GetGpuProgram()->AddConstantBuffer(shadow0);
-	pass->GetGpuProgram()->AddConstantBuffer(shadow1);
-	pass->GetGpuProgram()->AddConstantBuffer(worldCBO);
 
-}
-void FDx11Pipeline::_InitForwardPassShaderInput()
-{
-	FDx11Pass* pass = forwardPass.get();
-	CBOPtr frameCBO = ConstantBufferPool::Instance().GetResource("frame");
-	CBOPtr resizeCBO = ConstantBufferPool::Instance().GetResource("onResize");
-	CBOPtr lightCBO = ConstantBufferPool::Instance().GetResource("light");
-	CBOPtr worldCBO = ConstantBufferPool::Instance().GetResource("world");
-
-	pass->GetGpuProgram()->AddConstantBuffer(frameCBO);
-	pass->GetGpuProgram()->AddConstantBuffer(resizeCBO);
-	pass->GetGpuProgram()->AddConstantBuffer(lightCBO);
-	pass->GetGpuProgram()->AddConstantBuffer(worldCBO);
-}
-
-void FDx11Pipeline::_InitSkyPassShaderInput()
-{
-	FDx11Pass* pass = skyPass.get();
-	CBOPtr skyMVP = ConstantBufferPool::Instance().GetResource("frame");
-	pass->GetGpuProgram()->AddConstantBuffer(skyMVP);
-}
 
 void FDx11Pipeline::_InitDeferredPassShaderInput()
 {
 	FDx11Pass* pass = deferredPass.get();
-	CBOPtr defer0 = ConstantBufferPool::Instance().GetResource("frame");
-	CBOPtr defer1 = ConstantBufferPool::Instance().GetResource("onResize");
-	CBOPtr defer2 = ConstantBufferPool::Instance().GetResource("Light");
-
-	pass->GetGpuProgram()->AddConstantBuffer(defer0);
-	pass->GetGpuProgram()->AddConstantBuffer(defer1);
-	pass->GetGpuProgram()->AddConstantBuffer(defer2);
-
 
 	pass->GetGpuProgram()->AddSamplerResource(SamplerStateType::LINIEAR_WRAP, 0);
 	pass->GetGpuProgram()->AddShaderResource(pass->GlobalContext()->GetSrvMap("gBuffer0"), 0);
@@ -193,17 +168,12 @@ void FDx11Pipeline::_InitDeferredPassShaderInput()
 	pass->GetGpuProgram()->AddShaderResource(pass->GlobalContext()->GetSrvMap("gBufferDepth"), 3);
 }
 
-void FDx11Pipeline::_InitGBufferPassShaderInput()
+void FDx11Pipeline::_InitForwardPassShaderInput()
 {
-	FDx11Pass* pass = gBufferPass.get();
-	CBOPtr frameCBO = ConstantBufferPool::Instance().GetResource("frame");
-	CBOPtr resizeCBO = ConstantBufferPool::Instance().GetResource("onResize");
-	CBOPtr worldCBO = ConstantBufferPool::Instance().GetResource("world");
-
-	pass->GetGpuProgram()->AddConstantBuffer(frameCBO);
-	pass->GetGpuProgram()->AddConstantBuffer(resizeCBO);
-	pass->GetGpuProgram()->AddConstantBuffer(worldCBO);
+	FDx11Pass* pass = forwardPass.get();
+	pass->GetGpuProgram()->AddShaderResource(pass->GlobalContext()->GetSrvMap("shadowMapDepth"), 5);
 }
+
 
 
 

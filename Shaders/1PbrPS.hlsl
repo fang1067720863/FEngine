@@ -2,6 +2,8 @@
 #include"Pbr.hlsli"
 #include"1Default.hlsli"
 
+#define SHADOW 1
+#define PCF_SAMPLE_NUM 16
 
 
 Texture2D gBaseColorMap : register(t0);
@@ -9,10 +11,56 @@ Texture2D gMetalRoughnessMap : register(t1);
 Texture2D gNormalMap : register(t2);
 Texture2D gAoMap : register(t3);
 Texture2D gEmissiveMap : register(t4);
+
+#if SHADOW
+  Texture2D gShadowMap: register(t5);
+#endif
+
 SamplerState basicSampler : register(s0);
 cbuffer CBChangesEveryObjectDrawing : register(b3)
 {
     PbrMaterial g_Material;
+}
+
+float2 poissonDisk[16] = {
+    float2( -0.94201624, -0.39906216 ),
+    float2( 0.94558609, -0.76890725 ),
+    float2( -0.094184101, -0.92938870 ),
+    float2( 0.34495938, 0.29387760 ),
+    float2( -0.91588581, 0.45771432 ),
+    float2( -0.81544232, -0.87912464 ),
+    float2( -0.38277543, 0.27676845 ),
+    float2( 0.97484398, 0.75648379 ),
+    float2( 0.44323325, -0.97511554 ),
+    float2( 0.53742981, -0.47373420 ),
+    float2( -0.26496911, -0.41893023 ),
+    float2( 0.79197514, 0.19090188 ),
+    float2( -0.24188840, 0.99706507 ),
+    float2( -0.81409955, 0.91437590 ),
+    float2( 0.19984126, 0.78641367 ),
+    float2( 0.14383161, -0.14100790 )
+};
+
+float PCF(float2 uv, float radius,float depth)
+{
+    int sum = 0;
+    float bias = 0.005f;
+    float shadowFactor =0.0;
+    for(int i=0;i<PCF_SAMPLE_NUM;i++)
+    {
+        float2 uvSample = poissonDisk[i]*radius + uv;
+        float3 minDepth = gShadowMap.Sample(basicSampler, uvSample).r;
+        shadowFactor = depth - minDepth > bias? 0.1f :1.0f;
+        sum+=shadowFactor;
+    }
+    // if(sum < 16 && sum > 0)
+    // {
+    //     return 0.0f;
+    // }
+    // return 1.0f;
+    sum/=PCF_SAMPLE_NUM;
+    return sum;
+
 }
 
 float4 PS(VertexPosHWNormalTex pIn) : SV_Target
@@ -24,16 +72,6 @@ float4 PS(VertexPosHWNormalTex pIn) : SV_Target
     float roughnessFactor = 1.0;
     float metallicFactor = 1.0;
     float3 emissiveFactor = float3(1.0f, 1.0f, 1.0f);
-
-        /* float4 baseColorFactor = g_Material
-     float3 emissiveFactor;
-
-     float metallicFactor;
-     float roughnessFactor;
-     float alphaMask;
-     float alphaMaskCutoff;
-     float aoStrength;*/
-
 
     float3 v = normalize(g_EyePosW.xyz - pIn.PosW);
     float3 n = normalize(pIn.NormalW);
@@ -65,6 +103,21 @@ float4 PS(VertexPosHWNormalTex pIn) : SV_Target
     float NdotV = max(dot(n, v), 0.0f);
 
     Lo += BRDF(VdotH, NdotH, NdotL, NdotV, roughness, metallic, f0, diffuseColor, lightColor, ao, emissive);
+    
+    float shadowFactor = 1.0f;
+   
+    #if SHADOW
+        float bias = 0.005f;
+        float4 posLC = mul(float4(pIn.PosW, 1.0f), g_LightTransform);  // light coordinate
+        posLC /= posLC.w;
+        float2 uv = posLC.xy * float2(0.5f, -0.5f) + float2(0.5f,0.5f);
+        // float depthLC = posLC.z;
+        // float3 minDepth = gShadowMap.Sample(basicSampler, uv).r;
+        // shadowFactor = depthLC - minDepth > bias? 0.1f :1.0f;
+        shadowFactor = PCF(uv,0.01,posLC.z);
+    #endif
+    
+    
 
    /* for (int i = 0; i < lightNum; ++i)
     {
@@ -99,6 +152,14 @@ float4 PS(VertexPosHWNormalTex pIn) : SV_Target
     //float3 ambient = float3(0.03, 0.03, 0.03) * albedo * ao;
 
     float3 color = Lo.rgb;
+
+    if (shadowFactor < 0.3f)
+		color *= shadowFactor;
+    // if (shadowFactor < 0.1f)
+	// 	color *= float3(1.0f, 0.25f, 0.25f);
+    // if (shadowFactor > 0.9f)
+	// 	color *= float3(0.25f, 0.25f, 1.0f);
+
 
     // HDR tonemapping
     color = color / (color + float3(1.0f, 1.0f, 1.0f));

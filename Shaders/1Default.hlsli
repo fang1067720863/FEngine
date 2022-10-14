@@ -20,6 +20,10 @@ cbuffer CBEveryObject : register(b3)
 	matrix g_World;
 }
 
+cbuffer CBLightTransform :register(b4)
+{
+	matrix g_LightTransform;
+}
 
 
 

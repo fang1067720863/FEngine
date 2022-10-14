@@ -68,6 +68,7 @@ public:
 				return srvMap[name];
 			}
 			else {
+				std::cout << "no texture in context" << std::endl;
 				return -1;
 			}
 		}
@@ -92,12 +93,15 @@ public:
 	bool Begin();
 	bool End();
 	bool InitPass(const std::string& vs, const std::string& ps);
+	void SetConstantBufferSlots(std::vector<std::string>&& slots);
+	void AddRTShaderResource(const std::vector<std::string>& targets);
 	
 protected:
 	FDx11Pass(Ptr<PassBuilder::PassContext> _context, const PassBuilder::PassOption& _option);
 
 	bool _InitRenderTexture(ID3D11Device* device);
 	bool _InitGpuProgram(const std::string& vs, const std::string& ps);
+	bool _AddSRVConstant();
 
 	bool _UseRenderState();
 	bool _SetRenderTarget();
@@ -113,6 +117,7 @@ protected:
 	std::string                    mName;
 	unsigned int                   mNumViews{ 0 };
 	PassBuilder::PassOption        option;
+	std::vector<std::string>       mConstantSlots;
 
 	FDx11Device* mDevice;
 	Ptr<PassBuilder::PassContext> globalContext;
