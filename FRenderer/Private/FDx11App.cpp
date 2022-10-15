@@ -56,6 +56,7 @@ bool FDx11App::InitGameObject()
 	quad->SetModelFile(File("D:\\GitProject\\FEngine\\FRenderer\\Model"));
 
 	renderQuad = new FDx11Mesh(quad.get(), m_pDevice);
+	//renderQuad->SetRenderMask(static_cast<uint16_t>(RenderMask::DeferQuad));
 
 	Ptr<FGeometry> land = ShapeGeometryBuilder::instance().BuildGeomtry(FQuad());
 	land->SetModelFile(File("D:\\GitProject\\FEngine\\FRenderer\\Model\\"));

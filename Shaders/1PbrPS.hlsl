@@ -3,7 +3,7 @@
 #include"1Default.hlsli"
 
 #define SHADOW 1
-#define PCF_SAMPLE_NUM 16
+
 
 
 Texture2D gBaseColorMap : register(t0);
@@ -21,8 +21,12 @@ cbuffer CBChangesEveryObjectDrawing : register(b3)
 {
     PbrMaterial g_Material;
 }
+static const float shadowMapSizeDiv = 1.0/800.0;
+static const float shadowDepthBias = 0.005f;
+static const int poissonDiskCount = 16;
+static const int poissonDiskCount_D2 = 8;
 
-float2 poissonDisk[16] = {
+static const float2 poissonDisk[16] = {
     float2( -0.94201624, -0.39906216 ),
     float2( 0.94558609, -0.76890725 ),
     float2( -0.094184101, -0.92938870 ),
@@ -43,24 +47,33 @@ float2 poissonDisk[16] = {
 
 float PCF(float2 uv, float radius,float depth)
 {
-    int sum = 0;
-    float bias = 0.005f;
+    float sum = 0.0;
     float shadowFactor =0.0;
-    for(int i=0;i<PCF_SAMPLE_NUM;i++)
+
+    int i;
+    // first cheap filtering
+    for(i=0;i<poissonDiskCount_D2;i++)
     {
         float2 uvSample = poissonDisk[i]*radius + uv;
         float3 minDepth = gShadowMap.Sample(basicSampler, uvSample).r;
-        shadowFactor = depth - minDepth > bias? 0.1f :1.0f;
+        shadowFactor = depth - minDepth > shadowDepthBias? 1.0f :0.0f;
         sum+=shadowFactor;
     }
-    // if(sum < 16 && sum > 0)
-    // {
-    //     return 0.0f;
-    // }
-    // return 1.0f;
-    sum/=PCF_SAMPLE_NUM;
-    return sum;
 
+    if(sum * (poissonDiskCount_D2 * 1.0 - sum)==0.0)
+    {
+        return 1 - sum/poissonDiskCount_D2;
+    }
+
+    for(i=poissonDiskCount_D2;i<poissonDiskCount;i++)
+    {
+        float2 uvSample = poissonDisk[i]*radius + uv;
+        float3 minDepth = gShadowMap.Sample(basicSampler, uvSample).r;
+        shadowFactor = depth - minDepth > shadowDepthBias? 1.0f :0.0f;
+        sum+=shadowFactor;
+    }
+    sum/= poissonDiskCount;
+    return 1.0-sum;
 }
 
 float4 PS(VertexPosHWNormalTex pIn) : SV_Target
@@ -108,13 +121,11 @@ float4 PS(VertexPosHWNormalTex pIn) : SV_Target
    
     #if SHADOW
         float bias = 0.005f;
+        float cell = 5 * shadowMapSizeDiv;
         float4 posLC = mul(float4(pIn.PosW, 1.0f), g_LightTransform);  // light coordinate
         posLC /= posLC.w;
         float2 uv = posLC.xy * float2(0.5f, -0.5f) + float2(0.5f,0.5f);
-        // float depthLC = posLC.z;
-        // float3 minDepth = gShadowMap.Sample(basicSampler, uv).r;
-        // shadowFactor = depthLC - minDepth > bias? 0.1f :1.0f;
-        shadowFactor = PCF(uv,0.01,posLC.z);
+        shadowFactor = PCF(uv,cell,posLC.z);
     #endif
     
     
@@ -152,14 +163,7 @@ float4 PS(VertexPosHWNormalTex pIn) : SV_Target
     //float3 ambient = float3(0.03, 0.03, 0.03) * albedo * ao;
 
     float3 color = Lo.rgb;
-
-    if (shadowFactor < 0.3f)
-		color *= shadowFactor;
-    // if (shadowFactor < 0.1f)
-	// 	color *= float3(1.0f, 0.25f, 0.25f);
-    // if (shadowFactor > 0.9f)
-	// 	color *= float3(0.25f, 0.25f, 1.0f);
-
+    color *= shadowFactor;
 
     // HDR tonemapping
     color = color / (color + float3(1.0f, 1.0f, 1.0f));
